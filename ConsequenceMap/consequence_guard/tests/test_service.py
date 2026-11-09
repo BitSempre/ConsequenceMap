@@ -291,6 +291,17 @@ class FailClosedTests(GuardTestCase):
 
     def _broken_store(self):
         class _Broken:
+            """A store that cannot do anything.
+
+            Every method raises, including the nonce recording: the
+            request is refused at the FIRST durable operation, before
+            any authorisation logic is reached.
+            """
+
+            def record_nonce(self, *args, **kwargs):
+                from consequence_guard.store import StoreUnavailable
+                raise StoreUnavailable("the disk is full")
+
             def append_audit(self, *args, **kwargs):
                 from consequence_guard.store import StoreUnavailable
                 raise StoreUnavailable("the disk is full")

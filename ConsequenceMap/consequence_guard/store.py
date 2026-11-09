@@ -168,6 +168,12 @@ CREATE TABLE IF NOT EXISTS audit_log (
     record_hash  TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS seen_nonces (
+    nonce        TEXT PRIMARY KEY,
+    seen_at      TEXT NOT NULL,
+    operation_id TEXT NOT NULL DEFAULT ''
+);
+
 CREATE TABLE IF NOT EXISTS audit_checkpoints (
     checkpoint_id TEXT PRIMARY KEY,
     sequence      INTEGER NOT NULL,
@@ -431,6 +437,58 @@ class GuardStore:
             {"operation_id": row[0], "state": row[1], "operation": row[2]}
             for row in rows
         ]
+
+    # -- transport nonces ----------------------------------------------
+
+    def record_nonce(
+        self,
+        nonce: str,
+        now: str,
+        operation_id: str = "",
+    ) -> bool:
+        """Record a transport nonce.
+
+        Returns ``True`` if this nonce is new, ``False`` if it has been
+        seen before.
+
+        The nonce set is **durable**. An in-memory set is lost when the
+        service restarts, which would reopen the transport-level replay
+        window every time the service was restarted - and an agent can
+        restart a service. The spent set already refuses a replayed
+        *authorisation*; this refuses a replayed *request*, which is a
+        different thing: a request that is refused for its nonce never
+        reaches the authorisation logic at all.
+
+        The insertion is inside an immediate transaction, so two
+        processes cannot both record the same nonce as new.
+        """
+        with self._lock:
+            try:
+                with self._transaction() as connection:
+                    existing = connection.execute(
+                        "SELECT nonce FROM seen_nonces WHERE nonce = ?",
+                        (nonce,),
+                    ).fetchone()
+                    if existing is not None:
+                        return False
+                    connection.execute(
+                        "INSERT INTO seen_nonces (nonce, seen_at, operation_id) "
+                        "VALUES (?, ?, ?)",
+                        (nonce, now, operation_id),
+                    )
+            except sqlite3.IntegrityError:
+                return False
+        return True
+
+    def nonce_seen(self, nonce: str) -> bool:
+        rows = self._read(
+            "SELECT nonce FROM seen_nonces WHERE nonce = ?", (nonce,)
+        )
+        return bool(rows)
+
+    def nonce_count(self) -> int:
+        rows = self._read("SELECT COUNT(*) FROM seen_nonces")
+        return int(rows[0][0]) if rows else 0
 
     # -- audit ---------------------------------------------------------
 

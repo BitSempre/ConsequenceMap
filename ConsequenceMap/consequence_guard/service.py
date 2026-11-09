@@ -261,7 +261,6 @@ class GuardService:
         self.store = store
         self.verifier = verifier
         self._clock = clock
-        self._seen_nonces: set = set()
 
     def _now(self) -> str:
         if self._clock is not None:
@@ -312,13 +311,29 @@ class GuardService:
         # 2 - the nonce. A request the service has already seen is a
         #     replay at the transport layer, and is refused before the
         #     authorisation is even considered.
+        #
+        #     The set is DURABLE. An in-memory set is lost when the
+        #     service restarts, and an agent can restart a service, so
+        #     an in-memory set would reopen the replay window on every
+        #     restart. The durable set also refuses the replay before
+        #     the authorisation logic is reached at all.
         nonce = message["nonce"]
-        if nonce in self._seen_nonces:
+        try:
+            is_new = self.store.record_nonce(
+                nonce, self._now(), operation_id
+            )
+        except StoreUnavailable as exc:
+            return ServiceDecision(
+                DECISION_DENY,
+                "the request could not be recorded, so it is refused: %s"
+                % (exc,),
+                operation_id,
+            )
+        if not is_new:
             return ServiceDecision(
                 DECISION_DENY, "this request has already been answered",
                 operation_id,
             )
-        self._seen_nonces.add(nonce)
 
         # 3 - the operation must be in the allowlist. Default deny.
         operation = self.policy.operation(message["operation_id"])
