@@ -128,6 +128,7 @@ class GuardTestCase(unittest.TestCase):
             operation_id=overrides.pop("operation_id", "file.delete"),
             proposal=overrides.pop("proposal", PROPOSAL),
             authorization=overrides.pop("authorization", authorization),
+            requested_scope=overrides.pop("requested_scope", ["files:write"]),
             issued_at=overrides.pop("issued_at", format_rfc3339(now_utc())),
         )
         message.update(overrides)

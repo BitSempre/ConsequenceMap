@@ -19,7 +19,7 @@ the agent has.
 """
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping, Optional, Sequence
 
 from .ipc import InProcessTransport, PipeClientTransport, Transport
 from .protocol import (
@@ -56,6 +56,7 @@ class GuardClient:
         operation_id: str,
         proposal: Mapping[str, Any],
         authorization: Mapping[str, Any],
+        requested_scope: Sequence[str],
         issued_at: str,
     ) -> Mapping[str, Any]:
         """Ask the guard to perform an operation.
@@ -69,6 +70,7 @@ class GuardClient:
             operation_id=operation_id,
             proposal=proposal,
             authorization=authorization,
+            requested_scope=requested_scope,
             issued_at=issued_at,
         )
         try:

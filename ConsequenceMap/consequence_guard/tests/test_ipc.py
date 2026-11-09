@@ -100,7 +100,8 @@ class TransportTestCase(unittest.TestCase):
         authorization["signature"] = self.device.sign(authorization)
         return build_request_message(
             nonce=nonce, operation_id="file.delete", proposal=PROPOSAL,
-            authorization=authorization, issued_at=format_rfc3339(now_utc()),
+            authorization=authorization, requested_scope=["files:write"],
+            issued_at=format_rfc3339(now_utc()),
         )
 
 
@@ -170,6 +171,7 @@ class ClientTests(TransportTestCase):
         response = client.request_execution(
             nonce="n-1", operation_id="file.delete", proposal=PROPOSAL,
             authorization=self._message()["authorization"],
+            requested_scope=["files:write"],
             issued_at=format_rfc3339(now_utc()),
         )
         self.assertEqual(response["decision"], DECISION_ALLOW)
@@ -184,7 +186,8 @@ class ClientTests(TransportTestCase):
         with self.assertRaises(ClientUnavailable):
             client.request_execution(
                 nonce="n-1", operation_id="file.delete", proposal=PROPOSAL,
-                authorization={}, issued_at=format_rfc3339(now_utc()),
+                authorization={}, requested_scope=["files:write"],
+                issued_at=format_rfc3339(now_utc()),
             )
         self.assertEqual(self.calls, [])
 
@@ -197,7 +200,8 @@ class ClientTests(TransportTestCase):
         with self.assertRaises(ClientUnavailable):
             client.request_execution(
                 nonce="n-1", operation_id="file.delete", proposal=PROPOSAL,
-                authorization={}, issued_at=format_rfc3339(now_utc()),
+                authorization={}, requested_scope=["files:write"],
+                issued_at=format_rfc3339(now_utc()),
             )
 
     def test_the_client_reads_the_decision_not_a_boolean(self):

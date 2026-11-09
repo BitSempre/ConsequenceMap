@@ -52,6 +52,7 @@ from typing import Any, Callable, Mapping, Optional, Sequence
 
 from consequence_map.core.authorization import (
     AuthorizationError,
+    _as_scope,
     AuthorizationExpired,
     AuthorizationInvalid,
     AuthorizationReplay,
@@ -333,16 +334,42 @@ class GuardService:
         #
         #     The REQUEST is rebuilt here from the authorisation and the
         #     proposal, because the request is what binds the two: it
-        #     carries the nonce, the proposal hash and the scope that
-        #     was asked for. The plugin does not send a request - it
-        #     sends a proposal and an authorisation - so the service
-        #     derives the request rather than trusting one it received.
+        #     carries the nonce, the proposal hash, the scope and the
+        #     OPERATION that was asked for. The plugin does not send a
+        #     request - it sends a proposal and an authorisation - so
+        #     the service derives the request rather than trusting one
+        #     it received.
         #
         #     The derived request's scope is the authorisation's OWN
         #     approved scope. That is deliberate: the check below
         #     compares the approved scope against the scope the human
         #     granted, and using the request's scope here would let the
         #     plugin widen its own request to match a narrow approval.
+        #
+        #     The derived request's OPERATION is the operation the
+        #     AUTHORISATION was made for. The operation the plugin asks
+        #     for is then compared against it. An approval for
+        #     "file.delete" must not authorise "repo.wipe" merely
+        #     because both happen to need the same scope.
+        signed_operation = message["authorization"].get("operation")
+        if signed_operation is None:
+            # Older authorisations do not carry the operation. The
+            # service refuses them rather than guessing: the
+            # operation is what the human approved, and without it
+            # there is nothing to bind to.
+            return ServiceDecision(
+                DECISION_DENY,
+                "the authorisation does not name the operation it was "
+                "made for, so it cannot be applied to one",
+                operation_id,
+            )
+        if signed_operation != operation.identifier:
+            return ServiceDecision(
+                DECISION_DENY,
+                "the authorisation was made for operation %r, not %r"
+                % (signed_operation, operation.identifier),
+                operation_id,
+            )
         try:
             derived_request = {
                 "request_id": message["authorization"].get("request_id", ""),
@@ -350,7 +377,7 @@ class GuardService:
                 "proposal_hash": message["authorization"].get("proposal_hash", ""),
                 "nonce": message["authorization"].get("nonce", ""),
                 "project": "",
-                "operation": operation.identifier,
+                "operation": signed_operation,
                 "requested_scope": list(
                     message["authorization"].get("approved_scope", ())
                 ),
@@ -419,13 +446,44 @@ class GuardService:
                 operation_id,
             )
 
-        # 5 - the granted scope must cover the operation's scope.
+        # 5 - the granted scope must cover the operation's scope, AND
+        #     must not exceed what was asked for.
+        #
+        #     The second half matters. The derived request's scope is
+        #     the authorisation's own approved scope, so the
+        #     "approved is a subset of requested" check inside
+        #     verify_authorization is VACUOUS - it compares a set with
+        #     itself. It cannot detect an approval that grants more
+        #     than the operation needs.
+        #
+        #     The scope the PLUGIN asked for is carried separately in
+        #     the message, and the approval must be a subset of THAT.
+        #     An approval that grants "admin" when the request asked
+        #     for "files:write" is refused here.
         granted = set(message["authorization"].get("approved_scope", ()))
         if operation.scope not in granted:
             return ServiceDecision(
                 DECISION_DENY,
                 "the authorisation grants %s, which does not include %r"
                 % (sorted(granted), operation.scope),
+                operation_id,
+            )
+        requested = message.get("requested_scope")
+        if requested is None:
+            requested = message["authorization"].get("approved_scope", ())
+        try:
+            requested_set = set(_as_scope(requested, "requested_scope"))
+        except AuthorizationInvalid as exc:
+            return ServiceDecision(
+                DECISION_DENY,
+                "the requested scope is not valid: %s" % (exc,),
+                operation_id,
+            )
+        if not granted.issubset(requested_set):
+            return ServiceDecision(
+                DECISION_DENY,
+                "the authorisation grants %s, which is outside the requested "
+                "scope %s" % (sorted(granted), sorted(requested_set)),
                 operation_id,
             )
 

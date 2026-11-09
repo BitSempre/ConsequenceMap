@@ -101,6 +101,7 @@ REQUEST_FIELDS = frozenset({
     "operation_id",
     "proposal",
     "authorization",
+    "requested_scope",
     "issued_at",
 })
 
@@ -122,6 +123,7 @@ REQUEST_REQUIRED = frozenset({
     "operation_id",
     "proposal",
     "authorization",
+    "requested_scope",
 })
 
 
@@ -164,6 +166,7 @@ def build_request_message(
     operation_id: str,
     proposal: Mapping[str, Any],
     authorization: Mapping[str, Any],
+    requested_scope: Sequence[str],
     issued_at: str,
     protocol_version: str = PROTOCOL_VERSION,
 ) -> Mapping[str, Any]:
@@ -180,6 +183,7 @@ def build_request_message(
         "operation_id": operation_id,
         "proposal": dict(proposal),
         "authorization": dict(authorization),
+        "requested_scope": list(requested_scope),
         "issued_at": issued_at,
     }
 
@@ -306,6 +310,12 @@ def parse_request_message(
         raise SchemaViolation("the proposal must be a mapping")
     if not isinstance(document["authorization"], Mapping):
         raise SchemaViolation("the authorization must be a mapping")
+    scope = document["requested_scope"]
+    if not isinstance(scope, (list, tuple)):
+        raise SchemaViolation("the requested scope must be a list")
+    for item in scope:
+        if not isinstance(item, str):
+            raise SchemaViolation("the requested scope must contain only names")
     return dict(document)
 
 

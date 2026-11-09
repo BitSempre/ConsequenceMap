@@ -136,6 +136,7 @@ MANDATORY_AUTHORIZATION_FIELDS: Sequence[str] = (
     "authorization_id",
     "request_id",
     "proposal_hash",
+    "operation",
     "nonce",
     "approved_scope",
     "approved_by",
@@ -314,6 +315,10 @@ def build_authorization(
         "authorization_id": authorization_id or ("auth-" + os.urandom(16).hex()),
         "request_id": request["request_id"],
         "proposal_hash": request["proposal_hash"],
+        # The operation the approval was made FOR. Without it, an
+        # approval for one operation could be presented for another
+        # that happens to need the same scope.
+        "operation": request["operation"],
         "nonce": request["nonce"],
         "approved_scope": list(_as_scope(approved_scope, "approved_scope")),
         "approved_by": approved_by,
