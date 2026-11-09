@@ -239,6 +239,16 @@ def qualify_forecast(
     confidence = forecast.get("confidence_overall")
     if not confidence:
         problems.append("the forecast states no overall confidence")
+    elif confidence not in CONFIDENCE_RANK:
+        # A confidence the platform does not define cannot be compared
+        # with anything, cannot be aggregated, and cannot be shown to a
+        # human as a level. Passing it through would put an invented
+        # label on the screen of the person who is about to authorise
+        # the operation.
+        problems.append(
+            "the forecast states the unknown confidence %r; expected one of %s"
+            % (confidence, ", ".join(sorted(CONFIDENCE_RANK)))
+        )
 
     risks = forecast.get("risk") or {}
     if risks.get("requires_human_approval") and confidence == "NONE":

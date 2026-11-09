@@ -138,6 +138,22 @@ def _encode(value: Any, path: str = "", _depth: int = 0) -> str:
                 raise CanonicalisationError(
                     "map keys must be strings at %r" % (path or "<root>",)
                 )
+            # A key is held to the SAME rule as a value. The canonical
+            # form is ASCII-only, and a key that is not ASCII breaks
+            # that - the output stops being the byte sequence the
+            # canonical form promises.
+            #
+            # It is also a normalisation trap. The same key can be
+            # written in composed form or in decomposed form: they are
+            # different byte strings that display the same. If both were
+            # accepted, two logically identical documents would hash to
+            # two different values, and the hash would stop meaning
+            # "this document".
+            if not key.isascii():
+                raise CanonicalisationError(
+                    "non-ASCII map key is not canonicalisable at %r: escape "
+                    "it to ASCII" % (path or "<root>",)
+                )
             if key in seen:
                 raise CanonicalisationError("duplicate map key %r" % (key,))
             seen.add(key)

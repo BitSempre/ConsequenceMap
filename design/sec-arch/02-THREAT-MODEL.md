@@ -336,3 +336,42 @@ next module: *validate at the edge, and reject rather than coerce.*
 
 Pinned by `test_regressions.py` and `test_regressions_round2.py` — 29
 tests, one per behaviour.
+
+### 8.2 The third probing round
+
+A third round — 25 probes against the canonical form, the analysis
+layer and the time parser, the areas the first two rounds did not
+touch — found **two more defects**:
+
+| ID | Defect | Exploit | Fix |
+|---|---|---|---|
+| **D-11** | Map **keys** were held to a different rule from map **values**. A value had to be ASCII; a key did not | The canonical form stopped being the byte sequence it promises. Worse, it opened a normalisation trap: the same key written in composed form (`é`) or decomposed form (`e` + combining accent) is two different byte strings that display the same, so **two logically identical documents could hash to two different values** | A key is now held to the same ASCII rule as a value |
+| **D-12** | `qualify_forecast` only tested the confidence against `NONE`. Any other label passed through | An invented confidence label would be shown to the **human who is about to authorise the operation** | The confidence must be one the platform defines |
+
+**D-11 is the more serious one.** The whole point of a canonical form is
+that one logical document has exactly one byte representation. A key
+that can be written two ways breaks that promise at the root, and the
+hash stops meaning "this document" — it starts meaning "this particular
+spelling of this document".
+
+**D-12 is the more embarrassing one.** The platform's own vocabulary was
+not being enforced on the field the human reads last, immediately
+before deciding.
+
+### 8.3 The tally
+
+**Twelve defects** in roughly 2 400 lines of new security code.
+
+| Round | Probes | Defects | Theme |
+|---|---|---|---|
+| 1 | 11 | 4 | Scope typing, depth, coercion order, truncatable chain |
+| 2 | 40 | 6 | Input validation at the edges |
+| 3 | 25 | 2 | Canonical-form invariants, vocabulary enforcement |
+
+**Eleven of the twelve were at a boundary**, and every one was a value
+accepted in a shape it should not have been. The design lesson is now
+written into the code: **validate at the edge, and reject rather than
+coerce.**
+
+Pinned by `test_regressions.py`, `test_regressions_round2.py` and
+`test_regressions_round3.py` — 37 tests, one per behaviour.
