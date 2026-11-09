@@ -276,3 +276,35 @@ All **VERIFIED_FACT**, measured read-only on 2026-11-09.
 tested. **Every enforcement boundary that depends on the Windows service,
 the phone, or a trusted clock is not.** The platform is not ready for
 production, and this table is why.
+
+---
+
+## 8. Defects found by probing our own implementation
+
+A threat model written by the same people who wrote the code is a
+statement of intent. The four defects below were found by **writing
+probes against the implementation** — attempts to break it — rather
+than by reading it. They are recorded here because they are the honest
+measure of how much the design documents missed.
+
+| ID | Defect | Exploit | Fix |
+|---|---|---|---|
+| **D-1** | A scope given as a **string** was accepted. `set("files:write")` is nine single-character scopes, and a subset comparison could succeed on one shared character | A scope comparison could authorise something it was not asked to authorise | A scope is now rejected unless it is a list of strings — checked at construction, at verification, and at the agent surface |
+| **D-2** | The canonical form had **no depth limit**. A 500-level document encoded without complaint | Resource exhaustion against the verifier; the phone has far less memory than the PC | A limit of 32 levels |
+| **D-3** | `AgentRequest` coerced the scope with `list()` **before** any validation | The string became a character list before the check could see it | The type is checked before anything is coerced |
+| **D-4** | The audit chain could be **truncated** and still verify — a prefix is itself a consistent chain | Records could be removed from the end of the history without detection | `verify_chain` now accepts an external anchor (`expected_head` / `expected_length`) and detects it |
+
+**D-4 is the interesting one.** It is not a bug in the hash chain — the
+chain is doing exactly what a hash chain does. It is a gap in what a
+hash chain can do at all, and the fix is the anchor: the head hash,
+recorded somewhere the agent cannot write. Without an anchor,
+truncation is undetectable, and the documentation now says so instead of
+implying coverage it does not have.
+
+**The lesson.** Four defects in roughly 2 300 lines of new security code,
+found in one probing session by an adversary working from the outside.
+Reading the code did not find them; attacking it did. **Every future
+change to this core should be probed the same way before it is
+committed.**
+
+Pinned by `test_regressions.py` — 15 tests, one per behaviour.
