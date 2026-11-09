@@ -52,7 +52,7 @@ import hashlib
 import os
 from typing import Any, Mapping, Optional, Sequence, Tuple
 
-from .timeutil import parse_rfc3339
+from .timeutil import format_rfc3339, now_utc, parse_rfc3339
 from .canonical import (
     CanonicalisationError,
     DOMAIN_AUTHORIZATION,
@@ -88,6 +88,7 @@ __all__ = [
     "Signer",
     "Verifier",
     "InMemorySigner",
+    "MAX_VALIDITY_SECONDS",
 ]
 
 
@@ -144,6 +145,51 @@ MANDATORY_AUTHORIZATION_FIELDS: Sequence[str] = (
     "protocol_version",
 )
 
+#: The longest a request may stay open, and the longest an
+#: authorization may stay valid.
+#:
+#: This is the **exposure window** for a captured authorization. An
+#: approval that is stolen can be used until it expires - and, before
+#: the executor's spent-authorization set existed, until it was spent.
+#: The shorter this is, the smaller the exposure.
+#:
+#: The value here is a **conservative default, not a decision**. The
+#: real number is question Q-5 in the residual-risk register, and it
+#: belongs to the project owner: it balances the exposure of a
+#: captured approval against the time a human needs to answer. Until
+#: that decision is made, the platform refuses anything longer than
+#: this rather than accepting an unbounded window.
+#:
+#: The policy is a **parameter**, not a constant baked into the
+#: protocol: a deployment given a different answer uses a different
+#: value without changing the protocol.
+MAX_VALIDITY_SECONDS = 3600
+
+
+def _assert_window_is_bounded(
+    valid_from: str,
+    expires_at: str,
+    *,
+    max_seconds: int,
+    what: str,
+) -> None:
+    """Refuse a validity window longer than the policy allows.
+
+    The window is measured from ``valid_from`` to ``expires_at``. A
+    window that starts in the past is fine - the human may have been
+    given the request earlier - but it may not END further ahead than
+    the policy allows.
+    """
+    start = parse_rfc3339(valid_from)
+    end = parse_rfc3339(expires_at)
+    span = (end - start).total_seconds()
+    if span > max_seconds:
+        raise AuthorizationInvalid(
+            "%s is open for %d seconds, which is longer than the %d second "
+            "policy allows" % (what, int(span), max_seconds)
+        )
+
+
 PROTOCOL_VERSION = "consequencemap.authorization.v1"
 
 
@@ -172,6 +218,7 @@ def build_request(
     expires_at: str,
     request_id: Optional[str] = None,
     nonce: Optional[str] = None,
+    max_validity_seconds: int = MAX_VALIDITY_SECONDS,
 ) -> Mapping[str, Any]:
     """Build an authorization request.
 
@@ -183,6 +230,15 @@ def build_request(
     # verification - and in between, it would be a request the agent
     # could hold open indefinitely.
     parse_rfc3339(expires_at)
+    # A request may not ask for more time than the policy allows. The
+    # window is measured from now, because a request has no valid_from:
+    # it is being made now.
+    _assert_window_is_bounded(
+        format_rfc3339(now_utc()),
+        expires_at,
+        max_seconds=max_validity_seconds,
+        what="the request",
+    )
     request = {
         "request_id": request_id or ("req-" + os.urandom(16).hex()),
         "proposal": proposal,
@@ -208,6 +264,7 @@ def build_authorization(
     expires_at: str,
     signature: str,
     authorization_id: Optional[str] = None,
+    max_validity_seconds: int = MAX_VALIDITY_SECONDS,
 ) -> Mapping[str, Any]:
     """Build an authorization over a request.
 
@@ -218,6 +275,12 @@ def build_authorization(
     # Both window endpoints are parsed here, for the same reason.
     parse_rfc3339(valid_from)
     parse_rfc3339(expires_at)
+    _assert_window_is_bounded(
+        valid_from,
+        expires_at,
+        max_seconds=max_validity_seconds,
+        what="the authorization",
+    )
     return {
         "authorization_id": authorization_id or ("auth-" + os.urandom(16).hex()),
         "request_id": request["request_id"],
@@ -359,6 +422,7 @@ def verify_authorization(
     revoked_key_ids: Sequence[str] = (),
     now: Optional[str] = None,
     parse_timestamp=None,
+    max_validity_seconds: Optional[int] = None,
 ) -> Mapping[str, Any]:
     """Verify that ``authorization`` authorises exactly ``proposal``.
 
@@ -465,7 +529,19 @@ def verify_authorization(
             % (authorization["expires_at"], request["expires_at"])
         )
 
-    # 7 - the current time must be inside the validity window
+    # 7 - the validity window must not exceed the policy. This is
+    #     re-checked here, not only at construction, because the
+    #     verifier is what grants the permission: a document built under
+    #     a laxer policy must not be honoured under a stricter one.
+    if max_validity_seconds is not None:
+        _assert_window_is_bounded(
+            authorization["valid_from"],
+            authorization["expires_at"],
+            max_seconds=max_validity_seconds,
+            what="the authorization",
+        )
+
+    # 8 - the current time must be inside the validity window
     if current < parse(authorization["valid_from"]):
         raise AuthorizationExpired(
             "authorization is not valid until %s" % (authorization["valid_from"],)
@@ -475,13 +551,13 @@ def verify_authorization(
             "authorization expired at %s" % (authorization["expires_at"],)
         )
 
-    # 8 - revocation
+    # 9 - revocation
     if authorization["public_key_id"] in set(revoked_key_ids):
         raise AuthorizationRevoked(
             "key %r is revoked" % (authorization["public_key_id"],)
         )
 
-    # 9 - the signature
+    # 10 - the signature
     payload = {
         key: value for key, value in authorization.items() if key != "signature"
     }

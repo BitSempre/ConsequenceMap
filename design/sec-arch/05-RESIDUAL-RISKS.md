@@ -172,7 +172,7 @@ the analysis from the authorisation is the whole answer.
 | **Q-2** | **Which PC-side signature algorithm?** | A maintained library breaks C-1; a pure-Python verifier needs independent review. **This is the same trade-off the Revision 5 analysis reached, and it recommends A2+A1** |
 | **Q-3** | **How does the owner revoke a lost phone without the phone?** | The agent drives the PC, so a PC-only mechanism is suspect. A second enrolled device? A printed recovery code? |
 | **Q-4** | **Should the trust anchor have a backup?** | One copy on one machine is a single point of failure — and that machine is the agent's |
-| **Q-5** | **What is the maximum validity window?** | It is simultaneously the exposure window for a lost phone and the replay window for a captured authorization |
+| **Q-5** | **What is the maximum validity window?** | It is simultaneously the exposure window for a lost phone and the replay window for a captured authorization | **NOW BOUNDED**: `MAX_VALIDITY_SECONDS = 3600` in `authorization.py`, enforced at construction and re-checked at verification. The parameter is the owner's to set; the default is conservative |
 | **Q-6** | **Is a second enrolled device required?** | It solves Q-3 cleanly, at the cost of a second thing to lose |
 | **Q-7** | **Who installs the Windows service, and when?** | It needs administrative authorisation and a maintenance window |
 

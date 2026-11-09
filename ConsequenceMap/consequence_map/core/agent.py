@@ -36,7 +36,7 @@ from typing import Any, Mapping, Optional, Protocol, Sequence
 from .authorization import build_request, proposal_hash
 from .canonical import CanonicalisationError
 from .execution import ExecutionRefused, OperationRegistry
-from .guard import GuardDecision, SecurityGuard, VerificationContext
+from .guard import GuardDecision, SecurityGuard, VerificationContext, DECISION_ALLOW
 
 __all__ = [
     "AgentRequest",
@@ -197,9 +197,14 @@ class HermesAdapter:
         )
 
     def to_result(self, decision: GuardDecision) -> Mapping[str, Any]:
-        """Render a decision for the agent to read."""
+        """Render a decision for the agent to read.
+
+        The ``allowed`` flag is derived from the decision here rather
+        than copied from the decision object, so that the flag the
+        agent reads and the decision it reads can never disagree.
+        """
         return {
-            "allowed": decision.allowed,
+            "allowed": decision.decision == DECISION_ALLOW,
             "decision": decision.decision,
             "reason": decision.reason,
             "checks": dict(decision.checks),

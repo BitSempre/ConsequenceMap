@@ -332,8 +332,11 @@ class AuthorizationVerificationTests(unittest.TestCase):
         self._verify(authorization=narrower)
 
     def test_an_authorization_outliving_the_request_is_rejected(self):
-        later = _future(3600)
-        request = _request(expires_at=_future(60))
+        # The authorization ends AFTER the request does. Both windows
+        # are inside the validity policy, so what is being tested is
+        # the ordering between them - not the policy.
+        request = _request(expires_at=_future(600))
+        later = _future(1200)
         long_lived = _signed(request, self.signer, expires_at=later)
         with self.assertRaises(AuthorizationInvalid):
             self._verify(request=request, authorization=long_lived)

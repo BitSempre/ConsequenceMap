@@ -453,3 +453,52 @@ the thing the mobile applications are written against. A defect there
 propagates to every phone.
 
 **Probe what ships, not just what is hardest.**
+
+### 8.7 The sixth round: where the agent is the adversary
+
+The sixth round attacked the places where the **agent** is the
+adversary: the surface it calls, the contract the guard transport
+speaks, and the policy that bounds how long an approval stays usable.
+
+| ID | Defect | Exploit | Fix |
+|---|---|---|---|
+| **D-17** | The guard transport could return a decision and an `allowed` flag that **disagreed** — `decision=DENY` with `allowed=True` | Both are part of the contract, and the agent's surface reads `allowed`. A transport could hand the agent a **denial dressed as a permission** | The two must agree; a contradiction is a contract violation. The agent's surface now derives `allowed` from the decision rather than copying it |
+| **D-18** | **Nothing bounded how long an approval could stay open.** The exposure window for a captured authorization was whatever the requester asked for — the agent could ask for ten years | A captured approval stayed usable for as long as the agent had asked for | `MAX_VALIDITY_SECONDS` — a **policy parameter**, enforced at construction *and* re-checked at verification |
+
+**D-17 is a reminder that a contract is more than its schema.** Closing
+the schema — refusing unexpected fields — is not enough. Two fields
+that are both *accepted* can still contradict each other, and the
+consumer that reads the wrong one acts on the wrong thing.
+
+**D-18 is a decision made by absence.** The right value for the maximum
+validity window is question Q-5 in the residual-risk register, and it
+belongs to the project owner: it balances the exposure of a captured
+approval against the time a human needs to answer. The platform cannot
+wait for that answer, and it must not accept an unbounded window while
+it waits. So the policy is a **parameter** with a conservative default
+(3600 s), enforced in code, and changed by configuration once the
+owner decides.
+
+### 8.8 The tally
+
+**Eighteen defects** in roughly 2 500 lines of new security code.
+
+| Round | Probes | Defects | Theme |
+|---|---|---|---|
+| 1 | 11 | 4 | Scope typing, depth, coercion order, truncatable chain |
+| 2 | 40 | 6 | Input validation at the edges |
+| 3 | 25 | 2 | Canonical-form invariants, vocabulary enforcement |
+| 4 | independent review | 2 | **Single-use enforcement — a defect the design documented wrongly** |
+| 5 | 18 (prototype) | 2 | **The displayed fields were outside the signature** |
+| 6 | 21 (agent boundary) | 2 | **A contract whose fields could contradict each other; an unbounded validity window** |
+
+**Fourteen of the eighteen were at a boundary**, and every one of them
+was a value accepted in a shape it should not have been. Two were
+structural — the absence of a rule (single-use, a validity bound) — and
+one was a rule that was written down wrongly (the replay risk).
+
+**What the rounds have in common is the target.** Every one of them
+was a place where something *enters* the platform: an input, a
+transport, a document, a phone screen. The defences are not in the
+middle of the system. They are at the places where the system meets
+someone who is not supposed to be trusted.

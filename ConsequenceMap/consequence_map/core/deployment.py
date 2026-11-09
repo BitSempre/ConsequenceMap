@@ -141,6 +141,26 @@ class GuardDeployment:
                 "the guard transport returned unexpected field(s): %s"
                 % (", ".join(unexpected),)
             )
+        # The 'allowed' flag must AGREE with the decision.
+        #
+        # Both fields are part of the contract, and a consumer is
+        # entitled to read either. If a transport could return
+        # decision=DENY with allowed=True, then a consumer that read
+        # 'allowed' would act on a denial as if it were a permission.
+        # That is the whole failure this platform exists to prevent,
+        # arriving through a field nobody thought to cross-check.
+        if "allowed" in answer:
+            if not isinstance(answer["allowed"], bool):
+                raise ContractViolation(
+                    "the guard transport returned a non-boolean 'allowed': %r"
+                    % (answer["allowed"],)
+                )
+            expected = decision == DECISION_ALLOW
+            if answer["allowed"] != expected:
+                raise ContractViolation(
+                    "the guard transport contradicts itself: decision %r "
+                    "with allowed=%r" % (decision, answer["allowed"])
+                )
         return dict(answer)
 
     def refuse(self, reason: str) -> Mapping[str, Any]:
