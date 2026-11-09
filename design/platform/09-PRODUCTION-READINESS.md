@@ -90,7 +90,7 @@ error). The mobile prototype: 13/13, exit 0.
 |---|---|
 | **Production original** | `C:\Users\Utente\Desktop\ConsequenceMap` — **96 files, 0 altered, 0 added, 0 removed**. `auto_repair: false`. The three protected files byte-identical. |
 | **Development copy** | `C:\Users\Utente\Desktop\ConsequenceMap-Platform` — branch `feature/platform-v1`, **31 commits**, working tree clean |
-| **Delivery** | `ConsequenceMap-Security-Platform-v1-20261109.zip` — 584 898 bytes, SHA-256 `81ce968d4f1cc37314cab9394b31d466a570aee6ccb1cb504137e81da563637e`, ZIP integrity verified, 218 entries |
+| **Delivery** | `ConsequenceMap-Security-Platform-v1-20261109.zip` — 584 898 bytes, SHA-256 recorded in `SHA256SUMS.txt`, ZIP integrity verified, 218 entries |
 | **Manifest** | `MANIFEST-SHA256.json` — 218 files, with a self-referencing fixed point |
 | **Git history** | Verifiable in the delivery copy; no commits were made in the production tree, which has no `.git` |
 

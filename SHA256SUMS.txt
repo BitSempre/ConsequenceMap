@@ -1,0 +1,2 @@
+4e62e418da08960a51ac70ff40c4f1eb4bc92ef7d3135406b9055b7d9523ec91  ConsequenceMap-Security-Platform-v1-20261109.zip
+510f415934cc6eb12d5ce3542e5b28da3ccc02c7262f3628ddf3c633a198a97c  ConsequenceMap-Platform/MANIFEST-SHA256.json

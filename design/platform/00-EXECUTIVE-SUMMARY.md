@@ -100,5 +100,5 @@ The full reasoning, per criterion, is in `09-PRODUCTION-READINESS.md`.
 | The code | `C:\Users\Utente\Desktop\ConsequenceMap-Platform` — branch `feature/platform-v1`, 31 commits |
 | The documents | `design/platform/` — 10 documents |
 | The decisions | `security-decisions/` — ADR-001 (cryptography), ADR-002 (the service identity), and D-22…D-28 |
-| The delivery | `ConsequenceMap-Security-Platform-v1-20261109.zip` — SHA-256 `81ce968d4f1cc37314cab9394b31d466a570aee6ccb1cb504137e81da563637e` |
+| The delivery | `ConsequenceMap-Security-Platform-v1-20261109.zip` — SHA-256 recorded in `SHA256SUMS.txt` |
 | The manifest | `MANIFEST-SHA256.json` — 218 files, with a self-referencing fixed point |

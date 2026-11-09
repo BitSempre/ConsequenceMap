@@ -1,6 +1,6 @@
 {
  "branch": "feature/platform-v1",
- "commits": 31,
+ "commits": 33,
  "files": {
   "ConsequenceMap/.gitignore": "7d5015c17c4b5fed6f797558dc1e5af7e2fe8d6122347029ef7d76d2db3ea286",
   "ConsequenceMap/consequence_guard/__init__.py": "cc259ade38c2251513bd37ec42b2c32d8a1afcccf1555eba57ec0b76a5b4f0fe",
@@ -200,7 +200,7 @@
   "design/mobile-auth/prototype/demo.py": "69c9bbb69f0985919ac6057ef73211a0292987899391987d6ac1755722e8d545",
   "design/mobile-auth/prototype/protocol.py": "4120b1f813d2e400fe7abfbf4af6b8054c0caaabdd1197e36df31850886f01c9",
   "design/mobile-auth/prototype/test_protocol_regressions.py": "5bea74c0695c089f9a6de01b6fa412fd77db546b6d8f208fea28a898dbc7c4c5",
-  "design/platform/00-EXECUTIVE-SUMMARY.md": "112a59fa8e402db923e4531d388da70e4c4ddc3ba9a166ed19f9fc80c518a63e",
+  "design/platform/00-EXECUTIVE-SUMMARY.md": "84500a0e1710b1bea12a61893397832ef2bda6dd078c76cd6c584640f323c447",
   "design/platform/01-ARCHITECTURE.md": "02d34200403edcb148d945c7ea7d032eef3b97d91fee87f4e1f282c96d506c03",
   "design/platform/02-TRUST-BOUNDARIES.md": "203cda0d0d1a03e4a93d7116faf3a82d243e31b542b6c3e7f363c279d7895179",
   "design/platform/03-THREAT-MODEL.md": "ed7c7abe80ac92f648a3b4643e92da8f142b619c9dd2dcd44234556f76d711b9",
@@ -209,7 +209,7 @@
   "design/platform/06-PERSISTENCE-AND-RECOVERY.md": "f7f1daea1e399ec3e969eca97b07eff70835719df632b2bb3231d167caa6d66e",
   "design/platform/07-DEVICE-PAIRING-AND-REVOCATION.md": "23de691a890a81ee0d6cf497068641c515682bb51f297b75edf0dc0e07ed463b",
   "design/platform/08-RED-TEAM-REPORT.md": "db76bfd7b9a6c37a50da43edff0187c64d38fcc712a490d31973968cb5ad8829",
-  "design/platform/09-PRODUCTION-READINESS.md": "632588148a09897b54c0206733a6387c817e6898d6efc5f969c673ef36b48829",
+  "design/platform/09-PRODUCTION-READINESS.md": "1f5cd467dcda950029bf69df12b2e40e1b62adf3c366526897f8937a5bd40dcb",
   "design/platform/10-TEST-RESULTS.md": "21e636bd54d6869fcbc5a1688711b50d8d3ed833558d4b60acc5dff78d6bfc32",
   "design/platform/11-RESIDUAL-RISKS.md": "dfcd5fb0151434d047eb626c92a90cf873a0423213c3e944d81e6dab183a0adb",
   "design/sec-arch/01-SECURITY-ARCHITECTURE.md": "7630e3c978cbe8104a719b89553ffb9bdbcfbd12f4cc9e4e1118544edc2f0238",
@@ -221,7 +221,7 @@
   "security-decisions/ADR-002-WINDOWS-SERVICE-IDENTITY.md": "52092564b253d0f45efa08add99372b48c89978efc248f72837bd78dce983c68",
   "security-decisions/SECURITY-DECISIONS-D22-D28.md": "a6e8499d0023627da507a84906ab46d50738b709d1116b78d747764d6921fe6a"
  },
- "generated_at": "2026-11-09T18:22:48Z",
- "head": "3c74943c71d8a600057122c7a2e2060927729836",
+ "generated_at": "2026-11-09T18:23:11Z",
+ "head": "af95d2d62a5dfb59e2eff8d6fba675c06e3537fa",
  "project": "ConsequenceMap Security Platform v1"
 }
