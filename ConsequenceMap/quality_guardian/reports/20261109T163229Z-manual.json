@@ -1,0 +1,122 @@
+{
+  "trigger": "manual",
+  "verdict": "WARNING",
+  "changed_files": [
+    "consequence_map/core/agent.py",
+    "consequence_map/core/audit.py",
+    "consequence_map/core/authorization.py",
+    "consequence_map/core/canonical.py",
+    "consequence_map/tests/test_regressions.py"
+  ],
+  "tests_executed": 19,
+  "test_runs": [
+    {
+      "module": "test_static_audits",
+      "passed": 9,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.729,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "9 test(s) passed"
+    },
+    {
+      "module": "test_import_audit",
+      "passed": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.706,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "10 test(s) passed"
+    }
+  ],
+  "checks": [
+    {
+      "name": "hermes-runtime-compatibility",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "installed (0, 22, 5) vs required >=0.22.5",
+      "repairable": false,
+      "evidence": {
+        "installed": "0.22.5"
+      }
+    },
+    {
+      "name": "production-stdlib-only",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "PRODUCTION_DEPENDENCIES is empty and no pyproject.toml exists",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "tests:test_static_audits",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "9 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_static_audits",
+        "passed": 9
+      }
+    },
+    {
+      "name": "tests:test_import_audit",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "10 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_import_audit",
+        "passed": 10
+      }
+    },
+    {
+      "name": "formatting-hygiene",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "no trailing whitespace or final-newline defect in the changed files",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "phase-2a-manifest-integrity",
+      "verdict": "WARNING",
+      "kind": "DOCUMENTATION",
+      "detail": "1 manifest divergence(s), all documented in an addendum \u2014 a known, recorded state, not a new regression",
+      "repairable": false,
+      "evidence": {
+        "documented": [
+          "consequence_map/domain/copy.py"
+        ]
+      }
+    },
+    {
+      "name": "tests-preserved",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "no test file was removed",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "state-comparison",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "0 file(s) differ from the pre-cycle state",
+      "repairable": false,
+      "evidence": {
+        "changed": []
+      }
+    }
+  ],
+  "repairs": [],
+  "repair_attempts": 0,
+  "stopped_reason": null,
+  "unresolved": [],
+  "human_decision_required": "",
+  "generated_at": "2026-11-09T16:32:29+00:00"
+}

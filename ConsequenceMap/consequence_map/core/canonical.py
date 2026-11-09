@@ -85,8 +85,20 @@ def _escape(text: str) -> str:
     return out.replace("=", "\\=").replace(";", "\\;")
 
 
-def _encode(value: Any, path: str = "") -> str:
+#: The deepest nesting the canonical form will encode. A proposal is a
+#: flat structure in practice; a deep one is either a mistake or an
+#: attempt to exhaust the verifier's stack, and either way it is refused
+#: rather than processed.
+MAX_DEPTH = 32
+
+
+def _encode(value: Any, path: str = "", _depth: int = 0) -> str:
     """Encode one value into its unambiguous canonical form."""
+    if _depth > MAX_DEPTH:
+        raise CanonicalisationError(
+            "the document nests deeper than %d levels at %r"
+            % (MAX_DEPTH, path or "<root>")
+        )
     if value is None:
         return "n:"
     if isinstance(value, bool):
@@ -131,12 +143,16 @@ def _encode(value: Any, path: str = "") -> str:
             seen.add(key)
         for key in sorted(value, key=lambda k: k.encode("utf-8")):
             items.append(
-                "%s=%s" % (_escape(key), _encode(value[key], "%s.%s" % (path, key)))
+                "%s=%s"
+                % (
+                    _escape(key),
+                    _encode(value[key], "%s.%s" % (path, key), _depth + 1),
+                )
             )
         return "m:%s" % ";".join(items)
     if isinstance(value, (list, tuple)):
         items = [
-            _encode(item, "%s[%d]" % (path or "<root>", index))
+            _encode(item, "%s[%d]" % (path or "<root>", index), _depth + 1)
             for index, item in enumerate(value)
         ]
         return "l:%s" % ";".join(items)

@@ -50,7 +50,7 @@ from __future__ import annotations
 
 import hashlib
 import os
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Tuple
 
 from .canonical import (
     CanonicalisationError,
@@ -184,7 +184,7 @@ def build_request(
         "nonce": nonce or new_nonce(),
         "project": project,
         "operation": operation,
-        "requested_scope": list(requested_scope),
+        "requested_scope": list(_as_scope(requested_scope, "requested_scope")),
         "requested_by": requested_by,
         "expires_at": expires_at,
         "protocol_version": PROTOCOL_VERSION,
@@ -214,7 +214,7 @@ def build_authorization(
         "request_id": request["request_id"],
         "proposal_hash": request["proposal_hash"],
         "nonce": request["nonce"],
-        "approved_scope": list(approved_scope),
+        "approved_scope": list(_as_scope(approved_scope, "approved_scope")),
         "approved_by": approved_by,
         "public_key_id": public_key_id,
         "valid_from": valid_from,
@@ -230,6 +230,34 @@ def _require_fields(document: Mapping[str, Any], fields: Sequence[str], what: st
         raise AuthorizationInvalid(
             "%s is missing mandatory field(s): %s" % (what, ", ".join(missing))
         )
+
+
+def _as_scope(value: Any, what: str) -> Tuple[str, ...]:
+    """Normalise a scope into a tuple of strings, or refuse it.
+
+    A scope is a SET OF NAMES. A bare string is not a set of one name --
+    it is an iterable of characters, and ``set("files:write")`` is
+    ``{'f','i','l','e','s',':','w','r','t'}``. Accepting a string here
+    would silently turn one scope into nine, and a comparison against
+    another string could then succeed on a single shared character.
+
+    So a string is rejected outright. The caller passes a list.
+    """
+    if isinstance(value, str):
+        raise AuthorizationInvalid(
+            "%s must be a list of names, not a string: a string would be "
+            "read as a sequence of characters" % (what,)
+        )
+    if not isinstance(value, (list, tuple)):
+        raise AuthorizationInvalid(
+            "%s must be a list of names" % (what,)
+        )
+    for item in value:
+        if not isinstance(item, str):
+            raise AuthorizationInvalid(
+                "%s must contain only strings" % (what,)
+            )
+    return tuple(value)
 
 
 def _scope_is_subset(approved: Sequence[str], requested: Sequence[str]) -> bool:
@@ -385,13 +413,12 @@ def verify_authorization(
         )
 
     # 5 - the authorization may not grant more than was requested
-    if not _scope_is_subset(
-        authorization["approved_scope"], request["requested_scope"]
-    ):
+    approved_scope = _as_scope(authorization["approved_scope"], "approved_scope")
+    requested_scope = _as_scope(request["requested_scope"], "requested_scope")
+    if not _scope_is_subset(approved_scope, requested_scope):
         raise AuthorizationScopeError(
             "authorization approves %r, which is outside the requested scope %r"
-            % (sorted(authorization["approved_scope"]),
-               sorted(request["requested_scope"]))
+            % (sorted(approved_scope), sorted(requested_scope))
         )
 
     # 6 - the authorization may not outlive the request

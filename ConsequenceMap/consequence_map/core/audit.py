@@ -170,16 +170,33 @@ class AuditLog:
     def __len__(self) -> int:
         return len(self._records)
 
-    def verify(self) -> None:
-        """Raise :class:`ChainBroken` if the chain does not verify."""
-        verify_chain(self._records)
+    def verify(
+        self,
+        expected_head: Optional[str] = None,
+        expected_length: Optional[int] = None,
+    ) -> None:
+        """Raise :class:`ChainBroken` if the chain does not verify.
+
+        Pass ``expected_head`` or ``expected_length`` to detect a
+        truncated chain; without an external anchor, truncation cannot be
+        seen.
+        """
+        verify_chain(
+            self._records,
+            expected_head=expected_head,
+            expected_length=expected_length,
+        )
 
     def head_hash(self) -> str:
         """The hash of the last record, or the genesis hash if empty."""
         return self._records[-1].record_hash if self._records else GENESIS_HASH
 
 
-def verify_chain(records: Sequence[Any]) -> None:
+def verify_chain(
+    records: Sequence[Any],
+    expected_head: Optional[str] = None,
+    expected_length: Optional[int] = None,
+) -> None:
     """Verify a hash chain.
 
     Checks, for every record in order:
@@ -190,6 +207,21 @@ def verify_chain(records: Sequence[Any]) -> None:
 
     A record that was altered, removed or inserted breaks at least one of
     these. Raises :class:`ChainBroken` naming the first broken record.
+
+    **Truncation.** A chain verifies happily when its tail has been cut
+    off, because a prefix is itself a consistent chain. Detecting that
+    needs an anchor from outside the chain, which is what the two
+    optional arguments are:
+
+    - ``expected_head`` - the hash of the last record, as recorded
+      elsewhere. With it, a truncated chain fails.
+    - ``expected_length`` - how many records the chain should have. With
+      it, a truncated chain fails too.
+
+    Without either, **truncation is undetectable**, and this function
+    does not pretend otherwise. The anchor must live somewhere the agent
+    cannot write; that is a deployment requirement, and it is the same
+    requirement that protects the trust anchor.
     """
     previous_hash = GENESIS_HASH
     for index, record in enumerate(records):
@@ -218,3 +250,16 @@ def verify_chain(records: Sequence[Any]) -> None:
                 "recorded hash" % (index,)
             )
         previous_hash = record.record_hash
+
+    if expected_length is not None and len(records) != expected_length:
+        raise ChainBroken(
+            "the chain has %d record(s), expected %d: records were removed "
+            "from the end" % (len(records), expected_length)
+        )
+    if expected_head is not None:
+        actual_head = previous_hash
+        if actual_head != expected_head:
+            raise ChainBroken(
+                "the chain's head is %s, expected %s: the chain was truncated "
+                "or extended" % (actual_head, expected_head)
+            )

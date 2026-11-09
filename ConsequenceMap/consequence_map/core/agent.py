@@ -74,6 +74,23 @@ class AgentRequest:
         self.arguments = dict(arguments)
         self.proposal = proposal
         self.project = project
+        # A scope is a list of NAMES. A bare string is not a list of one
+        # name - it is an iterable of characters, and list("files:write")
+        # is nine single-character scopes. The type is checked here, at
+        # the point of construction, because by the time a caller sees
+        # the object the damage would already be done.
+        if isinstance(requested_scope, str):
+            raise AgentRequestRejected(
+                "the requested scope must be a list of names, not a string: "
+                "a string would be read as a sequence of characters"
+            )
+        if not isinstance(requested_scope, (list, tuple)):
+            raise AgentRequestRejected("the requested scope must be a list")
+        for item in requested_scope:
+            if not isinstance(item, str):
+                raise AgentRequestRejected(
+                    "the requested scope must contain only names"
+                )
         self.requested_scope = list(requested_scope)
         self.requested_by = requested_by
         self.expires_at = expires_at
