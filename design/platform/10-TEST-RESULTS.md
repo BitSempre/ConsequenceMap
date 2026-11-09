@@ -11,7 +11,7 @@
 |---|---|---|
 | `consequence_map/tests` (the plugin) | 449 | **PASS** |
 | `consequence_guard/tests` (the service) | 122 | **PASS** |
-| Mobile protocol regression tests | 10 | **PASS** |
+| Mobile protocol regression tests | 12 | **PASS** |
 | Mobile prototype demonstration | 13 cases | **PASS**, exit 0 |
 | Quality Guardian | — | `WARNING` (one pre-existing error) |
 

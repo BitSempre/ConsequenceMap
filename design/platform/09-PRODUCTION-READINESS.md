@@ -168,11 +168,34 @@ and the time a human has to answer. It is one constant:
 | 13. Validity and clock skew are enforced by the service | **Yes** |
 | 14. The agent cannot run arbitrary commands through the service | **Yes** — the arguments are derived |
 | 15. The production tree is byte-identical | **Yes** — 96 files, 0 altered |
-| 16. No unresolved critical or high bypass from the Red Team | **Yes** — 3 confirmed, all fixed; 1 finding examined and already covered |
+| 16. No unresolved critical or high bypass from the Red Team | **Yes** — across eleven rounds: 39 defects found and fixed, and **eight** findings examined and rejected with the reasoning recorded |
 
 **13 of 16 criteria are met. 3 are not, and each names a specific
 missing thing: an installed service, an applied ACL, and an external
 anchor.**
+
+**The eleventh round.** Two further independent reviews ran — a
+cryptography engineer and a Windows security engineer — and their
+findings were checked against the code rather than accepted on
+authority. Two were confirmed and fixed:
+
+- **D-26**: the authorisation accepted an unknown field. The signed
+  payload already made an added field break the signature, but a field
+  the verifier ignores is authenticated-and-ignored — the exact
+  pattern the platform refuses everywhere else. The authorisation now
+  has a closed schema, like the IPC message already had.
+- **D-27**: there was no RFC 8032 test vector. A suite that only
+  checks "my signer agrees with my verifier" proves the two halves
+  agree, not that either is Ed25519. The official RFC 8032 Section 7.1
+  vectors now validate the implementation against an external
+  reference.
+
+Three findings were **rejected**, and the reasoning is recorded: the
+interactive user must not be denied on the pipe (it would stop the
+plugin from connecting); the nonce retention window must be at least
+the maximum authorisation validity; and the stated transitive
+dependencies (`six`, `importlib-metadata`) are not what
+`cryptography` 50.0.1 actually requires.
 
 Criterion 16 deserves a precise reading: the Red Team found no
 unresolved critical or high bypass **in the logic that could be
