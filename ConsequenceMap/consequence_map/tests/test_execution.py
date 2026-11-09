@@ -75,13 +75,17 @@ class ExecutionTestCase(unittest.TestCase):
         self.engine = ExecutionEngine(self.registry, self.verifier)
 
     def _request(self, **overrides):
+        # The request and the authorization share one expiry: an
+        # authorization may not outlive the request it answers, and two
+        # separately computed timestamps differ by a millisecond.
+        expires_at = _future(900)
         request = build_request(
             proposal=PROPOSAL,
             project="ConsequenceMap",
             operation="file.delete",
             requested_scope=["files:write", "files:read"],
             requested_by="hermes-agent",
-            expires_at=_future(900),
+            expires_at=expires_at,
         )
         authorization = build_authorization(
             request=request,
@@ -89,7 +93,7 @@ class ExecutionTestCase(unittest.TestCase):
             approved_by="human",
             public_key_id=self.signer.public_key_id(),
             valid_from=_past(60),
-            expires_at=_future(900),
+            expires_at=expires_at,
             signature="",
         )
         authorization = dict(authorization)
