@@ -89,6 +89,7 @@ __all__ = [
     "Verifier",
     "InMemorySigner",
     "MAX_VALIDITY_SECONDS",
+    "CLOCK_SKEW_SECONDS",
 ]
 
 
@@ -164,6 +165,34 @@ MANDATORY_AUTHORIZATION_FIELDS: Sequence[str] = (
 #: protocol: a deployment given a different answer uses a different
 #: value without changing the protocol.
 MAX_VALIDITY_SECONDS = 3600
+
+#: How much clock disagreement between the PC and the phone is
+#: tolerated, in seconds.
+#:
+#: The authorization is produced by the PHONE and verified by the PC.
+#: The two clocks are not the same clock: NTP drifts, a phone that has
+#: been offline for a week is wrong, and a user who set the date by
+#: hand is wrong by a lot.
+#:
+#: The tolerance exists so that a phone that is a little off is not
+#: treated as an attack. It is deliberately small, and it applies to
+#: the **validity window** - a clock that is off does not change what
+#: was approved.
+#:
+#: The important asymmetry: the tolerance makes an authorization
+#: usable slightly LONGER, never shorter. A phone whose clock is behind
+#: would otherwise produce an authorization that is already expired.
+#:
+#: This is a deployment parameter. A host with a trusted time source
+#: may set it to zero; a host accepting approvals from phones on a
+#: consumer network may set it higher.
+CLOCK_SKEW_SECONDS = 30
+
+
+def _skew(seconds: int):
+    """Return the clock-skew allowance as a timedelta."""
+    from datetime import timedelta
+    return timedelta(seconds=max(0, int(seconds)))
 
 
 def _assert_window_is_bounded(
@@ -423,6 +452,7 @@ def verify_authorization(
     now: Optional[str] = None,
     parse_timestamp=None,
     max_validity_seconds: Optional[int] = None,
+    clock_skew_seconds: int = CLOCK_SKEW_SECONDS,
 ) -> Mapping[str, Any]:
     """Verify that ``authorization`` authorises exactly ``proposal``.
 
@@ -541,12 +571,22 @@ def verify_authorization(
             what="the authorization",
         )
 
-    # 8 - the current time must be inside the validity window
+    # 8 - the current time must be inside the validity window.
+    #     The clock skew tolerance is applied on the EXPIRY side only.
+    #
+    #     A phone whose clock is behind produces an authorization that
+    #     looks expired to the PC. Without a tolerance, a slightly-wrong
+    #     phone would look exactly like a replay.
+    #
+    #     The tolerance is NOT applied to the start of the window: an
+    #     authorization that is not yet valid is refused, because the
+    #     phone saying "this is good from later" is a clock problem, not
+    #     a reason to accept early.
     if current < parse(authorization["valid_from"]):
         raise AuthorizationExpired(
             "authorization is not valid until %s" % (authorization["valid_from"],)
         )
-    if current > parse(authorization["expires_at"]):
+    if current > parse(authorization["expires_at"]) + _skew(clock_skew_seconds):
         raise AuthorizationExpired(
             "authorization expired at %s" % (authorization["expires_at"],)
         )

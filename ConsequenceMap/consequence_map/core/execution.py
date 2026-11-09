@@ -50,6 +50,7 @@ from .authorization import (
     Verifier,
     verify_authorization,
 )
+from .audit import AuditLog
 from .canonical import CanonicalisationError, DOMAIN_AUTHORIZATION, domain_hash
 
 __all__ = [
@@ -281,11 +282,18 @@ class ExecutionEngine:
         revoked_key_ids: Sequence[str] = (),
         clock=None,
         consumed: Optional["ConsumedAuthorizations"] = None,
+        audit: Optional[AuditLog] = None,
     ) -> None:
         self.registry = registry
         self.verifier = verifier
         self.revoked_key_ids = tuple(revoked_key_ids)
         self._clock = clock
+        # Every execution attempt is recorded, INCLUDING the refused
+        # ones. A refusal that is not recorded is indistinguishable from
+        # an operation that never happened - and that is exactly the
+        # gap an attacker wants. The attempt is what a reviewer needs
+        # to see: the refusals are the interesting part.
+        self.audit = audit if audit is not None else AuditLog()
         # The set of authorizations already spent. An authorization is
         # a single-use token: the human approved ONE operation, and the
         # executor must not be able to turn that one approval into two
@@ -322,6 +330,39 @@ class ExecutionEngine:
         :class:`ExecutionBlocked`; the caller decides whether that is a
         rejection or a block.
         """
+        # Every attempt is recorded, whatever its outcome. The audit
+        # trail is how a reviewer sees that an operation was REFUSED -
+        # and a refusal that leaves no trace is indistinguishable from
+        # an operation that never happened.
+        attempt = {
+            "operation": request.operation,
+            "request_id": request.request.get("request_id"),
+            "authorization_id": request.authorization.get("authorization_id"),
+        }
+        try:
+            return self._execute(request, state=state, now=now, attempt=attempt)
+        except (ExecutionRefused, ExecutionBlocked) as exc:
+            self.audit.append(
+                "execution.refused",
+                dict(attempt, reason=str(exc), refused_type=type(exc).__name__),
+            )
+            raise
+        except Exception as exc:
+            self.audit.append(
+                "execution.failed",
+                dict(attempt, reason=str(exc), error_type=type(exc).__name__),
+            )
+            raise
+
+    def _execute(
+        self,
+        request: ExecutionRequest,
+        *,
+        state: str,
+        now: Optional[str],
+        attempt: Mapping[str, Any],
+    ) -> Dict[str, Any]:
+        """Do the work. The caller records the outcome."""
         # 1. The operation must exist. Default deny.
         operation = self.registry.get(request.operation)
 
@@ -392,13 +433,24 @@ class ExecutionEngine:
         try:
             result = operation.handler(request.arguments)
         except ExecutionBlocked:
+            self.audit.append(
+                "execution.blocked", dict(attempt, reason="the handler blocked")
+            )
             raise
         except Exception as exc:
+            self.audit.append(
+                "execution.failed",
+                dict(attempt, reason=str(exc), error_type=type(exc).__name__),
+            )
             return {
                 "state": self.transition(state, STATE_FAILED),
                 "operation": request.operation,
                 "error": "%s: %s" % (type(exc).__name__, exc),
             }
+        self.audit.append(
+            "execution.completed",
+            dict(attempt, state=STATE_EXECUTED),
+        )
         return {
             "state": self.transition(state, STATE_EXECUTED),
             "operation": request.operation,

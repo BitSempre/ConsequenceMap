@@ -580,3 +580,58 @@ are recorded as requirements rather than shipped as a false promise:
 
 Neither is done. Both are deployment work, and both are on the list
 that the blocking decisions gate.
+
+### 8.12 The independent review, in full
+
+The independent reviewer returned **five** findings. Each was checked
+against the real code before anything was changed. **Two were real.
+Three were not.** All five are recorded here, because a finding that was
+tested and rejected should stay tested.
+
+| # | Finding | Verdict |
+|---|---|---|
+| 1 | Non-ASCII keys are escaped rather than rejected | **Already fixed** — the excerpt the reviewer worked from predated the fix (round three) |
+| 2 | The nonce check runs before the request_id check, allowing a replay | **Not a defect.** The nonce is a *binding* between an authorization and a request, not a replay detector — there is no store of seen nonces. An attacker reusing a nonce with a different request_id is refused by the request_id check that follows. The real replay defence is the executor's spent-authorization set (D-14) |
+| 3 | `_as_scope` does not verify the type before casting | **Not a defect.** It rejects a string, then anything that is not a list or tuple, then every item that is not a string |
+| 4 | The state machine may reach unintended states, and refusals give inadequate feedback | **Partly real, and worse than described.** The transitions are correct, but the **executor kept no audit trail at all** — so a refused execution left no trace. See D-20 |
+| 5 | The expiry check does not tolerate clock skew | **Real.** The authorization is produced by the *phone* and verified by the *PC*, and they have different clocks. See D-21 |
+
+| ID | Defect | Exploit | Fix |
+|---|---|---|---|
+| **D-20** | The **executor** kept no audit trail. The guard audited every decision; the executor — the thing that actually performs the operation — recorded nothing | An execution that was **refused** left no trace. The audit log's own docstring claims refusals are recorded; that was true of the guard and false of the executor | Every attempt is recorded, with the outcome and the reason. The refusals are the interesting part |
+| **D-21** | No **clock-skew tolerance** between the phone and the PC | A phone whose clock is a little behind produces an authorization that looks expired to the PC — and a slightly-wrong phone looks exactly like a replay | `CLOCK_SKEW_SECONDS` — a deployment parameter, applied to the **expiry side only**. An authorization that is not yet valid is still refused: a phone saying "this is good from later" is a clock problem, not a reason to accept early |
+
+**D-20 is a gap between a claim and the code.** The audit log's
+docstring says *"Both authorised and refused operations are recorded. A
+refusal that is not recorded is indistinguishable from an operation that
+never happened, which is exactly the gap an attacker wants."* That
+sentence was true of the guard and false of the executor. The docstring
+described the intended design; the executor had not been given it.
+
+**Why finding 2 was rejected.** The reviewer reasoned from the
+excerpt, in which the nonce was described as *"the replay defence"*.
+It is not. A nonce is a **binding**: it ties an authorization to one
+specific request. The replay defence is the spent-authorization set,
+which did not exist when the excerpt was written and does now. Reading
+a description and assuming it is the design is exactly how a wrong
+finding gets made — and the way to answer it is to write the probe.
+
+### 8.13 The tally
+
+**Twenty-one defects** in roughly 2 700 lines of new security code.
+
+| Round | Probes | Defects | Theme |
+|---|---|---|---|
+| 1 | 11 | 4 | Scope typing, depth, coercion order, truncatable chain |
+| 2 | 40 | 6 | Input validation at the edges |
+| 3 | 25 | 2 | Canonical-form invariants, vocabulary enforcement |
+| 4 | independent review | 2 | **Single-use enforcement — a defect the design documented wrongly** |
+| 5 | 18 (prototype) | 2 | **The displayed fields were outside the signature** |
+| 6 | 21 (agent boundary) | 2 | **A contract whose fields could contradict each other; an unbounded validity window** |
+| 7 | 22 (audit + analysis) | 1 | **The audit trail's records could be rewritten after the fact** |
+| 8 | independent review (full) | 2 | **The executor kept no audit trail; no clock-skew tolerance** |
+
+**The eight rounds found twenty-one defects and rejected three
+findings.** The rejected ones are as useful a record as the accepted
+ones: a review is only worth running if its output is checked, and
+"this was tested and it holds" is a result.
