@@ -1,6 +1,6 @@
 {
  "branch": "feature/platform-v1",
- "commits": 30,
+ "commits": 31,
  "files": {
   "ConsequenceMap/.gitignore": "7d5015c17c4b5fed6f797558dc1e5af7e2fe8d6122347029ef7d76d2db3ea286",
   "ConsequenceMap/consequence_guard/__init__.py": "cc259ade38c2251513bd37ec42b2c32d8a1afcccf1555eba57ec0b76a5b4f0fe",
@@ -181,8 +181,10 @@
   "ConsequenceMap/quality_guardian/reports/20261109T174000Z-manual.md": "25daa1fa093ec19b736445053eb67e6df8d954b9a9a2470b427d9e32828d0783",
   "ConsequenceMap/quality_guardian/reports/20261109T181159Z-manual.json": "3948c1e43be915514a0c3b5841138c6df9b3206314715ecdca48c5f5404c0b13",
   "ConsequenceMap/quality_guardian/reports/20261109T181159Z-manual.md": "660efd4dbd05a4e34cc62e26563b643568ecaafec7a0192c9545e9fcf1473de5",
+  "ConsequenceMap/quality_guardian/reports/20261109T182234Z-manual.json": "5810f90f4197a35cdba904fec5aaf223f5227bf0ddc1990e530c1dd1887b47b1",
+  "ConsequenceMap/quality_guardian/reports/20261109T182234Z-manual.md": "8abac79409e5c43ec56f284db501516c4e8799c84b7060bc3b8347358fd29369",
   "ConsequenceMap/quality_guardian/runner.py": "13199b08ef0f491a70ea32fdc2ae94851768888eb6258a6cff24e787abc058b0",
-  "ConsequenceMap/quality_guardian/state/last-seen.json": "f5f8368009252e690bd93e93c358463873300beba088f79239695a5da7448d18",
+  "ConsequenceMap/quality_guardian/state/last-seen.json": "2ee6ecd67b97d29473040a4d95ce4646d43f657f794d5970e27bcd1eaa4414a1",
   "ConsequenceMap/quality_guardian/state/repair-policy.json": "52f60c0afb16746a54c32a31b96c53f64eaa48ff074641966ec610f5c6c3b129",
   "ConsequenceMap/quality_guardian/tests/__init__.py": "1d5e6554d18266069a558355c938fc7ed5d34f575fab3869b17e0a96cd00ae57",
   "ConsequenceMap/quality_guardian/tests/isolated.py": "0b2443402bdc970a561fcd546524b785bcedaf86ccf730c171f7bd3b1fac55a4",
@@ -219,7 +221,7 @@
   "security-decisions/ADR-002-WINDOWS-SERVICE-IDENTITY.md": "52092564b253d0f45efa08add99372b48c89978efc248f72837bd78dce983c68",
   "security-decisions/SECURITY-DECISIONS-D22-D28.md": "a6e8499d0023627da507a84906ab46d50738b709d1116b78d747764d6921fe6a"
  },
- "generated_at": "2026-11-09T18:20:35Z",
- "head": "77b3ab04787ee010a3170a1bc4ec0804532ae915",
+ "generated_at": "2026-11-09T18:22:48Z",
+ "head": "3c74943c71d8a600057122c7a2e2060927729836",
  "project": "ConsequenceMap Security Platform v1"
 }
