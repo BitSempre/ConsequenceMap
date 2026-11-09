@@ -24,7 +24,7 @@ mission forbids executing.
 | Tests | 1 997 | 557 tests: 449 plugin, 108 guard, plus 10 mobile-protocol |
 | Design | 8 new + 15 existing | The architecture, boundaries, threat model, protocol, audit, persistence, pairing, Red Team report, and the ADRs |
 
-**28 commits** on `feature/platform-v1`. The production tree was
+**31 commits** on `feature/platform-v1`. The production tree was
 never touched.
 
 ### The architecture, in one sentence
@@ -89,9 +89,9 @@ error). The mobile prototype: 13/13, exit 0.
 | | |
 |---|---|
 | **Production original** | `C:\Users\Utente\Desktop\ConsequenceMap` — **96 files, 0 altered, 0 added, 0 removed**. `auto_repair: false`. The three protected files byte-identical. |
-| **Development copy** | `C:\Users\Utente\Desktop\ConsequenceMap-Platform` — branch `feature/platform-v1`, **28 commits**, working tree clean |
-| **Delivery** | `ConsequenceMap-Security-Platform-v1-20261109.zip` — 566 387 bytes, SHA-256 `4f0594c9ba489314163ca989a94b8d4e8226dbc7a9c5f5c97b1e513889d47680`, ZIP integrity verified, 211 entries |
-| **Manifest** | `MANIFEST-SHA256.json` — 210 files, with a self-referencing fixed point |
+| **Development copy** | `C:\Users\Utente\Desktop\ConsequenceMap-Platform` — branch `feature/platform-v1`, **31 commits**, working tree clean |
+| **Delivery** | `ConsequenceMap-Security-Platform-v1-20261109.zip` — 584 898 bytes, SHA-256 `81ce968d4f1cc37314cab9394b31d466a570aee6ccb1cb504137e81da563637e`, ZIP integrity verified, 218 entries |
+| **Manifest** | `MANIFEST-SHA256.json` — 218 files, with a self-referencing fixed point |
 | **Git history** | Verifiable in the delivery copy; no commits were made in the production tree, which has no `.git` |
 
 ---
