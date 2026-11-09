@@ -1,6 +1,6 @@
 {
  "branch": "feature/platform-v1",
- "commits": 38,
+ "commits": 41,
  "files": {
   "ConsequenceMap/.gitignore": "7d5015c17c4b5fed6f797558dc1e5af7e2fe8d6122347029ef7d76d2db3ea286",
   "ConsequenceMap/consequence_guard/__init__.py": "cc259ade38c2251513bd37ec42b2c32d8a1afcccf1555eba57ec0b76a5b4f0fe",
@@ -200,9 +200,9 @@
   "design/mobile-auth/05-RECOVERY-AND-DEVICE-REPLACEMENT.md": "301d92f6009316f21900126574afe59d85b13d3838456cbff301cc6b51f56635",
   "design/mobile-auth/06-COMPATIBILITY-MATRIX.md": "8fc3f46140c4c2d568a61a6cb0e26718cf33640db23084d634b2bf0e80cf0ea1",
   "design/mobile-auth/prototype/README.md": "8e1aa82fb6180dcad8474eb8f7e1d430ee25a571617f6c0f0b2f7e25f57cf929",
-  "design/mobile-auth/prototype/demo.py": "69c9bbb69f0985919ac6057ef73211a0292987899391987d6ac1755722e8d545",
-  "design/mobile-auth/prototype/protocol.py": "4120b1f813d2e400fe7abfbf4af6b8054c0caaabdd1197e36df31850886f01c9",
-  "design/mobile-auth/prototype/test_protocol_regressions.py": "5bea74c0695c089f9a6de01b6fa412fd77db546b6d8f208fea28a898dbc7c4c5",
+  "design/mobile-auth/prototype/demo.py": "67e5b74960b4490cb7638f0a01ee91e14ed28c7a74b69172a0bcbda6241419ec",
+  "design/mobile-auth/prototype/protocol.py": "19d8e2806780971a0329f75aaaf6d6b5a09310c50764f2c151fc73bf1ae88f47",
+  "design/mobile-auth/prototype/test_protocol_regressions.py": "62acc6d9f47456864dd1647f4906c12aefc131b3e429e51c8bfdd87e3c4ca801",
   "design/platform/00-EXECUTIVE-SUMMARY.md": "924ab872ba9960827be30b5209f5131ea3a09a0f3fe301269ca3ccbe292313ab",
   "design/platform/01-ARCHITECTURE.md": "02d34200403edcb148d945c7ea7d032eef3b97d91fee87f4e1f282c96d506c03",
   "design/platform/02-TRUST-BOUNDARIES.md": "203cda0d0d1a03e4a93d7116faf3a82d243e31b542b6c3e7f363c279d7895179",
@@ -212,8 +212,8 @@
   "design/platform/06-PERSISTENCE-AND-RECOVERY.md": "f7f1daea1e399ec3e969eca97b07eff70835719df632b2bb3231d167caa6d66e",
   "design/platform/07-DEVICE-PAIRING-AND-REVOCATION.md": "23de691a890a81ee0d6cf497068641c515682bb51f297b75edf0dc0e07ed463b",
   "design/platform/08-RED-TEAM-REPORT.md": "bf3f749c6618b3c833913c73abbef5f17c408f2304ce505fb038957474a3277c",
-  "design/platform/09-PRODUCTION-READINESS.md": "f1af914f9c859a07b42743e71d6e74e0f2ba689b96f0637e476d779b4952678c",
-  "design/platform/10-TEST-RESULTS.md": "07d6fad8f12c084fc75130b8f53ed20ea712b7ca4068083c12697bb39d27eb0f",
+  "design/platform/09-PRODUCTION-READINESS.md": "29f8cf47f947cc848537d8f473a2eced00679c3bd5eb3b06777b6085e266457b",
+  "design/platform/10-TEST-RESULTS.md": "fecf9ff36a4a0e56ede005cd4daddde73c64677719ab043d16c97c40d876cd81",
   "design/platform/11-RESIDUAL-RISKS.md": "dfcd5fb0151434d047eb626c92a90cf873a0423213c3e944d81e6dab183a0adb",
   "design/sec-arch/01-SECURITY-ARCHITECTURE.md": "7630e3c978cbe8104a719b89553ffb9bdbcfbd12f4cc9e4e1118544edc2f0238",
   "design/sec-arch/02-THREAT-MODEL.md": "9939b8f168f118c892b2351fe8f67b99e04cd563c82ae7cf23ca78d5b3809fa6",
@@ -224,7 +224,7 @@
   "security-decisions/ADR-002-WINDOWS-SERVICE-IDENTITY.md": "52092564b253d0f45efa08add99372b48c89978efc248f72837bd78dce983c68",
   "security-decisions/SECURITY-DECISIONS-D22-D28.md": "a6e8499d0023627da507a84906ab46d50738b709d1116b78d747764d6921fe6a"
  },
- "generated_at": "2026-11-09T18:36:53Z",
- "head": "c80637671ca1af9a442f4827a607ec8873fabbcb",
+ "generated_at": "2026-11-09T18:45:24Z",
+ "head": "d2dd0dd21d82e70953f388765fac61cda1d7948e",
  "project": "ConsequenceMap Security Platform v1"
 }
