@@ -24,7 +24,7 @@ proves it.
 | **T02** | The agent alters the Guard's configuration | SR-11 | — | **NOT IMPLEMENTED** |
 | **T03** | The agent grants itself privileges | SR-08 | `test_guard.py::test_t03_an_authorization_without_the_scope_is_denied` | **IMPLEMENTED** (protocol); enforcement needs the service |
 | **T04** | The agent fabricates an authorization | SR-03 | `test_authorization.py::test_t04_a_forged_signature_is_rejected`, `::test_t04_a_forged_signature_from_a_different_key_is_rejected` | **IMPLEMENTED** (protocol) |
-| **T05** | The agent reuses an earlier signature | SR-04 | `test_authorization.py::test_t05_a_replayed_authorization_against_a_new_request_is_rejected`, `::test_t05_a_replayed_authorization_over_the_same_proposal_is_rejected` | **IMPLEMENTED** |
+| **T05** | The agent reuses an earlier signature | SR-04 | `test_authorization.py::test_t05_a_replayed_authorization_against_a_new_request_is_rejected`, `::test_t05_a_replayed_authorization_over_the_same_proposal_is_rejected`, `test_regressions_round4.py::test_the_second_execution_is_refused`, `::test_a_shared_store_survives_two_engines` | **IMPLEMENTED** |
 | **T06** | The proposal changes after approval | SR-03 | `test_authorization.py::test_t06_a_proposal_changed_after_approval_is_rejected`, `::test_t06_a_resource_added_after_approval_is_rejected`, `::test_t06_a_permission_widened_after_approval_is_rejected` | **IMPLEMENTED** |
 | **T07** | The hash does not match the proposal | SR-03 | `test_authorization.py::test_t07_a_mismatched_proposal_hash_is_rejected` | **IMPLEMENTED** |
 | **T08** | The authorization expired | SR-05 | `test_authorization.py::test_t08_an_expired_authorization_is_rejected`, `::test_t08_an_authorization_not_yet_valid_is_rejected` | **IMPLEMENTED** (logic); trusted clock **NOT IMPLEMENTED** |
@@ -82,7 +82,7 @@ never trusted.
 ### SR-04 — Each request must be unique, and nonces must not repeat
 
 Every request carries a fresh 256-bit nonce. The authorization must
-carry the same nonce. A replay against a different request fails.
+carry the same nonce. A replay against a different request fails. A replay of the **same** authorization against the same request is refused by the executor's spent-authorization set: an approval is good for one execution, and the set must be durable and shared.
 
 *Verified by:* `test_authorization.py` T05.
 *Status:* **IMPLEMENTED**.

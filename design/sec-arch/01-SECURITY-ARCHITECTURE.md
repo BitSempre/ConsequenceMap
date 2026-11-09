@@ -126,7 +126,8 @@ checked" is not evidence and is not used.
 | The guard is unreachable | `GuardUnavailable` — a **refusal**. No cache, no fallback, no last-known-good |
 | The authorization is forged | `DENY`, reason names the check |
 | The proposal was changed | `DENY` — the hash is recomputed, not trusted |
-| An old authorization is replayed | `DENY` — the nonce differs |
+| An old authorization is replayed against a new request | `DENY` — the nonce differs |
+| The same authorization is executed twice | `DENY` — the executor's spent-authorization set; an approval is good for one execution |
 | The key was revoked | `DENY` |
 | The authorization expired | `DENY` |
 | The operation is off the allowlist | `DENY` — default deny |

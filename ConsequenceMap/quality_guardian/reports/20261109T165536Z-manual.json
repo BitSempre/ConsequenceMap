@@ -1,0 +1,53 @@
+{
+  "trigger": "manual",
+  "verdict": "WARNING",
+  "changed_files": [],
+  "tests_executed": 0,
+  "test_runs": [],
+  "checks": [
+    {
+      "name": "hermes-runtime-compatibility",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "installed (0, 22, 5) vs required >=0.22.5",
+      "repairable": false,
+      "evidence": {
+        "installed": "0.22.5"
+      }
+    },
+    {
+      "name": "production-stdlib-only",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "PRODUCTION_DEPENDENCIES is empty and no pyproject.toml exists",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "change-detection",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "no real content change was detected; no test was executed",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "phase-2a-manifest-integrity",
+      "verdict": "WARNING",
+      "kind": "DOCUMENTATION",
+      "detail": "1 manifest divergence(s), all documented in an addendum \u2014 a known, recorded state, not a new regression",
+      "repairable": false,
+      "evidence": {
+        "documented": [
+          "consequence_map/domain/copy.py"
+        ]
+      }
+    }
+  ],
+  "repairs": [],
+  "repair_attempts": 0,
+  "stopped_reason": null,
+  "unresolved": [],
+  "human_decision_required": "",
+  "generated_at": "2026-11-09T16:55:36+00:00"
+}

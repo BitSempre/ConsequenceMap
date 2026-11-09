@@ -43,6 +43,7 @@ to its own location.
 | 2 | The proposal's action changed after approval | rejected — `AuthorizationInvalid` |
 | 3 | A resource added after approval | rejected — `AuthorizationInvalid` |
 | 4 | An old approval replayed against another proposal | rejected — `AuthorizationInvalid` |
+| 4b | An old approval replayed against the **same** request | rejected at execution — the executor's spent-authorization set |
 | 5 | The authorization expired | rejected — `AuthorizationExpired` |
 | 6 | The phone's key was revoked | rejected — `AuthorizationRevoked` |
 | 7 | Non-ASCII text, unescaped | the canonical form refuses it — `CanonicalisationError` |
