@@ -61,7 +61,21 @@ class ChainBroken(AuditError):
 
 
 class AuditRecord:
-    """One entry in the audit trail."""
+    """One entry in the audit trail.
+
+    A record is **immutable**. Once written, its content cannot change:
+    the fields are read-only and the payload is a frozen snapshot.
+
+    The chain detects an altered record, but detection is not
+    prevention. An audit trail whose records can be rewritten after the
+    fact is not an audit trail - it is a suggestion that something
+    happened. Making the record immutable means the only way to change
+    the history is to build a different history, which produces a
+    different chain and a different head hash.
+    """
+
+    __slots__ = ("_sequence", "_event", "_payload", "_recorded_at",
+                 "_previous_hash", "_record_hash")
 
     def __init__(
         self,
@@ -72,18 +86,52 @@ class AuditRecord:
         previous_hash: str,
         record_hash: str,
     ) -> None:
-        self.sequence = sequence
-        self.event = event
-        self.payload = dict(payload)
-        self.recorded_at = recorded_at
-        self.previous_hash = previous_hash
-        self.record_hash = record_hash
+        object.__setattr__(self, "_sequence", sequence)
+        object.__setattr__(self, "_event", event)
+        object.__setattr__(self, "_payload", _freeze(payload))
+        object.__setattr__(self, "_recorded_at", recorded_at)
+        object.__setattr__(self, "_previous_hash", previous_hash)
+        object.__setattr__(self, "_record_hash", record_hash)
+
+    @property
+    def sequence(self) -> int:
+        return self._sequence
+
+    @property
+    def event(self) -> str:
+        return self._event
+
+    @property
+    def payload(self) -> Mapping[str, Any]:
+        return self._payload
+
+    @property
+    def recorded_at(self) -> str:
+        return self._recorded_at
+
+    @property
+    def previous_hash(self) -> str:
+        return self._previous_hash
+
+    @property
+    def record_hash(self) -> str:
+        return self._record_hash
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        raise AttributeError(
+            "an audit record is immutable: %r cannot be changed" % (name,)
+        )
+
+    def __delattr__(self, name: str) -> None:
+        raise AttributeError(
+            "an audit record is immutable: %r cannot be deleted" % (name,)
+        )
 
     def to_mapping(self) -> Mapping[str, Any]:
         return {
             "sequence": self.sequence,
             "event": self.event,
-            "payload": self.payload,
+            "payload": _thaw(self.payload),
             "recorded_at": self.recorded_at,
             "previous_hash": self.previous_hash,
             "record_hash": self.record_hash,
@@ -102,6 +150,84 @@ class AuditRecord:
 
     def __repr__(self) -> str:  # pragma: no cover - debugging aid
         return "<AuditRecord %d %s>" % (self.sequence, self.event)
+
+
+def _thaw(value: Any) -> Any:
+    """Turn a frozen snapshot back into ordinary containers.
+
+    The canonical form needs plain mappings and lists. The frozen
+    payload uses tuples for sequences and read-only mappings, so it is
+    converted here for the hash and for anything a caller wants to read.
+    """
+    if isinstance(value, FrozenMapping):
+        return value.to_plain()
+    if isinstance(value, Mapping):
+        return {key: _thaw(item) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return [_thaw(item) for item in value]
+    if isinstance(value, frozenset):
+        return sorted(value)
+    return value
+
+
+class FrozenMapping(Mapping):
+    """A read-only mapping.
+
+    A plain dict would still be mutable, and a frozen payload built out
+    of plain dicts would not be frozen at all - only the top level
+    would resist a change.
+    """
+
+    __slots__ = ("_data",)
+
+    def __init__(self, data: Mapping[str, Any]) -> None:
+        object.__setattr__(self, "_data", dict(data))
+
+    def __getitem__(self, key: str) -> Any:
+        return self._data[key]
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __repr__(self) -> str:  # pragma: no cover - debugging aid
+        return repr(self._data)
+
+    def __setitem__(self, key, value) -> None:
+        raise TypeError("a frozen mapping cannot be changed")
+
+    def __delitem__(self, key) -> None:
+        raise TypeError("a frozen mapping cannot be changed")
+
+    def __setattr__(self, name, value) -> None:
+        raise TypeError("a frozen mapping cannot be changed")
+
+    def __delattr__(self, name) -> None:
+        raise TypeError("a frozen mapping cannot be changed")
+
+    def to_plain(self) -> dict:
+        """A mutable copy, for the canonical form."""
+        return {key: _thaw(item) for key, item in self._data.items()}
+
+
+def _freeze(value: Any) -> Any:
+    """Return a read-only snapshot of a payload.
+
+    The snapshot is deep: a nested dict or list is frozen too, so
+    ``record.payload["nested"]["key"] = x`` cannot change what was
+    recorded.
+    """
+    if isinstance(value, Mapping):
+        return FrozenMapping(
+            {key: _freeze(item) for key, item in value.items()}
+        )
+    if isinstance(value, (list, tuple)):
+        return tuple(_freeze(item) for item in value)
+    if isinstance(value, (set, frozenset)):
+        return frozenset(value)
+    return value
 
 
 def _record_hash(
@@ -158,7 +284,9 @@ class AuditLog:
             self._records[-1].record_hash if self._records else GENESIS_HASH
         )
         moment = recorded_at or format_rfc3339(now_utc())
-        record_hash = _record_hash(sequence, event, payload, moment, previous_hash)
+        record_hash = _record_hash(
+            sequence, event, _thaw(_freeze(payload)), moment, previous_hash
+        )
         record = AuditRecord(
             sequence=sequence,
             event=event,
@@ -247,7 +375,7 @@ def verify_chain(
         expected = _record_hash(
             record.sequence,
             record.event,
-            record.payload,
+            _thaw(record.payload),
             record.recorded_at,
             record.previous_hash,
         )

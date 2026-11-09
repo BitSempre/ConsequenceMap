@@ -502,3 +502,81 @@ was a place where something *enters* the platform: an input, a
 transport, a document, a phone screen. The defences are not in the
 middle of the system. They are at the places where the system meets
 someone who is not supposed to be trusted.
+
+### 8.9 The seventh round: the audit trail's own integrity
+
+The seventh round attacked the **audit log** and the **analysis layer**
+- the two areas the earlier rounds had touched least.
+
+| ID | Defect | Exploit | Fix |
+|---|---|---|---|
+| **D-19** | An `AuditRecord` was a **mutable object**, and `append` returned the live internal object | Anyone holding that reference could rewrite a record after the fact. The chain **did** detect the rewrite — but detection is not prevention | A record is now **immutable**: read-only fields, and a deep, read-only payload snapshot |
+
+**D-19 is a property the audit trail was supposed to have and did not.**
+
+The whole design rests on the chain detecting tampering. It does — the
+probe confirmed the rewrite is caught. But a trail whose records can be
+rewritten is not a trail: it is a *suggestion that something happened*.
+If the attacker can rewrite a record, they can also rewrite it
+**consistently**, and then the chain verifies perfectly.
+
+That last case is the one the chain alone cannot catch, and it is why
+the fix is immutability rather than another hash. The only way to change
+the history is to build a *different* history, which produces a
+different chain and a different head hash — and the head hash is
+recorded outside the chain.
+
+**The payload is frozen deeply.** A snapshot that only protected the
+top level would not be a snapshot: `record.payload["nested"]["key"]`
+would still be writable. The payload is a read-only mapping of
+read-only mappings, and mutating the caller's own dictionary after the
+append does not reach into the log.
+
+**The analysis layer produced no defect.** Its checks — the
+weakest-link confidence aggregation, the closed classification
+vocabulary, the refusal to present an unverified claim as a fact, the
+refusal to qualify a forecast that does not state its unknowns — all
+held under probing. That is worth recording too: not every module has
+a hole, and saying so is part of an honest report.
+
+### 8.10 The tally
+
+**Nineteen defects** in roughly 2 600 lines of new security code.
+
+| Round | Probes | Defects | Theme |
+|---|---|---|---|
+| 1 | 11 | 4 | Scope typing, depth, coercion order, truncatable chain |
+| 2 | 40 | 6 | Input validation at the edges |
+| 3 | 25 | 2 | Canonical-form invariants, vocabulary enforcement |
+| 4 | independent review | 2 | **Single-use enforcement — a defect the design documented wrongly** |
+| 5 | 18 (prototype) | 2 | **The displayed fields were outside the signature** |
+| 6 | 21 (agent boundary) | 2 | **A contract whose fields could contradict each other; an unbounded validity window** |
+| 7 | 22 (audit + analysis) | 1 | **The audit trail's records could be rewritten after the fact** |
+
+**Fifteen of the nineteen were at a boundary**, and every one of them
+was a value accepted in a shape it should not have been. Two were
+structural — the absence of a rule (single-use, a validity bound) —
+one was a rule written down wrongly (the replay risk), and one was a
+**property claimed but not implemented** (the trail's immutability).
+
+**Where the rounds have found defects, in order of frequency:** a
+boundary that accepts a value in the wrong shape; a boundary that
+accepts a value that should not be accepted at all; a rule that was
+documented but not enforced; a property that was assumed rather than
+built.
+
+### 8.11 What the seventh round says about the remaining work
+
+The audit log is now immutable **in memory**. It is not yet durable,
+not yet shared across processes, and not yet anchored outside the
+agent's reach. The `ConsumedAuthorizations` set has the same gap. Both
+are recorded as requirements rather than shipped as a false promise:
+
+- the spent-authorization set must be **durable and shared**, so a
+  captured authorization cannot be replayed after a reboot;
+- the audit trail must be **anchored** — its head hash recorded where
+  the agent cannot write — so a truncation or a consistent rewrite is
+  detectable from outside.
+
+Neither is done. Both are deployment work, and both are on the list
+that the blocking decisions gate.

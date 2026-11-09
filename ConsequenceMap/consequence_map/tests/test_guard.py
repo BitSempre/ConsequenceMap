@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import unittest
 
-from consequence_map.core.audit import ChainBroken
+from consequence_map.core.audit import ChainBroken, AuditRecord, verify_chain
 from consequence_map.core.authorization import (
     InMemorySigner,
     InMemoryVerifier,
@@ -176,9 +176,25 @@ class GuardDecisionTests(GuardTestCase):
 
     def test_t15_the_audit_chain_detects_alteration(self):
         self.guard.decide(self._context())
-        self.guard.audit.records[0].payload = {"operation": "os.system"}
+        # The records are immutable, so the alteration is built as a
+        # replacement - which is what an attacker with access to the
+        # stored log would do anyway.
+        original = self.guard.audit.records[0]
+        altered = AuditRecord(
+            sequence=original.sequence,
+            event=original.event,
+            payload={"operation": "os.system"},
+            recorded_at=original.recorded_at,
+            previous_hash=original.previous_hash,
+            record_hash=original.record_hash,
+        )
         with self.assertRaises(ChainBroken):
-            self.guard.audit.verify()
+            verify_chain([altered])
+
+    def test_t15_a_guard_record_cannot_be_rewritten_in_place(self):
+        self.guard.decide(self._context())
+        with self.assertRaises(AttributeError):
+            self.guard.audit.records[0].payload = {"operation": "os.system"}
 
 
 class IndeterminateTests(GuardTestCase):

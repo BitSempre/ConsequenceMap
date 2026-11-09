@@ -18,6 +18,7 @@ from consequence_map.core.audit import (
     AuditLog,
     ChainBroken,
     verify_chain,
+    AuditRecord,
 )
 from consequence_map.core.canonical import CanonicalisationError
 from consequence_map.core.timeutil import format_rfc3339, now_utc
@@ -51,23 +52,87 @@ class AuditChainTests(unittest.TestCase):
         )
 
     # T15 - the agent alters the audit records
+    #
+    # The records are IMMUTABLE, so an alteration is built as a
+    # replacement rather than as an assignment. That is what an attacker
+    # with access to the stored log would do anyway: they would rewrite
+    # the file, not call a setter on a live object.
+    @staticmethod
+    def _rebuild(records, index, **changes):
+        """Return the chain with one record replaced."""
+        rebuilt = []
+        for position, record in enumerate(records):
+            if position != index:
+                rebuilt.append(record)
+                continue
+            fields = {
+                "sequence": record.sequence,
+                "event": record.event,
+                "payload": record.payload,
+                "recorded_at": record.recorded_at,
+                "previous_hash": record.previous_hash,
+                "record_hash": record.record_hash,
+            }
+            fields.update(changes)
+            rebuilt.append(AuditRecord(**fields))
+        return rebuilt
+
     def test_t15_an_altered_payload_is_detected(self):
-        record = self.log.records[2]
-        record.payload = {"request_id": "r-999"}
+        records = self._rebuild(self.log.records, 2, payload={"request_id": "r-999"})
         with self.assertRaises(ChainBroken):
-            self.log.verify()
+            verify_chain(records)
 
     def test_t15_an_altered_event_name_is_detected(self):
-        self.log.records[1].event = "authorization.auto_approved"
+        records = self._rebuild(
+            self.log.records, 1, event="authorization.auto_approved"
+        )
         with self.assertRaises(ChainBroken):
-            self.log.verify()
+            verify_chain(records)
 
     def test_t15_an_altered_timestamp_is_detected(self):
         # A timestamp that differs from the original, not merely "now" -
         # the append happened in the same millisecond.
-        self.log.records[1].recorded_at = "2020-01-01T00:00:00.000Z"
+        records = self._rebuild(
+            self.log.records, 1, recorded_at="2020-01-01T00:00:00.000Z"
+        )
         with self.assertRaises(ChainBroken):
-            self.log.verify()
+            verify_chain(records)
+
+    # Immutability: a record cannot be rewritten in place. Detection is
+    # not prevention, so prevention is worth having.
+    def test_a_record_cannot_have_its_event_changed(self):
+        record = self.log.records[1]
+        with self.assertRaises(AttributeError):
+            record.event = "authorization.auto_approved"
+
+    def test_a_record_cannot_have_its_payload_changed(self):
+        record = self.log.records[1]
+        with self.assertRaises(AttributeError):
+            record.payload = {"request_id": "r-999"}
+
+    def test_a_record_cannot_have_its_hash_changed(self):
+        record = self.log.records[1]
+        with self.assertRaises(AttributeError):
+            record.record_hash = "0" * 64
+
+    def test_a_record_cannot_have_a_field_deleted(self):
+        record = self.log.records[1]
+        with self.assertRaises(AttributeError):
+            del record.event
+
+    def test_the_payload_snapshot_is_deep(self):
+        log = AuditLog()
+        payload = {"nested": {"key": "original"}}
+        log.append("event", payload)
+        # mutating the caller's dict afterwards must not change the log
+        payload["nested"]["key"] = "changed"
+        self.assertEqual(log.records[0].payload["nested"]["key"], "original")
+
+    def test_a_nested_payload_cannot_be_mutated_through_the_record(self):
+        log = AuditLog()
+        log.append("event", {"nested": {"key": "original"}})
+        with self.assertRaises(TypeError):
+            log.records[0].payload["nested"]["key"] = "changed"
 
     def test_t15_a_removed_record_is_detected(self):
         records = list(self.log.records)
@@ -94,8 +159,7 @@ class AuditChainTests(unittest.TestCase):
         # chain - which is exactly why the chain alone is not prevention.
         # What it still catches is a rewrite that did not recompute the
         # hashes: this test rewrites the content but keeps the old hashes.
-        records = list(self.log.records)
-        records[3].payload = {"path": "secrets"}
+        records = self._rebuild(self.log.records, 3, payload={"path": "secrets"})
         with self.assertRaises(ChainBroken):
             verify_chain(records)
 
