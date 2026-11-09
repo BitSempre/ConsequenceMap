@@ -90,8 +90,8 @@ Severity reflects impact **and** likelihood in this environment.
 | **STRIDE** | Spoofing / Replay |
 | **Impact** | An operation the human approved once is approved again, without a new decision |
 | **Likelihood** | High without a nonce; low with one |
-| **Mitigation** | Every request carries a fresh 256-bit nonce. The authorization must carry the **same** nonce. The proposal must also hash to the same value. A replay against a new request fails the nonce check; a replay against the same request is caught by the expiry. |
-| **Residual risk** | An authorization replayed **within its validity window against the identical request** is accepted — by design, because that is the same operation, approved once, still valid. The validity window must therefore be short. |
+| **Mitigation** | Every request carries a fresh 256-bit nonce. The authorization must carry the **same** nonce. The proposal must also hash to the same value. A replay against a new request fails the nonce check. A replay against the same request is refused by the executor's **spent-authorization set**: an approval is good for **one** execution. |
+| **Residual risk** | The spent set must be **durable and shared** across processes. An engine that forgets it on restart would let a captured authorization be replayed after a reboot. The validity window must also be short — it is the exposure window for a captured authorization that has not yet been spent. |
 | **Test** | `test_authorization.py::test_t05_a_replayed_authorization_against_a_new_request_is_rejected`, `::test_t05_a_replayed_authorization_over_the_same_proposal_is_rejected` — **PASS** |
 | **Status** | Implemented and tested. |
 
@@ -358,7 +358,41 @@ spelling of this document".
 not being enforced on the field the human reads last, immediately
 before deciding.
 
-### 8.3 The tally
+### 8.3 The fourth round: an independent reviewer, and the defect the design had documented wrongly
+
+The fourth round was run by an **independent reviewer** working from a
+logic excerpt, with no access to the repository. It confirmed D-11 (the
+non-ASCII key) independently - which had already been found and fixed
+in round three - and then found the defect the three earlier rounds and
+the design documents had all missed.
+
+| ID | Defect | Exploit | Fix |
+|---|---|---|---|
+| **D-13** | There is **no store of spent nonces**. The `AuthorizationReplay` exception fired only when two nonces *differed*, not when one was reused | A captured (request, authorization) pair verified **five times in a row** | Documented as the deliberate residual risk it was meant to be — but see D-14, which is not acceptable |
+| **D-14** | The executor held **no memory of what it had already spent**. Its state machine guards transitions, but the *state is supplied by the caller* | The same approval executed the handler **three times**: "approved once, executed three times" | `ConsumedAuthorizations` — the executor marks an authorization spent before the handler runs |
+
+**D-14 is the one that matters, and the design had it backwards.**
+
+The threat model said:
+
+> An authorization replayed within its validity window against the
+> identical request is accepted — by design, because that is the same
+> operation, approved once, still valid.
+
+That is true of the **authorization**. It was not true of the
+**execution**. "Approved once" had become "executed three times",
+because the executor trusted a caller-supplied state and kept no record
+of its own.
+
+The design was self-consistent and wrong. It documented a residual risk
+it had actually designed away — and missed the one it had not.
+
+**Why the independent review found what three internal rounds did
+not:** the internal rounds tested the code against its own intent. The
+reviewer, having only the *description*, tested the description itself.
+When the description was wrong, only the outsider could see it.
+
+### 8.4 The tally
 
 **Twelve defects** in roughly 2 400 lines of new security code.
 

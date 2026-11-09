@@ -73,6 +73,7 @@ __all__ = [
     "OperationRegistry",
     "ExecutionRequest",
     "ExecutionEngine",
+    "ConsumedAuthorizations",
 ]
 
 
@@ -220,6 +221,50 @@ class ExecutionRequest:
         self.authorization = authorization
 
 
+class ConsumedAuthorizations:
+    """The set of authorizations that have already been spent.
+
+    An authorization is a **single-use token**. The human approved one
+    operation; the executor may carry it out once. Without this record,
+    the same approval can drive two executions, because the execution
+    state is supplied by the caller rather than held by the engine.
+
+    The key is derived from the authorization's identity and its nonce,
+    both of which are covered by the signature. An attacker who edits
+    either of them has to re-sign, and so cannot produce a second key
+    for the same approval.
+
+    In a real deployment this set must be **durable and shared**: an
+    engine that forgets it on restart would let a captured authorization
+    be replayed after a reboot. The in-memory implementation here is
+    the reference behaviour, not a production store.
+    """
+
+    def __init__(self) -> None:
+        self._keys: set = set()
+
+    @staticmethod
+    def key_for(authorization: Mapping[str, Any]) -> str:
+        """The spending key for an authorization."""
+        identity = authorization.get("authorization_id")
+        nonce = authorization.get("nonce")
+        if identity is None and nonce is None:
+            raise ExecutionRefused(
+                "the authorization carries neither an id nor a nonce, so it "
+                "cannot be marked as spent"
+            )
+        return "%s|%s" % (identity, nonce)
+
+    def contains(self, key: str) -> bool:
+        return key in self._keys
+
+    def add(self, key: str) -> None:
+        self._keys.add(key)
+
+    def __len__(self) -> int:
+        return len(self._keys)
+
+
 class ExecutionEngine:
     """Applies a decision, under conditions it verifies itself.
 
@@ -235,11 +280,17 @@ class ExecutionEngine:
         verifier: Verifier,
         revoked_key_ids: Sequence[str] = (),
         clock=None,
+        consumed: Optional["ConsumedAuthorizations"] = None,
     ) -> None:
         self.registry = registry
         self.verifier = verifier
         self.revoked_key_ids = tuple(revoked_key_ids)
         self._clock = clock
+        # The set of authorizations already spent. An authorization is
+        # a single-use token: the human approved ONE operation, and the
+        # executor must not be able to turn that one approval into two
+        # executions by being handed the same state twice.
+        self.consumed = consumed if consumed is not None else ConsumedAuthorizations()
 
     # -- state machine -------------------------------------------------
 
@@ -303,7 +354,20 @@ class ExecutionEngine:
                 % (operation.scope, sorted(granted))
             )
 
-        # 5. The arguments must be a mapping, and must not contain a
+        # 5. The authorization must not have been spent already. A
+        #    human approves ONE operation. The state machine alone does
+        #    not enforce that: the state is supplied by the caller, so a
+        #    caller that passes PREPARED again would run the handler a
+        #    second time with the same approval. The spent set is what
+        #    makes an authorization single-use.
+        spent_key = self.consumed.key_for(request.authorization)
+        if self.consumed.contains(spent_key):
+            raise ExecutionRefused(
+                "this authorization was already used to execute an operation; "
+                "an approval is good for one execution"
+            )
+
+        # 6. The arguments must be a mapping, and must not contain a
         #    command. The executor never accepts a command string.
         if not isinstance(request.arguments, Mapping):
             raise ExecutionRefused("arguments must be a mapping")
@@ -314,7 +378,16 @@ class ExecutionEngine:
                     "command" % (key,)
                 )
 
-        # 6. Execute, with the state machine reflecting the outcome.
+        # The authorization is marked spent BEFORE the handler runs.
+        #
+        # A handler that fails may have had a partial effect - it may
+        # have deleted three of four files before raising. Retrying the
+        # same authorization then would apply the approved effect twice.
+        # A human who wants a second attempt must approve a second
+        # operation, and that is visible in the audit trail.
+        self.consumed.add(spent_key)
+
+        # 7. Execute, with the state machine reflecting the outcome.
         state = self.transition(state, STATE_EXECUTING)
         try:
             result = operation.handler(request.arguments)
