@@ -52,6 +52,7 @@ import hashlib
 import os
 from typing import Any, Mapping, Optional, Sequence, Tuple
 
+from .timeutil import parse_rfc3339
 from .canonical import (
     CanonicalisationError,
     DOMAIN_AUTHORIZATION,
@@ -177,6 +178,11 @@ def build_request(
     ``expires_at`` is an RFC 3339 timestamp string. The caller decides the
     window; this module only records it and later checks the window.
     """
+    # The expiry is parsed here, not later. A request carrying an
+    # unparseable timestamp would be accepted here and rejected at
+    # verification - and in between, it would be a request the agent
+    # could hold open indefinitely.
+    parse_rfc3339(expires_at)
     request = {
         "request_id": request_id or ("req-" + os.urandom(16).hex()),
         "proposal": proposal,
@@ -209,6 +215,9 @@ def build_authorization(
     bytes of the authorization *without* the ``signature`` field. See
     :meth:`Signer.signing_payload`.
     """
+    # Both window endpoints are parsed here, for the same reason.
+    parse_rfc3339(valid_from)
+    parse_rfc3339(expires_at)
     return {
         "authorization_id": authorization_id or ("auth-" + os.urandom(16).hex()),
         "request_id": request["request_id"],
@@ -361,7 +370,7 @@ def verify_authorization(
     without waiting. They default to the current UTC time and a strict
     RFC 3339 parser.
     """
-    from .timeutil import now_utc, parse_rfc3339
+    from .timeutil import now_utc
 
     parse = parse_timestamp or parse_rfc3339
     current = parse(now) if now is not None else now_utc()
@@ -377,7 +386,35 @@ def verify_authorization(
             % (authorization["protocol_version"], PROTOCOL_VERSION)
         )
 
-    # 3 - the hash is RECOMPUTED from the proposal, not trusted from the request
+    # 3 - the hash is RECOMPUTED from the proposal, not trusted from the request.
+    #     And the request's OWN copy of the proposal must be the same
+    #     document - otherwise the request could display one proposal and
+    #     be verified against another. Two different documents, two
+    #     different hashes, one authorization.
+    if "proposal" in request:
+        request_proposal = request["proposal"]
+        if not isinstance(request_proposal, Mapping):
+            raise AuthorizationInvalid(
+                "the request's proposal must be a mapping"
+            )
+        try:
+            request_hash = proposal_hash(request_proposal)
+        except CanonicalisationError as exc:
+            raise AuthorizationInvalid(
+                "the request's proposal is not canonicalisable: %s" % (exc,)
+            )
+        try:
+            recomputed = proposal_hash(proposal)
+        except CanonicalisationError as exc:
+            raise AuthorizationInvalid(
+                "proposal is not canonicalisable: %s" % (exc,)
+            )
+        if request_hash != recomputed:
+            raise AuthorizationInvalid(
+                "the request's proposal does not match the proposal being "
+                "verified: they hash to %s and %s"
+                % (request_hash, recomputed)
+            )
     try:
         recomputed = proposal_hash(proposal)
     except CanonicalisationError as exc:

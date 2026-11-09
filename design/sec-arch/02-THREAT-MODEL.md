@@ -308,3 +308,31 @@ change to this core should be probed the same way before it is
 committed.**
 
 Pinned by `test_regressions.py` — 15 tests, one per behaviour.
+
+### 8.1 The second probing round
+
+A second round of probes — 40 attempts across the canonical form, the
+authorization protocol, the executor, the guard, the agent surface, the
+analysis layer, the audit log and the deployment contract — found **six
+more defects**, almost all of them about **input validation at the
+edges**:
+
+| ID | Defect | Exploit | Fix |
+|---|---|---|---|
+| **D-5** | The request's own copy of the proposal was never compared with the proposal being verified | The request could display one proposal and be verified against another | The two are compared; a mismatch is `AuthorizationInvalid` |
+| **D-6** | A request or authorization could carry an **unparseable timestamp** | Accepted at construction, rejected at verification — and in between, a request the agent could hold open | Both window endpoints are parsed at construction |
+| **D-7** | The agent adapter **ignored unknown fields** | A field the platform does not understand might be one it would have honoured | The schema is closed; an unknown field is refused |
+| **D-8** | A **command-shaped argument** was only refused further down the chain | The request was built before anything objected | Refused at the agent's own boundary |
+| **D-9** | `qualify_forecast` accepted a **dict where a list** was expected | `len(dict)` worked, and the forecast qualified | The collections must be collections |
+| **D-10** | The audit log accepted an event name containing a **newline** | A crafted event could forge the appearance of two records in a log a human reads | Event names are one line, with no control characters |
+
+**Together with the first round: ten defects in roughly 2 400 lines of
+new security code, found by attacking it rather than reading it.**
+
+**The pattern is consistent.** Nine of the ten were at an **input
+boundary**, and every one of them was a case where a value was accepted
+in a shape it should not have been. That is a design lesson for the
+next module: *validate at the edge, and reject rather than coerce.*
+
+Pinned by `test_regressions.py` and `test_regressions_round2.py` — 29
+tests, one per behaviour.

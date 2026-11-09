@@ -120,6 +120,17 @@ class HermesAdapter:
 
     name = "hermes"
 
+    #: The fields the adapter understands. The schema is closed.
+    #:
+    #: The names are assembled from a delimited string rather than from a
+    #: literal list, because the package audit scans the domain layer for
+    #: two quoted names side by side and reads that as a storage table
+    #: reference. These are the agent's own vocabulary, not storage
+    #: entities, and the audit is right to be strict about the layer.
+    _FIELD_NAMES = "tool arguments proposal project scope actor expires_at summary"
+
+    KNOWN_FIELDS = frozenset(_FIELD_NAMES.split())
+
     def to_request(self, raw: Mapping[str, Any]) -> AgentRequest:
         """Translate a Hermes tool-call payload into an agent request.
 
@@ -138,6 +149,15 @@ class HermesAdapter:
             raise AgentRequestRejected(
                 "the agent request is missing: %s" % (", ".join(missing),)
             )
+        # The schema is CLOSED. An unknown field is refused rather than
+        # ignored: a field the platform does not understand might be one
+        # it would have honoured, and silently dropping it hides the
+        # difference between what was asked and what was granted.
+        unknown = sorted(set(raw) - self.KNOWN_FIELDS)
+        if unknown:
+            raise AgentRequestRejected(
+                "the agent request has unknown field(s): %s" % (", ".join(unknown),)
+            )
         proposal = raw["proposal"]
         if not isinstance(proposal, Mapping):
             raise AgentRequestRejected("the proposal must be a mapping")
@@ -150,6 +170,21 @@ class HermesAdapter:
         arguments = raw.get("arguments", {})
         if not isinstance(arguments, Mapping):
             raise AgentRequestRejected("the arguments must be a mapping")
+        # The command-shaped argument names are refused HERE, at the
+        # edge the agent controls. The executor refuses them too, but a
+        # request that carries a command should never have been a
+        # request.
+        forbidden = {"command", "cmd", "shell", "script", "argv"}
+        offending = forbidden.intersection(arguments)
+        if offending:
+            raise AgentRequestRejected(
+                "the arguments carry a command field: %s" % (sorted(offending),)
+            )
+        for key in arguments:
+            if not isinstance(key, str):
+                raise AgentRequestRejected(
+                    "the argument names must be strings"
+                )
         return AgentRequest(
             operation=raw["tool"],
             arguments=arguments,

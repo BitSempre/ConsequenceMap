@@ -207,6 +207,11 @@ def qualify_forecast(
         problems.append("the forecast has no summary")
 
     unknowns = forecast.get("unknowns") or ()
+    if not isinstance(unknowns, (list, tuple)):
+        raise QualificationError(
+            "the forecast's unknowns must be a list, not %s"
+            % (type(unknowns).__name__,)
+        )
     if require_explicit_unknowns and not unknowns:
         problems.append(
             "the forecast records no unknowns: the human would be approving "
@@ -214,6 +219,11 @@ def qualify_forecast(
         )
 
     evidence = forecast.get("evidence") or ()
+    if not isinstance(evidence, (list, tuple)):
+        raise QualificationError(
+            "the forecast's evidence must be a list, not %s"
+            % (type(evidence).__name__,)
+        )
     for item in evidence:
         classification = item.get("classification")
         if classification == CLASS_VERIFIED_FACT and not item.get("source_kind"):

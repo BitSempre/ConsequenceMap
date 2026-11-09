@@ -146,6 +146,13 @@ class AuditLog:
         """
         if not isinstance(event, str) or not event:
             raise AuditError("an audit event needs a name")
+        # An event name is a single line. A newline in it would let a
+        # crafted event forge the appearance of two records in a log that
+        # a human reads.
+        if any(character in event for character in "\r\n\x00"):
+            raise AuditError(
+                "an audit event name must not contain control characters"
+            )
         sequence = len(self._records)
         previous_hash = (
             self._records[-1].record_hash if self._records else GENESIS_HASH

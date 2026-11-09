@@ -94,6 +94,9 @@ class GuardDeployment:
     #: in-process deployment does NOT, and says so.
     provides_boundary = False
 
+    #: The fields a compliant transport returns. The schema is closed.
+    RESPONSE_FIELDS = frozenset({"decision", "reason", "allowed", "checks", "detail"})
+
     def __init__(self, transport: Optional[GuardTransport] = None) -> None:
         self._transport = transport
 
@@ -130,6 +133,14 @@ class GuardDeployment:
             )
         if "reason" not in answer:
             raise ContractViolation("the guard transport returned no reason")
+        # The response schema is closed. An unexpected field means the
+        # transport is not the thing this contract describes.
+        unexpected = sorted(set(answer) - self.RESPONSE_FIELDS)
+        if unexpected:
+            raise ContractViolation(
+                "the guard transport returned unexpected field(s): %s"
+                % (", ".join(unexpected),)
+            )
         return dict(answer)
 
     def refuse(self, reason: str) -> Mapping[str, Any]:
