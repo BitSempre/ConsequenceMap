@@ -107,8 +107,8 @@ specification rather than in a test.
 ### 3.4 The wrong screen
 
 **Attack.** A crafted proposal carries a string that renders as a
-different operation — for example, a request whose resource list
-contains a newline and the words "APPROVED".
+different operation — for example, a resource name containing a newline
+followed by a word that looks like the platform's own decision banner.
 
 **Requirement.** All strings are rendered as **plain text**, never as
 markup, never with a renderer that interprets them. No HTML, no
