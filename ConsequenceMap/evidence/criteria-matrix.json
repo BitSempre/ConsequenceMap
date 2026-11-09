@@ -1,0 +1,1082 @@
+[
+ {
+  "id": "AC-DATA-01",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_validation.py:10 test_AC_DATA_01_a_valid_envelope_is_accepted [ok]; test_validation.py:15 test_AC_DATA_01_an_unknown_major_version_is_rejected [ok]; test_validation.py:19 test_AC_DATA_01_a_missing_schema_version_is_rejected [ok]; test_validation.py:23 test_AC_DATA_01_a_non_integer_schema_version_is_rejected [ok]; test_validation.py:27 test_AC_DATA_01_a_boolean_schema_version_is_rejected [ok]; test_validation.py:32 test_AC_DATA_01_unknown_minor_fields_are_ignored [ok]; test_validation.py:36 test_AC_DATA_01_a_non_mapping_is_rejected [ok]",
+  "tests": [
+   "test_AC_DATA_01_a_valid_envelope_is_accepted",
+   "test_AC_DATA_01_an_unknown_major_version_is_rejected",
+   "test_AC_DATA_01_a_missing_schema_version_is_rejected",
+   "test_AC_DATA_01_a_non_integer_schema_version_is_rejected",
+   "test_AC_DATA_01_a_boolean_schema_version_is_rejected",
+   "test_AC_DATA_01_unknown_minor_fields_are_ignored",
+   "test_AC_DATA_01_a_non_mapping_is_rejected"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok",
+   "ok",
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "Every envelope carries schema_version=1; an unknown major version is rejected and unknown minor fields ignored.",
+  "rule": "\u00a72.1"
+ },
+ {
+  "id": "AC-DATA-02",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_validation.py:42 test_AC_DATA_02_a_valid_timestamp_is_accepted [ok]; test_validation.py:47 test_AC_DATA_02_a_timestamp_without_milliseconds_is_rejected [ok]; test_validation.py:51 test_AC_DATA_02_a_timestamp_with_an_offset_is_rejected [ok]; test_validation.py:55 test_AC_DATA_02_a_non_utc_timestamp_is_rejected [ok]; test_validation.py:59 test_AC_DATA_02_an_impossible_calendar_date_is_rejected [ok]; test_validation.py:63 test_AC_DATA_02_a_lowercase_z_is_rejected [ok]; test_validation.py:67 test_AC_DATA_02_a_non_string_is_rejected [ok]",
+  "tests": [
+   "test_AC_DATA_02_a_valid_timestamp_is_accepted",
+   "test_AC_DATA_02_a_timestamp_without_milliseconds_is_rejected",
+   "test_AC_DATA_02_a_timestamp_with_an_offset_is_rejected",
+   "test_AC_DATA_02_a_non_utc_timestamp_is_rejected",
+   "test_AC_DATA_02_an_impossible_calendar_date_is_rejected",
+   "test_AC_DATA_02_a_lowercase_z_is_rejected",
+   "test_AC_DATA_02_a_non_string_is_rejected"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok",
+   "ok",
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "Every timestamp is RFC 3339 UTC with millisecond precision; a non-conforming timestamp is rejected.",
+  "rule": "\u00a72.1"
+ },
+ {
+  "id": "AC-DATA-03",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_enums.py:28 test_AC_DATA_03_a_member_validates [ok]; test_enums.py:33 test_AC_DATA_03_an_unknown_value_is_an_error_not_a_default [ok]",
+  "tests": [
+   "test_AC_DATA_03_a_member_validates",
+   "test_AC_DATA_03_an_unknown_value_is_an_error_not_a_default"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "Every enumeration is closed; an unknown enum value is a validation error, never a silent default.",
+  "rule": "\u00a72.1,\u00a72.2"
+ },
+ {
+  "id": "AC-DATA-04",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_coverage_gaps.py:28 test_AC_DATA_04_every_free_text_field_has_a_documented_cap [ok]; test_coverage_gaps.py:45 test_AC_DATA_04_the_caps_match_the_specification [ok]",
+  "tests": [
+   "test_AC_DATA_04_every_free_text_field_has_a_documented_cap",
+   "test_AC_DATA_04_the_caps_match_the_specification"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "Every free-text field is redacted and length-capped before persistence.",
+  "rule": "\u00a72.1,\u00a78.3,\u00a78.5"
+ },
+ {
+  "id": "AC-DATA-05",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:19 test_AC_DATA_05_P1_scope_excluded_must_be_present [ok]; test_records.py:25 test_AC_DATA_05_P1_scope_excluded_must_be_non_empty [ok]",
+  "tests": [
+   "test_AC_DATA_05_P1_scope_excluded_must_be_present",
+   "test_AC_DATA_05_P1_scope_excluded_must_be_non_empty"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "A proposal carries a non-empty scope.excluded.",
+  "rule": "P-1"
+ },
+ {
+  "id": "AC-DATA-06",
+  "layer": "unit",
+  "state": "PASS (2A half)",
+  "evidence": "the 2A half is executed; the path-containment half -> Phase 2B (target validation -> 2A; path containment -> 2B)",
+  "tests": [
+   "test_AC_DATA_06_P2_a_filesystem_target_requires_a_non_empty_paths_list",
+   "test_AC_DATA_06_P2_a_filesystem_target_requires_the_paths_key"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "A FILESYSTEM proposal target has a non-empty paths list and every path resolves inside the authorized root.",
+  "rule": "P-2,\u00a77.2"
+ },
+ {
+  "id": "AC-DATA-07",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:43 test_AC_DATA_07_P3_a_non_filesystem_target_is_not_rejected [ok]",
+  "tests": [
+   "test_AC_DATA_07_P3_a_non_filesystem_target_is_not_rejected"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "A non-FILESYSTEM target is not rejected for lacking a path.",
+  "rule": "P-3"
+ },
+ {
+  "id": "AC-DATA-08",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:48 test_AC_DATA_08_P4_an_undeterminable_target_kind_is_unknown [ok]",
+  "tests": [
+   "test_AC_DATA_08_P4_an_undeterminable_target_kind_is_unknown"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "An undeterminable target kind is stored as UNKNOWN and its dimensions are UNKNOWN, never treated as safe.",
+  "rule": "P-4,\u00a79"
+ },
+ {
+  "id": "AC-DATA-09",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:66 test_AC_DATA_09_an_absent_collection_is_an_error [ok]; test_records.py:78 test_AC_DATA_09_an_empty_collection_is_present_not_missing [ok]; test_records.py:84 test_AC_DATA_09_a_missing_risk_is_an_error [ok]",
+  "tests": [
+   "test_AC_DATA_09_an_absent_collection_is_an_error",
+   "test_AC_DATA_09_an_empty_collection_is_present_not_missing",
+   "test_AC_DATA_09_a_missing_risk_is_an_error"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "A forecast records evidence, impact, risk, alternatives and unknowns; a missing collection is a validation error.",
+  "rule": "\u00a72.4"
+ },
+ {
+  "id": "AC-DATA-10",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:179 test_AC_DATA_10_evidence_needs_a_classification_and_source_ref [ok]",
+  "tests": [
+   "test_AC_DATA_10_evidence_needs_a_classification_and_source_ref"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "Each evidence row carries a classification from {VERIFIED_FACT, INFERENCE, UNKNOWN} and a source reference.",
+  "rule": "\u00a72.4,\u00a79"
+ },
+ {
+  "id": "AC-DATA-11",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:90 test_AC_DATA_11_F1_an_unknown_relation_edge_requires_unknown_evidence [ok]; test_records.py:97 test_AC_DATA_11_F1_with_unknown_evidence_is_accepted [ok]",
+  "tests": [
+   "test_AC_DATA_11_F1_an_unknown_relation_edge_requires_unknown_evidence",
+   "test_AC_DATA_11_F1_with_unknown_evidence_is_accepted"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "An UNKNOWN_RELATION edge requires at least one UNKNOWN evidence entry.",
+  "rule": "F-1"
+ },
+ {
+  "id": "AC-DATA-12",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:104 test_AC_DATA_12_F2_an_inferred_edge_must_be_an_inference [ok]; test_records.py:111 test_AC_DATA_12_F2_with_the_right_classification_is_accepted [ok]",
+  "tests": [
+   "test_AC_DATA_12_F2_an_inferred_edge_must_be_an_inference",
+   "test_AC_DATA_12_F2_with_the_right_classification_is_accepted"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "An INFERRED edge has classification INFERENCE.",
+  "rule": "F-2"
+ },
+ {
+  "id": "AC-DATA-13",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:117 test_AC_DATA_13_F3_severity_moderate_requires_an_alternative [ok]; test_records.py:125 test_AC_DATA_13_F3_severity_high_requires_an_alternative [ok]; test_records.py:133 test_AC_DATA_13_F3_severity_low_does_not_require_an_alternative [ok]",
+  "tests": [
+   "test_AC_DATA_13_F3_severity_moderate_requires_an_alternative",
+   "test_AC_DATA_13_F3_severity_high_requires_an_alternative",
+   "test_AC_DATA_13_F3_severity_low_does_not_require_an_alternative"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "severity >= MODERATE requires at least one alternative.",
+  "rule": "F-3"
+ },
+ {
+  "id": "AC-DATA-14",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:138 test_AC_DATA_14_F4_an_unobservable_edge_must_be_unknown_and_low [ok]; test_records.py:145 test_AC_DATA_14_F4_with_low_confidence_is_accepted [ok]",
+  "tests": [
+   "test_AC_DATA_14_F4_an_unobservable_edge_must_be_unknown_and_low",
+   "test_AC_DATA_14_F4_with_low_confidence_is_accepted"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "An observable:false edge has classification UNKNOWN and confidence LOW.",
+  "rule": "F-4"
+ },
+ {
+  "id": "AC-DATA-15",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:153 test_AC_DATA_15_F5_an_unobservable_edge_requires_dimension_caveats [ok]",
+  "tests": [
+   "test_AC_DATA_15_F5_an_unobservable_edge_requires_dimension_caveats"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "Any observable:false edge produces a non-empty risk.dimension_caveats.",
+  "rule": "F-5"
+ },
+ {
+  "id": "AC-DATA-16",
+  "layer": "integration",
+  "state": "PASS",
+  "evidence": "test_integration.py:43 test_AC_DATA_16_a_sealed_forecast_is_returned_by_the_read_path [ok]; test_repository.py:142 test_AC_DATA_16_a_forecast_returned_by_a_read_path_is_sealed [ok]",
+  "tests": [
+   "test_AC_DATA_16_a_sealed_forecast_is_returned_by_the_read_path",
+   "test_AC_DATA_16_a_forecast_returned_by_a_read_path_is_sealed"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "A forecast returned by any read path has a non-null sealed_at.",
+  "rule": "F-6"
+ },
+ {
+  "id": "AC-DATA-17",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:163 test_AC_DATA_17_overall_confidence_is_the_lowest_of_the_material_claims [ok]; test_records.py:170 test_AC_DATA_17_an_overstated_overall_confidence_is_rejected [ok]",
+  "tests": [
+   "test_AC_DATA_17_overall_confidence_is_the_lowest_of_the_material_claims",
+   "test_AC_DATA_17_an_overstated_overall_confidence_is_rejected"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "Forecast confidence_overall equals the lowest confidence among material claims.",
+  "rule": "\u00a72.4"
+ },
+ {
+  "id": "AC-DATA-18",
+  "layer": "unit",
+  "state": "DEFERRED",
+  "evidence": "deferred to Phase 2B - owner's decision, 2026-11-08",
+  "tests": [
+   "test_AC_DATA_18_a_summary_with_guarantee_language_is_rejected",
+   "test_AC_DATA_18_an_ordinary_summary_passes",
+   "test_AC_DATA_18_the_lint_covers_every_guarantee_word"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "Forecast summary contains no guarantee language.",
+  "rule": "\u00a712.2"
+ },
+ {
+  "id": "AC-DATA-19",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:196 test_AC_DATA_19_E1_an_unknown_status_is_accepted [ok]; test_records.py:200 test_AC_DATA_19_E1_an_issued_command_is_never_completed [ok]",
+  "tests": [
+   "test_AC_DATA_19_E1_an_unknown_status_is_accepted",
+   "test_AC_DATA_19_E1_an_issued_command_is_never_completed"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "An execution with no host-reported result has status UNKNOWN_STATUS, never COMPLETED.",
+  "rule": "E-1"
+ },
+ {
+  "id": "AC-DATA-20",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:207 test_AC_DATA_20_E2_a_blocked_execution_records_the_error_type [ok]; test_records.py:212 test_AC_DATA_20_E2_distinguishes_plugin_block_from_tool_error [ok]; test_records.py:220 test_AC_DATA_20_E2_an_unknown_error_type_is_rejected [ok]",
+  "tests": [
+   "test_AC_DATA_20_E2_a_blocked_execution_records_the_error_type",
+   "test_AC_DATA_20_E2_distinguishes_plugin_block_from_tool_error",
+   "test_AC_DATA_20_E2_an_unknown_error_type_is_rejected"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "A BLOCKED execution records the host error_type and distinguishes plugin_block from tool_error.",
+  "rule": "E-2"
+ },
+ {
+  "id": "AC-DATA-21",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_repository.py:60 test_AC_DATA_21_tool_arguments_are_stored_only_as_digests [ok]",
+  "tests": [
+   "test_AC_DATA_21_tool_arguments_are_stored_only_as_digests"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "Tool arguments and results are stored only as sha256 digests; raw values are never persisted.",
+  "rule": "\u00a78.1,\u00a78.2"
+ },
+ {
+  "id": "AC-DATA-22",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:252 test_AC_DATA_22_O2_an_observed_observation_requires_an_evidence_ref [ok]",
+  "tests": [
+   "test_AC_DATA_22_O2_an_observed_observation_requires_an_evidence_ref"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "An OBSERVED outcome observation carries a non-empty evidence_ref.",
+  "rule": "O-2"
+ },
+ {
+  "id": "AC-DATA-23",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:259 test_AC_DATA_23_O1_unverified_forces_not_verifiable_or_not_applicable [ok]; test_records.py:265 test_AC_DATA_23_O1_unverified_accepts_not_verifiable [ok]",
+  "tests": [
+   "test_AC_DATA_23_O1_unverified_forces_not_verifiable_or_not_applicable",
+   "test_AC_DATA_23_O1_unverified_accepts_not_verifiable"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "verification_method UNVERIFIED forces every observation to NOT_VERIFIABLE or NOT_APPLICABLE.",
+  "rule": "O-1"
+ },
+ {
+  "id": "AC-DATA-24",
+  "layer": "integration",
+  "state": "PASS",
+  "evidence": "test_integration.py:71 test_AC_DATA_24_the_forecast_is_unchanged_after_the_outcome [ok]; test_repository.py:166 test_AC_DATA_24_a_comparison_references_the_forecast_that_existed [ok]",
+  "tests": [
+   "test_AC_DATA_24_the_forecast_is_unchanged_after_the_outcome",
+   "test_AC_DATA_24_a_comparison_references_the_forecast_that_existed"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "A comparison references the forecast that existed at execution time and never rewrites it.",
+  "rule": "C-1"
+ },
+ {
+  "id": "AC-DATA-25",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:288 test_AC_DATA_25_C2_counts_must_equal_the_item_counts [ok]; test_records.py:296 test_AC_DATA_25_C2_the_sum_of_counts_must_equal_the_item_count [ok]",
+  "tests": [
+   "test_AC_DATA_25_C2_counts_must_equal_the_item_counts",
+   "test_AC_DATA_25_C2_the_sum_of_counts_must_equal_the_item_count"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "comparison.counts equals the per-label item counts and their sum equals the item count.",
+  "rule": "C-2"
+ },
+ {
+  "id": "AC-DATA-26",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:304 test_AC_DATA_26_C3_an_unexpected_item_has_a_null_forecast_ref [ok]; test_records.py:312 test_AC_DATA_26_C3_an_unexpected_item_needs_a_non_null_observed_ref [ok]",
+  "tests": [
+   "test_AC_DATA_26_C3_an_unexpected_item_has_a_null_forecast_ref",
+   "test_AC_DATA_26_C3_an_unexpected_item_needs_a_non_null_observed_ref"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "An item with origin UNEXPECTED has a null forecast_ref and a non-null observed_ref.",
+  "rule": "C-3"
+ },
+ {
+  "id": "AC-DATA-27",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:319 test_AC_DATA_27_C4_forecast_ref_kind_alternative_is_rejected [ok]",
+  "tests": [
+   "test_AC_DATA_27_C4_forecast_ref_kind_alternative_is_rejected"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "forecast_ref_kind=alternative is rejected at validation.",
+  "rule": "C-4"
+ },
+ {
+  "id": "AC-DATA-28",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_records.py:327 test_AC_DATA_28_C5_no_unexpected_item_requires_the_note_to_say_so [ok]; test_records.py:338 test_AC_DATA_28_C5_is_accepted_with_the_note [ok]",
+  "tests": [
+   "test_AC_DATA_28_C5_no_unexpected_item_requires_the_note_to_say_so",
+   "test_AC_DATA_28_C5_is_accepted_with_the_note"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "A comparison has at least one UNEXPECTED item, or its accuracy_note states that none were found.",
+  "rule": "C-5"
+ },
+ {
+  "id": "AC-DATA-29",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_coverage_gaps.py:93 test_AC_DATA_29_a_comparison_records_whether_each_unknown_dimension_was_resolved [ok]; test_coverage_gaps.py:114 test_AC_DATA_29_an_unresolved_dimension_is_recorded_as_unresolved [ok]",
+  "tests": [
+   "test_AC_DATA_29_a_comparison_records_whether_each_unknown_dimension_was_resolved",
+   "test_AC_DATA_29_an_unresolved_dimension_is_recorded_as_unresolved"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "A comparison records, for each forecast UNKNOWN dimension, whether it was resolved.",
+  "rule": "C-6"
+ },
+ {
+  "id": "AC-DATA-30",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_serialization.py:23 test_AC_DATA_30_every_envelope_path_maps_to_exactly_one_storage_location [ok]; test_serialization.py:30 test_AC_DATA_30_the_mapping_covers_the_specification_table [ok]; test_serialization.py:41 test_AC_DATA_30_there_is_no_reverse_converter [ok]; test_serialization.py:52 test_AC_DATA_30_every_mapped_table_exists_in_the_schema [ok]",
+  "tests": [
+   "test_AC_DATA_30_every_envelope_path_maps_to_exactly_one_storage_location",
+   "test_AC_DATA_30_the_mapping_covers_the_specification_table",
+   "test_AC_DATA_30_there_is_no_reverse_converter",
+   "test_AC_DATA_30_every_mapped_table_exists_in_the_schema"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "The envelope is a wire form of the relational model; one field maps to exactly one storage location and there is no reverse converter.",
+  "rule": "\u00a710 (M-6,M-7)"
+ },
+ {
+  "id": "AC-DATA-31",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_serialization.py:60 test_AC_DATA_31_the_json_is_sorted_and_compact [ok]; test_serialization.py:64 test_AC_DATA_31_the_same_input_produces_the_same_output [ok]; test_serialization.py:69 test_AC_DATA_31_the_row_serialisation_uses_the_ddl_column_order [ok]; test_serialization.py:75 test_AC_DATA_31_an_envelope_serialises_deterministically [ok]",
+  "tests": [
+   "test_AC_DATA_31_the_json_is_sorted_and_compact",
+   "test_AC_DATA_31_the_same_input_produces_the_same_output",
+   "test_AC_DATA_31_the_row_serialisation_uses_the_ddl_column_order",
+   "test_AC_DATA_31_an_envelope_serialises_deterministically"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "Serialisation is deterministic: sorted keys, fixed field order, RFC 3339 timestamps.",
+  "rule": "\u00a710 (M-8)"
+ },
+ {
+  "id": "AC-DATA-32",
+  "layer": "static",
+  "state": "DEFERRED",
+  "evidence": "deferred to Phase 2C - owner's decision, 2026-11-08",
+  "tests": [
+   "test_AC_DATA_32_the_desktop_layer_never_references_a_table_name",
+   "test_AC_DATA_32_the_package_has_no_desktop_or_sdk_dependency"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "The Desktop layer never references a table name.",
+  "rule": "\u00a710 (M-9)"
+ },
+ {
+  "id": "AC-DATA-33",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_serialization.py:90 test_AC_DATA_33_the_hash_is_computed_over_the_rows_not_the_envelope [ok]",
+  "tests": [
+   "test_AC_DATA_33_the_hash_is_computed_over_the_rows_not_the_envelope"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "content_hash is computed over the canonical row serialisation, not over the envelope serialisation.",
+  "rule": "\u00a710 (M-10)"
+ },
+ {
+  "id": "AC-LLM-05",
+  "layer": "static",
+  "state": "DEFERRED",
+  "evidence": "deferred to Phase 2C - owner's decision, 2026-11-08",
+  "tests": [
+   "test_AC_LLM_05_no_api_key_is_required",
+   "test_AC_LLM_05_the_production_dependency_inventory_is_empty"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "The plugin requires no API key and no credential of its own, and declares no python dependency on a paid service.",
+  "rule": "LLM-4"
+ },
+ {
+  "id": "AC-LLM-06",
+  "layer": "static",
+  "state": "DEFERRED",
+  "evidence": "deferred to Phase 2B - owner's decision, 2026-11-08",
+  "tests": [
+   "test_AC_LLM_06_the_use_inference_setting_exists_and_defaults_to_false"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "The use_inference setting exists in the plugin's config schema and defaults to false.",
+  "rule": "LLM-6"
+ },
+ {
+  "id": "AC-PATH-20",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_repository.py:101 test_AC_PATH_20_the_authorized_root_is_never_persisted_verbatim [ok]",
+  "tests": [
+   "test_AC_PATH_20_the_authorized_root_is_never_persisted_verbatim"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "No field stores the raw authorized root, the user's home directory, the hostname or any environment value.",
+  "rule": "PATH-1,PATH-4,M-3"
+ },
+ {
+  "id": "AC-PATH-22",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_repository.py:117 test_AC_PATH_22_the_digest_is_stable_across_writes [ok]",
+  "tests": [
+   "test_AC_PATH_22_the_digest_is_stable_across_writes"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "A path resolving inside the authorized root is stored relative to that root.",
+  "rule": "PATH-3"
+ },
+ {
+  "id": "AC-PRIV-01",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_redaction.py:58 test_AC_PRIV_01_a_secret_in_a_free_text_field_never_reaches_the_database [ok]",
+  "tests": [
+   "test_AC_PRIV_01_a_secret_in_a_free_text_field_never_reaches_the_database"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "Every field marked redacted passes through redact_for_egress before it is written.",
+  "rule": "PR-1"
+ },
+ {
+  "id": "AC-PRIV-02",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_redaction.py:78 test_AC_PRIV_02_a_raising_redactor_prevents_the_write [ok]",
+  "tests": [
+   "test_AC_PRIV_02_a_raising_redactor_prevents_the_write"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "If the redactor raises, the write fails closed with REDACTION_UNAVAILABLE; the unredacted value is never persisted.",
+  "rule": "PR-1"
+ },
+ {
+  "id": "AC-PRIV-03",
+  "layer": "static",
+  "state": "PASS",
+  "evidence": "test_coverage_gaps.py:245 test_AC_PRIV_03_the_repository_is_the_only_write_path [ok]; test_coverage_gaps.py:253 test_AC_PRIV_03_no_other_module_writes_to_the_database [ok]",
+  "tests": [
+   "test_AC_PRIV_03_the_repository_is_the_only_write_path",
+   "test_AC_PRIV_03_no_other_module_writes_to_the_database"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "Redaction is applied inside the storage layer, beneath every write path.",
+  "rule": "PR-2"
+ },
+ {
+  "id": "AC-PRIV-05",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_redaction.py:65 test_AC_PRIV_05_no_credential_is_persisted_in_any_field [ok]",
+  "tests": [
+   "test_AC_PRIV_05_no_credential_is_persisted_in_any_field"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "No API key, token, password or credential is persisted in any field.",
+  "rule": "\u00a78.2"
+ },
+ {
+  "id": "AC-PRIV-19",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_redaction.py:47 test_AC_PRIV_19_the_cap_is_applied_after_redaction [ok]; test_redaction.py:91 test_AC_PRIV_19_an_over_long_field_is_truncated_with_the_marker [ok]; test_redaction.py:98 test_AC_PRIV_19_the_cap_matrix_is_applied_per_field [ok]",
+  "tests": [
+   "test_AC_PRIV_19_the_cap_is_applied_after_redaction",
+   "test_AC_PRIV_19_an_over_long_field_is_truncated_with_the_marker",
+   "test_AC_PRIV_19_the_cap_matrix_is_applied_per_field"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "Every free-text field is truncated at its documented cap with a truncation marker, and the truncation is recorded.",
+  "rule": "\u00a78.5"
+ },
+ {
+  "id": "AC-PRIV-22",
+  "layer": "static",
+  "state": "PASS",
+  "evidence": "test_redaction.py:112 test_AC_PRIV_22_the_package_never_reads_a_credential_file [ok]; test_redaction.py:134 test_AC_PRIV_22_the_environment_is_never_read [ok]",
+  "tests": [
+   "test_AC_PRIV_22_the_package_never_reads_a_credential_file",
+   "test_AC_PRIV_22_the_environment_is_never_read"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "Credential files are never read by the plugin at all \u2014 not read and then redacted, but never read.",
+  "rule": "\u00a78.2 (M-4)"
+ },
+ {
+  "id": "AC-SEPR-01",
+  "layer": "static",
+  "state": "PASS",
+  "evidence": "test_schema.py:29 test_AC_SEPR_01_the_two_records_are_separate_tables_with_separate_prefixes [ok]",
+  "tests": [
+   "test_AC_SEPR_01_the_two_records_are_separate_tables_with_separate_prefixes"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "host_authorization and product_decision are separate tables with separate identifiers.",
+  "rule": "\u00a72.5,\u00a72.6,PD-6"
+ },
+ {
+  "id": "AC-SEPR-02",
+  "layer": "static",
+  "state": "PASS",
+  "evidence": "test_schema.py:39 test_AC_SEPR_02_there_is_no_foreign_key_between_the_two_records [ok]",
+  "tests": [
+   "test_AC_SEPR_02_there_is_no_foreign_key_between_the_two_records"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "There is no foreign key from product_decision to host_authorization, nor the reverse.",
+  "rule": "\u00a72.7"
+ },
+ {
+  "id": "AC-SEPR-03",
+  "layer": "static",
+  "state": "PASS",
+  "evidence": "test_coverage_gaps.py:208 test_AC_SEPR_03_there_is_no_merge_operation [ok]; test_coverage_gaps.py:226 test_AC_SEPR_03_the_two_records_have_distinct_identifier_prefixes [ok]",
+  "tests": [
+   "test_AC_SEPR_03_there_is_no_merge_operation",
+   "test_AC_SEPR_03_the_two_records_have_distinct_identifier_prefixes"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "There is no merge operation that writes one record from both sources.",
+  "rule": "\u00a72.7"
+ },
+ {
+  "id": "AC-SEPR-11",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_repository.py:23 test_AC_SEPR_11_a_supersedes_chain_appends_and_preserves_the_prior_row [ok]",
+  "tests": [
+   "test_AC_SEPR_11_a_supersedes_chain_appends_and_preserves_the_prior_row"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "Each product_decision change appends a new row linked by supersedes; the prior row remains intact.",
+  "rule": "PD-1"
+ },
+ {
+  "id": "AC-SEPR-12",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_repository.py:46 test_AC_SEPR_12_a_rejected_decision_needs_no_authorization_row [ok]",
+  "tests": [
+   "test_AC_SEPR_12_a_rejected_decision_needs_no_authorization_row"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "A product_decision with state REJECTED is displayable without any host_authorization row existing.",
+  "rule": "\u00a72.7"
+ },
+ {
+  "id": "AC-STORE-01",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_triggers.py:67 test_AC_STORE_01_the_first_seal_succeeds [ok]; test_triggers.py:74 test_AC_STORE_01_a_second_seal_is_rejected [ok]",
+  "tests": [
+   "test_AC_STORE_01_the_first_seal_succeeds",
+   "test_AC_STORE_01_a_second_seal_is_rejected"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "A forecast transitions exactly once from unsealed to sealed; a second seal is rejected.",
+  "rule": "\u00a73.3"
+ },
+ {
+  "id": "AC-STORE-02",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_triggers.py:79 test_AC_STORE_02_the_only_permitted_update_is_the_seal [ok]; test_triggers.py:83 test_AC_STORE_02_a_content_hash_change_is_rejected [ok]",
+  "tests": [
+   "test_AC_STORE_02_the_only_permitted_update_is_the_seal",
+   "test_AC_STORE_02_a_content_hash_change_is_rejected"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "The only permitted UPDATE on forecast sets sealed_at from NULL to a timestamp; every other column change is rejected.",
+  "rule": "\u00a73.3"
+ },
+ {
+  "id": "AC-STORE-03",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_triggers.py:87 test_AC_STORE_03_unsealing_is_rejected [ok]",
+  "tests": [
+   "test_AC_STORE_03_unsealing_is_rejected"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "Un-sealing (sealed_at back to NULL) is rejected.",
+  "rule": "\u00a73.3"
+ },
+ {
+  "id": "AC-STORE-04",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_triggers.py:92 test_AC_STORE_04_a_multi_column_tamper_is_rejected_in_one_statement [ok]",
+  "tests": [
+   "test_AC_STORE_04_a_multi_column_tamper_is_rejected_in_one_statement"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "A combined multi-column tamper is rejected in a single statement.",
+  "rule": "\u00a73.3"
+ },
+ {
+  "id": "AC-STORE-05",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_triggers.py:98 test_AC_STORE_05_delete_is_always_rejected [ok]",
+  "tests": [
+   "test_AC_STORE_05_delete_is_always_rejected"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "DELETE on forecast is always rejected.",
+  "rule": "\u00a73.3"
+ },
+ {
+  "id": "AC-STORE-06",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_triggers.py:101 test_AC_STORE_06_an_insert_after_the_seal_is_rejected [ok]",
+  "tests": [
+   "test_AC_STORE_06_an_insert_after_the_seal_is_rejected"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "After the seal, INSERT into any forecast child table is rejected.",
+  "rule": "\u00a73.3"
+ },
+ {
+  "id": "AC-STORE-07",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_triggers.py:111 test_AC_STORE_07_a_child_update_is_rejected [ok]; test_triggers.py:120 test_AC_STORE_07_a_child_delete_is_rejected [ok]",
+  "tests": [
+   "test_AC_STORE_07_a_child_update_is_rejected",
+   "test_AC_STORE_07_a_child_delete_is_rejected"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "After the seal, UPDATE and DELETE on every forecast child table are rejected.",
+  "rule": "\u00a73.3"
+ },
+ {
+  "id": "AC-STORE-08",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_coverage_gaps.py:133 test_AC_STORE_08_the_family_uses_raise_abort [ok]; test_coverage_gaps.py:139 test_AC_STORE_08_the_family_uses_scalar_subqueries_in_when_clauses [ok]; test_coverage_gaps.py:148 test_AC_STORE_08_the_family_executes_on_the_installed_sqlite [ok]",
+  "tests": [
+   "test_AC_STORE_08_the_family_uses_raise_abort",
+   "test_AC_STORE_08_the_family_uses_scalar_subqueries_in_when_clauses",
+   "test_AC_STORE_08_the_family_executes_on_the_installed_sqlite"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "The trigger family uses RAISE(ABORT) and scalar subqueries in WHEN clauses, compatible with the installed SQLite.",
+  "rule": "\u00a73.3,\u00a711"
+ },
+ {
+  "id": "AC-STORE-09",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_repository.py:148 test_AC_STORE_09_the_content_hash_is_computed_before_the_header_insert [ok]",
+  "tests": [
+   "test_AC_STORE_09_the_content_hash_is_computed_before_the_header_insert"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "content_hash is computed before the header INSERT because the seal trigger permits no other column change.",
+  "rule": "\u00a73.3"
+ },
+ {
+  "id": "AC-STORE-10",
+  "layer": "integration",
+  "state": "PASS",
+  "evidence": "test_integration.py:58 test_AC_STORE_10_an_unsealed_forecast_is_invisible [ok]; test_repository.py:134 test_AC_STORE_10_an_unsealed_forecast_is_invisible_to_every_read_path [ok]",
+  "tests": [
+   "test_AC_STORE_10_an_unsealed_forecast_is_invisible",
+   "test_AC_STORE_10_an_unsealed_forecast_is_invisible_to_every_read_path"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "An unsealed forecast is invisible to every read path.",
+  "rule": "\u00a73.3"
+ },
+ {
+  "id": "AC-STORE-11",
+  "layer": "static",
+  "state": "PASS",
+  "evidence": "test_repository.py:75 test_AC_STORE_11_there_is_no_write_path_from_the_outcome_side_to_a_forecast [ok]; test_static_audits.py:44 test_AC_STORE_11_no_outcome_side_write_reaches_a_forecast_table [ok]; test_static_audits.py:65 test_AC_STORE_11_the_repository_has_no_forecast_write_on_the_outcome_side [ok]",
+  "tests": [
+   "test_AC_STORE_11_there_is_no_write_path_from_the_outcome_side_to_a_forecast",
+   "test_AC_STORE_11_no_outcome_side_write_reaches_a_forecast_table",
+   "test_AC_STORE_11_the_repository_has_no_forecast_write_on_the_outcome_side"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "No write path exists from outcome, outcome_observation, comparison, comparison_item, host_authorization or product_decision to any forecast table.",
+  "rule": "\u00a73.4"
+ },
+ {
+  "id": "AC-STORE-12",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_triggers.py:172 test_AC_STORE_12_every_observation_table_rejects_update_and_delete [ok]",
+  "tests": [
+   "test_AC_STORE_12_every_observation_table_rejects_update_and_delete"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "Every entity other than proposal, product_decision and host_authorization rejects UPDATE and DELETE.",
+  "rule": "\u00a73.4"
+ },
+ {
+  "id": "AC-STORE-13",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_triggers.py:265 test_AC_STORE_13_a_resolved_authorization_is_immutable [ok]",
+  "tests": [
+   "test_AC_STORE_13_a_resolved_authorization_is_immutable"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "host_authorization is immutable once resolved_at is set; a correction is a new row linked by supersedes.",
+  "rule": "AUTH-12,\u00a73.4"
+ },
+ {
+  "id": "AC-STORE-14",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_triggers.py:290 test_AC_STORE_14_a_product_decision_is_append_only [ok]",
+  "tests": [
+   "test_AC_STORE_14_a_product_decision_is_append_only"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "product_decision changes only by appending a new row linked by supersedes; no row is updated or deleted.",
+  "rule": "PD-1,\u00a73.4"
+ },
+ {
+  "id": "AC-STORE-15",
+  "layer": "static",
+  "state": "PASS",
+  "evidence": "test_repository.py:88 test_AC_STORE_15_exactly_one_write_method_per_table [ok]; test_static_audits.py:82 test_AC_STORE_15_every_table_has_exactly_one_write_method [ok]",
+  "tests": [
+   "test_AC_STORE_15_exactly_one_write_method_per_table",
+   "test_AC_STORE_15_every_table_has_exactly_one_write_method"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "Exactly one write path owns each table; the Desktop layer is read-only over the database.",
+  "rule": "\u00a73.5"
+ },
+ {
+  "id": "AC-STORE-16",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_migrations.py:110 test_AC_STORE_16_the_path_is_resolved_from_the_hermes_home_on_every_call [ok]",
+  "tests": [
+   "test_AC_STORE_16_the_path_is_resolved_from_the_hermes_home_on_every_call"
+  ],
+  "statuses": [
+   "ok"
+  ],
+  "text": "The database path is resolved from get_hermes_home() on every access.",
+  "rule": "\u00a73.1"
+ },
+ {
+  "id": "AC-STORE-17",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_coverage_gaps.py:169 test_AC_STORE_17_the_plugin_requests_wal_and_records_the_observed_mode [ok]; test_coverage_gaps.py:186 test_AC_STORE_17_a_delete_mode_is_not_an_error [ok]; test_coverage_gaps.py:202 test_AC_STORE_17_the_observed_mode_is_recorded [ok]",
+  "tests": [
+   "test_AC_STORE_17_the_plugin_requests_wal_and_records_the_observed_mode",
+   "test_AC_STORE_17_a_delete_mode_is_not_an_error",
+   "test_AC_STORE_17_the_observed_mode_is_recorded"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "The database is opened in WAL mode so a Desktop reader and a tool writer coexist.",
+  "rule": "\u00a73.1"
+ },
+ {
+  "id": "AC-STORE-18",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_migrations.py:36 test_AC_STORE_18_a_newer_database_requires_read_only [ok]; test_migrations.py:46 test_AC_STORE_18_applying_to_a_newer_database_raises [ok]",
+  "tests": [
+   "test_AC_STORE_18_a_newer_database_requires_read_only",
+   "test_AC_STORE_18_applying_to_a_newer_database_raises"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "A database with a newer schema_version is opened read-only.",
+  "rule": "\u00a73.7"
+ },
+ {
+  "id": "AC-STORE-19",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_migrations.py:23 test_AC_STORE_19_the_schema_version_is_recorded [ok]; test_migrations.py:26 test_AC_STORE_19_applying_twice_is_idempotent [ok]; test_migrations.py:56 test_AC_STORE_19_a_failing_migration_rolls_back [ok]",
+  "tests": [
+   "test_AC_STORE_19_the_schema_version_is_recorded",
+   "test_AC_STORE_19_applying_twice_is_idempotent",
+   "test_AC_STORE_19_a_failing_migration_rolls_back"
+  ],
+  "statuses": [
+   "ok",
+   "ok",
+   "ok"
+  ],
+  "text": "Migrations are forward-only, transactional, and applied on plugin load.",
+  "rule": "\u00a73.7"
+ },
+ {
+  "id": "AC-STORE-20",
+  "layer": "unit",
+  "state": "PASS",
+  "evidence": "test_migrations.py:79 test_AC_STORE_20_no_automatic_deletion_occurs [ok]; test_migrations.py:94 test_AC_STORE_20_the_store_grows_with_record_count_not_field_size [ok]",
+  "tests": [
+   "test_AC_STORE_20_no_automatic_deletion_occurs",
+   "test_AC_STORE_20_the_store_grows_with_record_count_not_field_size"
+  ],
+  "statuses": [
+   "ok",
+   "ok"
+  ],
+  "text": "No automatic deletion occurs; the store grows with record count, not field size.",
+  "rule": "\u00a73.6"
+ }
+]

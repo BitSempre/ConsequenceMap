@@ -1,0 +1,798 @@
+{
+ "AC-DATA-01": [
+  {
+   "file": "test_validation.py",
+   "line": 10,
+   "test": "test_AC_DATA_01_a_valid_envelope_is_accepted"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 15,
+   "test": "test_AC_DATA_01_an_unknown_major_version_is_rejected"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 19,
+   "test": "test_AC_DATA_01_a_missing_schema_version_is_rejected"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 23,
+   "test": "test_AC_DATA_01_a_non_integer_schema_version_is_rejected"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 27,
+   "test": "test_AC_DATA_01_a_boolean_schema_version_is_rejected"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 32,
+   "test": "test_AC_DATA_01_unknown_minor_fields_are_ignored"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 36,
+   "test": "test_AC_DATA_01_a_non_mapping_is_rejected"
+  }
+ ],
+ "AC-DATA-02": [
+  {
+   "file": "test_validation.py",
+   "line": 42,
+   "test": "test_AC_DATA_02_a_valid_timestamp_is_accepted"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 47,
+   "test": "test_AC_DATA_02_a_timestamp_without_milliseconds_is_rejected"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 51,
+   "test": "test_AC_DATA_02_a_timestamp_with_an_offset_is_rejected"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 55,
+   "test": "test_AC_DATA_02_a_non_utc_timestamp_is_rejected"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 59,
+   "test": "test_AC_DATA_02_an_impossible_calendar_date_is_rejected"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 63,
+   "test": "test_AC_DATA_02_a_lowercase_z_is_rejected"
+  },
+  {
+   "file": "test_validation.py",
+   "line": 67,
+   "test": "test_AC_DATA_02_a_non_string_is_rejected"
+  }
+ ],
+ "AC-DATA-03": [
+  {
+   "file": "test_enums.py",
+   "line": 28,
+   "test": "test_AC_DATA_03_a_member_validates"
+  },
+  {
+   "file": "test_enums.py",
+   "line": 33,
+   "test": "test_AC_DATA_03_an_unknown_value_is_an_error_not_a_default"
+  }
+ ],
+ "AC-DATA-04": [
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 28,
+   "test": "test_AC_DATA_04_every_free_text_field_has_a_documented_cap"
+  },
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 45,
+   "test": "test_AC_DATA_04_the_caps_match_the_specification"
+  }
+ ],
+ "AC-DATA-05": [
+  {
+   "file": "test_records.py",
+   "line": 19,
+   "test": "test_AC_DATA_05_P1_scope_excluded_must_be_present"
+  },
+  {
+   "file": "test_records.py",
+   "line": 25,
+   "test": "test_AC_DATA_05_P1_scope_excluded_must_be_non_empty"
+  }
+ ],
+ "AC-DATA-06": [
+  {
+   "file": "test_records.py",
+   "line": 31,
+   "test": "test_AC_DATA_06_P2_a_filesystem_target_requires_a_non_empty_paths_list"
+  },
+  {
+   "file": "test_records.py",
+   "line": 37,
+   "test": "test_AC_DATA_06_P2_a_filesystem_target_requires_the_paths_key"
+  }
+ ],
+ "AC-DATA-07": [
+  {
+   "file": "test_records.py",
+   "line": 43,
+   "test": "test_AC_DATA_07_P3_a_non_filesystem_target_is_not_rejected"
+  }
+ ],
+ "AC-DATA-08": [
+  {
+   "file": "test_records.py",
+   "line": 48,
+   "test": "test_AC_DATA_08_P4_an_undeterminable_target_kind_is_unknown"
+  }
+ ],
+ "AC-DATA-09": [
+  {
+   "file": "test_records.py",
+   "line": 66,
+   "test": "test_AC_DATA_09_an_absent_collection_is_an_error"
+  },
+  {
+   "file": "test_records.py",
+   "line": 78,
+   "test": "test_AC_DATA_09_an_empty_collection_is_present_not_missing"
+  },
+  {
+   "file": "test_records.py",
+   "line": 84,
+   "test": "test_AC_DATA_09_a_missing_risk_is_an_error"
+  }
+ ],
+ "AC-DATA-10": [
+  {
+   "file": "test_records.py",
+   "line": 179,
+   "test": "test_AC_DATA_10_evidence_needs_a_classification_and_source_ref"
+  }
+ ],
+ "AC-DATA-11": [
+  {
+   "file": "test_records.py",
+   "line": 90,
+   "test": "test_AC_DATA_11_F1_an_unknown_relation_edge_requires_unknown_evidence"
+  },
+  {
+   "file": "test_records.py",
+   "line": 97,
+   "test": "test_AC_DATA_11_F1_with_unknown_evidence_is_accepted"
+  }
+ ],
+ "AC-DATA-12": [
+  {
+   "file": "test_records.py",
+   "line": 104,
+   "test": "test_AC_DATA_12_F2_an_inferred_edge_must_be_an_inference"
+  },
+  {
+   "file": "test_records.py",
+   "line": 111,
+   "test": "test_AC_DATA_12_F2_with_the_right_classification_is_accepted"
+  }
+ ],
+ "AC-DATA-13": [
+  {
+   "file": "test_records.py",
+   "line": 117,
+   "test": "test_AC_DATA_13_F3_severity_moderate_requires_an_alternative"
+  },
+  {
+   "file": "test_records.py",
+   "line": 125,
+   "test": "test_AC_DATA_13_F3_severity_high_requires_an_alternative"
+  },
+  {
+   "file": "test_records.py",
+   "line": 133,
+   "test": "test_AC_DATA_13_F3_severity_low_does_not_require_an_alternative"
+  }
+ ],
+ "AC-DATA-14": [
+  {
+   "file": "test_records.py",
+   "line": 138,
+   "test": "test_AC_DATA_14_F4_an_unobservable_edge_must_be_unknown_and_low"
+  },
+  {
+   "file": "test_records.py",
+   "line": 145,
+   "test": "test_AC_DATA_14_F4_with_low_confidence_is_accepted"
+  }
+ ],
+ "AC-DATA-15": [
+  {
+   "file": "test_records.py",
+   "line": 153,
+   "test": "test_AC_DATA_15_F5_an_unobservable_edge_requires_dimension_caveats"
+  }
+ ],
+ "AC-DATA-16": [
+  {
+   "file": "test_integration.py",
+   "line": 43,
+   "test": "test_AC_DATA_16_a_sealed_forecast_is_returned_by_the_read_path"
+  },
+  {
+   "file": "test_repository.py",
+   "line": 142,
+   "test": "test_AC_DATA_16_a_forecast_returned_by_a_read_path_is_sealed"
+  }
+ ],
+ "AC-DATA-17": [
+  {
+   "file": "test_records.py",
+   "line": 163,
+   "test": "test_AC_DATA_17_overall_confidence_is_the_lowest_of_the_material_claims"
+  },
+  {
+   "file": "test_records.py",
+   "line": 170,
+   "test": "test_AC_DATA_17_an_overstated_overall_confidence_is_rejected"
+  }
+ ],
+ "AC-DATA-18": [
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 71,
+   "test": "test_AC_DATA_18_a_summary_with_guarantee_language_is_rejected"
+  },
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 77,
+   "test": "test_AC_DATA_18_an_ordinary_summary_passes"
+  },
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 83,
+   "test": "test_AC_DATA_18_the_lint_covers_every_guarantee_word"
+  }
+ ],
+ "AC-DATA-19": [
+  {
+   "file": "test_records.py",
+   "line": 196,
+   "test": "test_AC_DATA_19_E1_an_unknown_status_is_accepted"
+  },
+  {
+   "file": "test_records.py",
+   "line": 200,
+   "test": "test_AC_DATA_19_E1_an_issued_command_is_never_completed"
+  }
+ ],
+ "AC-DATA-20": [
+  {
+   "file": "test_records.py",
+   "line": 207,
+   "test": "test_AC_DATA_20_E2_a_blocked_execution_records_the_error_type"
+  },
+  {
+   "file": "test_records.py",
+   "line": 212,
+   "test": "test_AC_DATA_20_E2_distinguishes_plugin_block_from_tool_error"
+  },
+  {
+   "file": "test_records.py",
+   "line": 220,
+   "test": "test_AC_DATA_20_E2_an_unknown_error_type_is_rejected"
+  }
+ ],
+ "AC-DATA-21": [
+  {
+   "file": "test_repository.py",
+   "line": 60,
+   "test": "test_AC_DATA_21_tool_arguments_are_stored_only_as_digests"
+  }
+ ],
+ "AC-DATA-22": [
+  {
+   "file": "test_records.py",
+   "line": 252,
+   "test": "test_AC_DATA_22_O2_an_observed_observation_requires_an_evidence_ref"
+  }
+ ],
+ "AC-DATA-23": [
+  {
+   "file": "test_records.py",
+   "line": 259,
+   "test": "test_AC_DATA_23_O1_unverified_forces_not_verifiable_or_not_applicable"
+  },
+  {
+   "file": "test_records.py",
+   "line": 265,
+   "test": "test_AC_DATA_23_O1_unverified_accepts_not_verifiable"
+  }
+ ],
+ "AC-DATA-24": [
+  {
+   "file": "test_integration.py",
+   "line": 71,
+   "test": "test_AC_DATA_24_the_forecast_is_unchanged_after_the_outcome"
+  },
+  {
+   "file": "test_repository.py",
+   "line": 166,
+   "test": "test_AC_DATA_24_a_comparison_references_the_forecast_that_existed"
+  }
+ ],
+ "AC-DATA-25": [
+  {
+   "file": "test_records.py",
+   "line": 288,
+   "test": "test_AC_DATA_25_C2_counts_must_equal_the_item_counts"
+  },
+  {
+   "file": "test_records.py",
+   "line": 296,
+   "test": "test_AC_DATA_25_C2_the_sum_of_counts_must_equal_the_item_count"
+  }
+ ],
+ "AC-DATA-26": [
+  {
+   "file": "test_records.py",
+   "line": 304,
+   "test": "test_AC_DATA_26_C3_an_unexpected_item_has_a_null_forecast_ref"
+  },
+  {
+   "file": "test_records.py",
+   "line": 312,
+   "test": "test_AC_DATA_26_C3_an_unexpected_item_needs_a_non_null_observed_ref"
+  }
+ ],
+ "AC-DATA-27": [
+  {
+   "file": "test_records.py",
+   "line": 319,
+   "test": "test_AC_DATA_27_C4_forecast_ref_kind_alternative_is_rejected"
+  }
+ ],
+ "AC-DATA-28": [
+  {
+   "file": "test_records.py",
+   "line": 327,
+   "test": "test_AC_DATA_28_C5_no_unexpected_item_requires_the_note_to_say_so"
+  },
+  {
+   "file": "test_records.py",
+   "line": 338,
+   "test": "test_AC_DATA_28_C5_is_accepted_with_the_note"
+  }
+ ],
+ "AC-DATA-29": [
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 93,
+   "test": "test_AC_DATA_29_a_comparison_records_whether_each_unknown_dimension_was_resolved"
+  },
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 114,
+   "test": "test_AC_DATA_29_an_unresolved_dimension_is_recorded_as_unresolved"
+  }
+ ],
+ "AC-DATA-30": [
+  {
+   "file": "test_serialization.py",
+   "line": 23,
+   "test": "test_AC_DATA_30_every_envelope_path_maps_to_exactly_one_storage_location"
+  },
+  {
+   "file": "test_serialization.py",
+   "line": 30,
+   "test": "test_AC_DATA_30_the_mapping_covers_the_specification_table"
+  },
+  {
+   "file": "test_serialization.py",
+   "line": 41,
+   "test": "test_AC_DATA_30_there_is_no_reverse_converter"
+  },
+  {
+   "file": "test_serialization.py",
+   "line": 52,
+   "test": "test_AC_DATA_30_every_mapped_table_exists_in_the_schema"
+  }
+ ],
+ "AC-DATA-31": [
+  {
+   "file": "test_serialization.py",
+   "line": 60,
+   "test": "test_AC_DATA_31_the_json_is_sorted_and_compact"
+  },
+  {
+   "file": "test_serialization.py",
+   "line": 64,
+   "test": "test_AC_DATA_31_the_same_input_produces_the_same_output"
+  },
+  {
+   "file": "test_serialization.py",
+   "line": 69,
+   "test": "test_AC_DATA_31_the_row_serialisation_uses_the_ddl_column_order"
+  },
+  {
+   "file": "test_serialization.py",
+   "line": 75,
+   "test": "test_AC_DATA_31_an_envelope_serialises_deterministically"
+  }
+ ],
+ "AC-DATA-32": [
+  {
+   "file": "test_static_audits.py",
+   "line": 94,
+   "test": "test_AC_DATA_32_the_desktop_layer_never_references_a_table_name"
+  },
+  {
+   "file": "test_static_audits.py",
+   "line": 136,
+   "test": "test_AC_DATA_32_the_package_has_no_desktop_or_sdk_dependency"
+  }
+ ],
+ "AC-DATA-33": [
+  {
+   "file": "test_serialization.py",
+   "line": 90,
+   "test": "test_AC_DATA_33_the_hash_is_computed_over_the_rows_not_the_envelope"
+  }
+ ],
+ "AC-STORE-01": [
+  {
+   "file": "test_triggers.py",
+   "line": 67,
+   "test": "test_AC_STORE_01_the_first_seal_succeeds"
+  },
+  {
+   "file": "test_triggers.py",
+   "line": 74,
+   "test": "test_AC_STORE_01_a_second_seal_is_rejected"
+  }
+ ],
+ "AC-STORE-02": [
+  {
+   "file": "test_triggers.py",
+   "line": 79,
+   "test": "test_AC_STORE_02_the_only_permitted_update_is_the_seal"
+  },
+  {
+   "file": "test_triggers.py",
+   "line": 83,
+   "test": "test_AC_STORE_02_a_content_hash_change_is_rejected"
+  }
+ ],
+ "AC-STORE-03": [
+  {
+   "file": "test_triggers.py",
+   "line": 87,
+   "test": "test_AC_STORE_03_unsealing_is_rejected"
+  }
+ ],
+ "AC-STORE-04": [
+  {
+   "file": "test_triggers.py",
+   "line": 92,
+   "test": "test_AC_STORE_04_a_multi_column_tamper_is_rejected_in_one_statement"
+  }
+ ],
+ "AC-STORE-05": [
+  {
+   "file": "test_triggers.py",
+   "line": 98,
+   "test": "test_AC_STORE_05_delete_is_always_rejected"
+  }
+ ],
+ "AC-STORE-06": [
+  {
+   "file": "test_triggers.py",
+   "line": 101,
+   "test": "test_AC_STORE_06_an_insert_after_the_seal_is_rejected"
+  }
+ ],
+ "AC-STORE-07": [
+  {
+   "file": "test_triggers.py",
+   "line": 111,
+   "test": "test_AC_STORE_07_a_child_update_is_rejected"
+  },
+  {
+   "file": "test_triggers.py",
+   "line": 120,
+   "test": "test_AC_STORE_07_a_child_delete_is_rejected"
+  }
+ ],
+ "AC-STORE-08": [
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 133,
+   "test": "test_AC_STORE_08_the_family_uses_raise_abort"
+  },
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 139,
+   "test": "test_AC_STORE_08_the_family_uses_scalar_subqueries_in_when_clauses"
+  },
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 148,
+   "test": "test_AC_STORE_08_the_family_executes_on_the_installed_sqlite"
+  }
+ ],
+ "AC-STORE-09": [
+  {
+   "file": "test_repository.py",
+   "line": 148,
+   "test": "test_AC_STORE_09_the_content_hash_is_computed_before_the_header_insert"
+  }
+ ],
+ "AC-STORE-10": [
+  {
+   "file": "test_integration.py",
+   "line": 58,
+   "test": "test_AC_STORE_10_an_unsealed_forecast_is_invisible"
+  },
+  {
+   "file": "test_repository.py",
+   "line": 134,
+   "test": "test_AC_STORE_10_an_unsealed_forecast_is_invisible_to_every_read_path"
+  }
+ ],
+ "AC-STORE-11": [
+  {
+   "file": "test_repository.py",
+   "line": 75,
+   "test": "test_AC_STORE_11_there_is_no_write_path_from_the_outcome_side_to_a_forecast"
+  },
+  {
+   "file": "test_static_audits.py",
+   "line": 44,
+   "test": "test_AC_STORE_11_no_outcome_side_write_reaches_a_forecast_table"
+  },
+  {
+   "file": "test_static_audits.py",
+   "line": 65,
+   "test": "test_AC_STORE_11_the_repository_has_no_forecast_write_on_the_outcome_side"
+  }
+ ],
+ "AC-STORE-12": [
+  {
+   "file": "test_triggers.py",
+   "line": 172,
+   "test": "test_AC_STORE_12_every_observation_table_rejects_update_and_delete"
+  }
+ ],
+ "AC-STORE-13": [
+  {
+   "file": "test_triggers.py",
+   "line": 265,
+   "test": "test_AC_STORE_13_a_resolved_authorization_is_immutable"
+  }
+ ],
+ "AC-STORE-14": [
+  {
+   "file": "test_triggers.py",
+   "line": 290,
+   "test": "test_AC_STORE_14_a_product_decision_is_append_only"
+  }
+ ],
+ "AC-STORE-15": [
+  {
+   "file": "test_repository.py",
+   "line": 88,
+   "test": "test_AC_STORE_15_exactly_one_write_method_per_table"
+  },
+  {
+   "file": "test_static_audits.py",
+   "line": 82,
+   "test": "test_AC_STORE_15_every_table_has_exactly_one_write_method"
+  }
+ ],
+ "AC-STORE-16": [
+  {
+   "file": "test_migrations.py",
+   "line": 110,
+   "test": "test_AC_STORE_16_the_path_is_resolved_from_the_hermes_home_on_every_call"
+  }
+ ],
+ "AC-STORE-17": [
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 169,
+   "test": "test_AC_STORE_17_the_plugin_requests_wal_and_records_the_observed_mode"
+  },
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 186,
+   "test": "test_AC_STORE_17_a_delete_mode_is_not_an_error"
+  },
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 202,
+   "test": "test_AC_STORE_17_the_observed_mode_is_recorded"
+  }
+ ],
+ "AC-STORE-18": [
+  {
+   "file": "test_migrations.py",
+   "line": 36,
+   "test": "test_AC_STORE_18_a_newer_database_requires_read_only"
+  },
+  {
+   "file": "test_migrations.py",
+   "line": 46,
+   "test": "test_AC_STORE_18_applying_to_a_newer_database_raises"
+  }
+ ],
+ "AC-STORE-19": [
+  {
+   "file": "test_migrations.py",
+   "line": 23,
+   "test": "test_AC_STORE_19_the_schema_version_is_recorded"
+  },
+  {
+   "file": "test_migrations.py",
+   "line": 26,
+   "test": "test_AC_STORE_19_applying_twice_is_idempotent"
+  },
+  {
+   "file": "test_migrations.py",
+   "line": 56,
+   "test": "test_AC_STORE_19_a_failing_migration_rolls_back"
+  }
+ ],
+ "AC-STORE-20": [
+  {
+   "file": "test_migrations.py",
+   "line": 79,
+   "test": "test_AC_STORE_20_no_automatic_deletion_occurs"
+  },
+  {
+   "file": "test_migrations.py",
+   "line": 94,
+   "test": "test_AC_STORE_20_the_store_grows_with_record_count_not_field_size"
+  }
+ ],
+ "AC-SEPR-01": [
+  {
+   "file": "test_schema.py",
+   "line": 29,
+   "test": "test_AC_SEPR_01_the_two_records_are_separate_tables_with_separate_prefixes"
+  }
+ ],
+ "AC-SEPR-02": [
+  {
+   "file": "test_schema.py",
+   "line": 39,
+   "test": "test_AC_SEPR_02_there_is_no_foreign_key_between_the_two_records"
+  }
+ ],
+ "AC-SEPR-03": [
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 208,
+   "test": "test_AC_SEPR_03_there_is_no_merge_operation"
+  },
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 226,
+   "test": "test_AC_SEPR_03_the_two_records_have_distinct_identifier_prefixes"
+  }
+ ],
+ "AC-SEPR-11": [
+  {
+   "file": "test_repository.py",
+   "line": 23,
+   "test": "test_AC_SEPR_11_a_supersedes_chain_appends_and_preserves_the_prior_row"
+  }
+ ],
+ "AC-SEPR-12": [
+  {
+   "file": "test_repository.py",
+   "line": 46,
+   "test": "test_AC_SEPR_12_a_rejected_decision_needs_no_authorization_row"
+  }
+ ],
+ "AC-PRIV-01": [
+  {
+   "file": "test_redaction.py",
+   "line": 58,
+   "test": "test_AC_PRIV_01_a_secret_in_a_free_text_field_never_reaches_the_database"
+  }
+ ],
+ "AC-PRIV-02": [
+  {
+   "file": "test_redaction.py",
+   "line": 78,
+   "test": "test_AC_PRIV_02_a_raising_redactor_prevents_the_write"
+  }
+ ],
+ "AC-PRIV-03": [
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 245,
+   "test": "test_AC_PRIV_03_the_repository_is_the_only_write_path"
+  },
+  {
+   "file": "test_coverage_gaps.py",
+   "line": 253,
+   "test": "test_AC_PRIV_03_no_other_module_writes_to_the_database"
+  }
+ ],
+ "AC-PRIV-05": [
+  {
+   "file": "test_redaction.py",
+   "line": 65,
+   "test": "test_AC_PRIV_05_no_credential_is_persisted_in_any_field"
+  }
+ ],
+ "AC-PRIV-19": [
+  {
+   "file": "test_redaction.py",
+   "line": 47,
+   "test": "test_AC_PRIV_19_the_cap_is_applied_after_redaction"
+  },
+  {
+   "file": "test_redaction.py",
+   "line": 91,
+   "test": "test_AC_PRIV_19_an_over_long_field_is_truncated_with_the_marker"
+  },
+  {
+   "file": "test_redaction.py",
+   "line": 98,
+   "test": "test_AC_PRIV_19_the_cap_matrix_is_applied_per_field"
+  }
+ ],
+ "AC-PRIV-22": [
+  {
+   "file": "test_redaction.py",
+   "line": 112,
+   "test": "test_AC_PRIV_22_the_package_never_reads_a_credential_file"
+  },
+  {
+   "file": "test_redaction.py",
+   "line": 134,
+   "test": "test_AC_PRIV_22_the_environment_is_never_read"
+  }
+ ],
+ "AC-PATH-20": [
+  {
+   "file": "test_repository.py",
+   "line": 101,
+   "test": "test_AC_PATH_20_the_authorized_root_is_never_persisted_verbatim"
+  }
+ ],
+ "AC-PATH-22": [
+  {
+   "file": "test_repository.py",
+   "line": 117,
+   "test": "test_AC_PATH_22_the_digest_is_stable_across_writes"
+  }
+ ],
+ "AC-LLM-05": [
+  {
+   "file": "test_static_audits.py",
+   "line": 169,
+   "test": "test_AC_LLM_05_no_api_key_is_required"
+  },
+  {
+   "file": "test_static_audits.py",
+   "line": 177,
+   "test": "test_AC_LLM_05_the_production_dependency_inventory_is_empty"
+  }
+ ],
+ "AC-LLM-06": [
+  {
+   "file": "test_static_audits.py",
+   "line": 162,
+   "test": "test_AC_LLM_06_the_use_inference_setting_exists_and_defaults_to_false"
+  }
+ ]
+}

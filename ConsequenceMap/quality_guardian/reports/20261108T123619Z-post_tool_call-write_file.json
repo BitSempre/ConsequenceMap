@@ -1,0 +1,178 @@
+{
+  "trigger": "post_tool_call:write_file",
+  "verdict": "FAIL",
+  "changed_files": [
+    "probe_tmp.py"
+  ],
+  "tests_executed": 38,
+  "test_runs": [
+    {
+      "module": "test_static_audits",
+      "passed": 9,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.623,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "9 test(s) passed"
+    },
+    {
+      "module": "test_import_audit",
+      "passed": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.57,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "10 test(s) passed"
+    },
+    {
+      "module": "test_static_audits",
+      "passed": 9,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.653,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "9 test(s) passed"
+    },
+    {
+      "module": "test_import_audit",
+      "passed": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.632,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "10 test(s) passed"
+    }
+  ],
+  "checks": [
+    {
+      "name": "hermes-runtime-compatibility",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "installed (0, 22, 5) vs required >=0.22.5",
+      "repairable": false,
+      "evidence": {
+        "installed": "0.22.5"
+      }
+    },
+    {
+      "name": "production-stdlib-only",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "PRODUCTION_DEPENDENCIES is empty and no pyproject.toml exists",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "tests:test_static_audits",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "9 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_static_audits",
+        "passed": 9
+      }
+    },
+    {
+      "name": "tests:test_import_audit",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "10 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_import_audit",
+        "passed": 10
+      }
+    },
+    {
+      "name": "formatting-hygiene",
+      "verdict": "WARNING",
+      "kind": "IMPLEMENTATION",
+      "detail": "1 line(s) with trailing whitespace across 1 file(s)",
+      "repairable": true,
+      "evidence": {
+        "issues": [
+          {
+            "path": "probe_tmp.py",
+            "trailing_whitespace_lines": 1,
+            "missing_final_newline": false,
+            "extra_final_newline": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "repair:probe_tmp.py",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "the repair was applied and the tests still pass",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "phase-2a-manifest-integrity",
+      "verdict": "FAIL",
+      "kind": "IMPLEMENTATION",
+      "detail": "1 manifest entry/entries changed",
+      "repairable": false,
+      "evidence": {
+        "mismatched": [
+          "consequence_map/domain/copy.py"
+        ]
+      }
+    },
+    {
+      "name": "tests-preserved",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "no test file was removed",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "state-comparison",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "1 file(s) differ from the pre-cycle state",
+      "repairable": false,
+      "evidence": {
+        "changed": [
+          "probe_tmp.py"
+        ]
+      }
+    }
+  ],
+  "repairs": [
+    {
+      "path": "probe_tmp.py",
+      "level": 1,
+      "kind": "IMPLEMENTATION",
+      "description": "mechanical formatting: 1 line(s) with trailing whitespace, final-newline normalised",
+      "applied": true,
+      "before_hash": "cc47296f1b3ee8d02f577aae0d7ce45f9a332aee300faf969594d503b96cff97",
+      "after_hash": "06edbcf4336165a271e6524025a6439c3caa3246fd0796f116772279707a5325",
+      "reverted": false,
+      "error": ""
+    }
+  ],
+  "repair_attempts": 1,
+  "stopped_reason": null,
+  "unresolved": [
+    {
+      "name": "phase-2a-manifest-integrity",
+      "verdict": "FAIL",
+      "kind": "IMPLEMENTATION",
+      "detail": "1 manifest entry/entries changed"
+    }
+  ],
+  "human_decision_required": "",
+  "generated_at": "2026-11-08T12:36:19+00:00"
+}
