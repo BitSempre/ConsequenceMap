@@ -10,13 +10,13 @@
 | Suite | Tests | Result |
 |---|---|---|
 | `consequence_map/tests` (the plugin) | 449 | **PASS** |
-| `consequence_guard/tests` (the service) | 105 | **PASS** |
+| `consequence_guard/tests` (the service) | 108 | **PASS** |
 | Mobile protocol regression tests | 10 | **PASS** |
 | Mobile prototype demonstration | 13 cases | **PASS**, exit 0 |
 | Quality Guardian | — | `WARNING` (one pre-existing error) |
 
-**554 tests pass.** The baseline before this mission was 449
-plugin tests; the mission added 105 service tests and 10 protocol
+**557 tests pass.** The baseline before this mission was 449
+plugin tests; the mission added 108 service tests and 10 protocol
 tests.
 
 ## The tests that matter most

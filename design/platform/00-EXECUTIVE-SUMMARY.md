@@ -33,7 +33,7 @@ imposed on it. **It is what makes it safe.** The code that would
 accept a forged approval is in the other process, and the agent
 cannot reach it.
 
-- **554 tests pass** (449 plugin, 105 service, plus 10 mobile-protocol).
+- **557 tests pass** (449 plugin, 108 service, plus 10 mobile-protocol).
 - **34 defects** found and fixed across nine adversarial rounds, three
   of them by independent reviewers.
 - The production tree was **never touched**: 96 files, 0 altered.

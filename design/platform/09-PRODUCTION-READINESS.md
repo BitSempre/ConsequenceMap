@@ -21,7 +21,7 @@ mission forbids executing.
 |---|---|---|
 | `consequence_map/core/` | 2 903 | The plugin: canonical form, the authorization protocol, the executor, the in-memory guard, the audit trail, the agent surface, the analysis layer |
 | `consequence_guard/` | 2 607 | The service: Ed25519 crypto, the protocol, the policy, the authority, the durable store, the transport, the plugin client, revocation, crash recovery |
-| Tests | 1 997 | 554 tests: 449 plugin, 105 guard, plus 10 mobile-protocol |
+| Tests | 1 997 | 557 tests: 449 plugin, 108 guard, plus 10 mobile-protocol |
 | Design | 8 new + 15 existing | The architecture, boundaries, threat model, protocol, audit, persistence, pairing, Red Team report, and the ADRs |
 
 **28 commits** on `feature/platform-v1`. The production tree was
@@ -57,7 +57,7 @@ is no path by which it can be talked into accepting a forged approval.
 | The agent cannot run arbitrary commands | The handler's arguments are **derived** by the policy's argument map |
 | The production tree is byte-identical | 96 files, 0 altered; the three protected files' SHA-256 unchanged |
 
-**554 tests pass. The Guardian reports WARNING** (one pre-existing
+**557 tests pass. The Guardian reports WARNING** (one pre-existing
 error). The mobile prototype: 13/13, exit 0.
 
 ---
