@@ -1,6 +1,6 @@
 {
  "branch": "feature/platform-v1",
- "commits": 37,
+ "commits": 38,
  "files": {
   "ConsequenceMap/.gitignore": "7d5015c17c4b5fed6f797558dc1e5af7e2fe8d6122347029ef7d76d2db3ea286",
   "ConsequenceMap/consequence_guard/__init__.py": "cc259ade38c2251513bd37ec42b2c32d8a1afcccf1555eba57ec0b76a5b4f0fe",
@@ -224,7 +224,7 @@
   "security-decisions/ADR-002-WINDOWS-SERVICE-IDENTITY.md": "52092564b253d0f45efa08add99372b48c89978efc248f72837bd78dce983c68",
   "security-decisions/SECURITY-DECISIONS-D22-D28.md": "a6e8499d0023627da507a84906ab46d50738b709d1116b78d747764d6921fe6a"
  },
- "generated_at": "2026-11-09T18:36:41Z",
- "head": "1fe0ed19f4bb9a9befc599fee21be83a54beef84",
+ "generated_at": "2026-11-09T18:36:53Z",
+ "head": "c80637671ca1af9a442f4827a607ec8873fabbcb",
  "project": "ConsequenceMap Security Platform v1"
 }
