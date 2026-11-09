@@ -534,13 +534,27 @@ class GuardService:
         authorization_id = authorization.get("authorization_id", "")
         nonce = authorization.get("nonce", "")
 
+        # The INSTANCE identifier is the service's own, not the
+        # operation's name.
+        #
+        # The operation_id in the message names the KIND of operation
+        # ("file.delete"), not the individual execution. Two executions
+        # of the same kind therefore share an identifier, and the
+        # second one's state update would overwrite the first one's -
+        # which would let a later execution mark an operation whose
+        # outcome was UNKNOWN as COMPLETED.
+        #
+        # The instance identifier is derived from the authorisation,
+        # which is unique per approval.
+        instance_id = "op:%s:%s" % (authorization_id or "unknown", nonce or "unknown")
+
         # The audit record of the attempt comes first. If it cannot be
         # written, the operation does not run.
         try:
             self.store.append_audit(
                 "guard.request.accepted",
                 {
-                    "operation_id": operation_id,
+                    "operation_id": instance_id,
                     "operation": operation.identifier,
                     "authorization_id": authorization_id,
                     "request_digest": request_digest(message),
@@ -557,7 +571,7 @@ class GuardService:
 
         try:
             self.store.record_operation(
-                operation_id=operation_id,
+                operation_id=instance_id,
                 state=OperationState.RECEIVED,
                 request_id=authorization.get("request_id", ""),
                 authorization_id=authorization_id,
@@ -581,7 +595,7 @@ class GuardService:
                 authorization_id=authorization_id,
                 nonce=nonce,
                 request_id=authorization.get("request_id", ""),
-                operation_id=operation_id,
+                operation_id=instance_id,
                 consumed_by="guard",
                 now=now,
             )
@@ -601,7 +615,7 @@ class GuardService:
             )
 
         self.store.record_operation(
-            operation_id=operation_id,
+            operation_id=instance_id,
             state=OperationState.CONSUMED,
             request_id=authorization.get("request_id", ""),
             authorization_id=authorization_id,
@@ -615,7 +629,7 @@ class GuardService:
         arguments = operation.derive_arguments(message["proposal"])
 
         self.store.record_operation(
-            operation_id=operation_id,
+            operation_id=instance_id,
             state=OperationState.EXECUTION_STARTED,
             request_id=authorization.get("request_id", ""),
             authorization_id=authorization_id,
@@ -628,7 +642,7 @@ class GuardService:
             result = operation.handler(arguments)
         except Exception as exc:
             self._record_outcome(
-                operation_id, OperationState.FAILED, now, authorization_id,
+                instance_id, OperationState.FAILED, now, authorization_id,
                 operation, "%s: %s" % (type(exc).__name__, exc),
             )
             return ServiceDecision(
@@ -639,7 +653,7 @@ class GuardService:
             )
 
         self._record_outcome(
-            operation_id, OperationState.COMPLETED, now, authorization_id,
+            instance_id, OperationState.COMPLETED, now, authorization_id,
             operation, "",
         )
         return ServiceDecision(

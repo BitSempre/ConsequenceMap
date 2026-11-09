@@ -103,6 +103,25 @@ class GuardTestCase(unittest.TestCase):
         self.calls.append(dict(arguments))
         return {"ok": True}
 
+    def _instance_state(self, state=None):
+        """The state of the one recorded operation instance.
+
+        The instance identifier is the service's own - derived from the
+        authorisation - not the operation's name. Two executions of the
+        same kind have separate records.
+        """
+        from consequence_guard.store import OperationState
+
+        if state is None:
+            found = []
+            for candidate in OperationState.__dict__.values():
+                if not isinstance(candidate, str):
+                    continue
+                found.extend(self.store.operations_in_state(candidate))
+            return found[0]["operation_id"] if found else None
+        found = self.store.operations_in_state(state)
+        return found[0]["operation_id"] if found else None
+
     def _authorisation(self, scope=("files:write",), signer=None, proposal=None):
         """Build a valid authorisation, signed by the trusted device."""
         signer = signer or self.device
@@ -245,7 +264,8 @@ class HappyPathTests(GuardTestCase):
         message = self._request()
         self.service.decide(message)
         self.assertEqual(
-            self.store.operation_state("file.delete"), OperationState.COMPLETED
+            self.store.operation_state(self._instance_state()),
+            OperationState.COMPLETED,
         )
 
     def test_the_audit_records_the_attempt(self):
@@ -334,7 +354,8 @@ class FailClosedTests(GuardTestCase):
         decision = service.decide(self._request())
         self.assertEqual(decision.decision, DECISION_DENY)
         self.assertEqual(
-            self.store.operation_state("file.delete"), OperationState.FAILED
+            self.store.operation_state(self._instance_state()),
+            OperationState.FAILED,
         )
 
     def test_handle_safe_turns_any_failure_into_a_refusal(self):

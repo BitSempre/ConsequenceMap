@@ -43,6 +43,26 @@ approval that grants more than the operation needs.
 **Fix.** The requested scope now travels in the message, separately
 from the approval, and the approval must be a subset of **that**.
 
+### D-25 — The operation identifier named the kind, not the instance
+
+**Severity: HIGH.**
+
+The message's `operation_id` is the name in the policy's allowlist —
+`file.delete`. Two executions of the same kind therefore shared an
+identifier, and because `record_operation` upserts by that
+identifier, the second execution's state update **overwrote** the
+first one's.
+
+That breaks the recovery guarantee. If execution A was left in
+`OUTCOME_UNKNOWN` by a crash, and execution B of the same kind
+completed afterwards, B's upsert would mark A as `COMPLETED` — and the
+platform would report an operation as finished whose effect may never
+have happened. The very failure the state machine exists to prevent.
+
+**Fix.** The instance identifier is now the service's own, derived
+from the authorisation: unique per approval, because the approval is
+unique.
+
 ### D-24 — The transport nonce set was not durable
 
 **Severity: HIGH.**
@@ -59,6 +79,34 @@ in-memory set was a weaker defence than it should have been.
 atomic pattern as the spent set. The refusal is fail-closed: if the
 nonce cannot be recorded, the request is refused before any
 authorisation logic is reached.
+
+### A finding examined and rejected: "the plugin's `requested_scope` can be manipulated"
+
+The Red Team raised this twice. It is **not** exploitable, and the
+reason is worth stating, because it is the kind of thing that looks
+like a hole:
+
+The plugin sends `requested_scope`. The agent controls the plugin, so
+the agent controls that field. The check is "the granted scope must be
+a subset of the requested scope". An agent that widens the requested
+scope makes that check *easier* to pass — so the finding looks right.
+
+But the check is not what grants anything. **The granted scope comes
+from the signature.** The agent cannot widen it: it would need the
+phone's key. The requested scope is a *claim about what was asked
+for*, and the check only asks "did the human grant at least what was
+asked for, and no more than the operation needs?"
+
+The probe: an approval granting `files:write` was sent with a
+requested scope of `["files:write", "admin"]`. The operation
+`file.delete`, which needs `files:write`, ran — correctly, because
+the human approved it. An operation needing `admin` was **refused**:
+"the authorisation was made for operation 'file.delete', not
+'admin.op'".
+
+**The effective scope is the granted scope, always.** The requested
+scope can only make the check stricter, never looser, because the
+granted scope has to be inside it.
 
 ## Findings examined and not confirmed
 
