@@ -409,3 +409,47 @@ coerce.**
 
 Pinned by `test_regressions.py`, `test_regressions_round2.py` and
 `test_regressions_round3.py` — 37 tests, one per behaviour.
+
+### 8.6 The fifth round: the prototype, which had never been probed
+
+Four rounds had attacked the **core**. The mobile prototype — the
+reference implementation the phone applications are written against —
+had only ever been *run*, never *attacked*. Probing it found two
+defects, one of them the worst of the sixteen.
+
+| ID | Defect | Exploit | Fix |
+|---|---|---|---|
+| **D-15** | `escape_tree` escaped values but **not keys** | The canonical form refuses a non-ASCII key, so the prototype could build a tree the canonicaliser rejected — and the phone and the PC would disagree about what was approved | Keys are escaped as well as values |
+| **D-16** | The fields the phone **displays** — the affected resources and the consequence summary — lived **beside** the proposal rather than **inside** it | The proposal is what gets hashed and signed. Those fields were outside the hash and outside the signature. **An attacker could change what the phone showed without invalidating the approval** | The display fields are part of the proposal, so they are hashed and signed with it |
+
+**D-16 is the worst of the sixteen, and it is a bypass of the entire
+human-in-the-loop premise.**
+
+The human approves what they see on the phone. The phone shows the
+affected resources and the consequence summary. Those two fields were
+not covered by the signature. The request still verified, because the
+verifier only ever looked at the proposal — so an attacker could show
+the human *“deletes one report”* and have *“deletes the repository”*
+approved and executed, with a valid signature on the request.
+
+The demonstration prototype had a case for this and called it a
+"DESIGN OBLIGATION, not a bug": a *lying* summary still verifies,
+because a signature cannot tell a human that the summary is untrue.
+That was true — but it was the wrong thing to be worried about. The
+problem was not that a lie could be *signed*. It was that the
+displayed field could be *changed after* it was signed.
+
+**What the fix does and does not do.** The display fields are now
+inside the proposal, so they are covered by the hash and the signature.
+They cannot be altered after the human approved them. A summary that
+was a lie *at the moment of approval* still verifies — no signature can
+prevent that — and the mitigation remains what it always was: the
+phone renders the resources and the action verbatim, and does not ask
+the human to trust a summary.
+
+**The lesson.** The core had been attacked four times and the
+prototype not once. The prototype is the *reference implementation* —
+the thing the mobile applications are written against. A defect there
+propagates to every phone.
+
+**Probe what ships, not just what is hardest.**

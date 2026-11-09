@@ -103,11 +103,20 @@ def escape_tree(value: Any) -> Any:
 
     Use this on the PC before computing the hash, and on the phone before
     displaying and signing. The two must produce identical trees.
+
+    **Keys are escaped as well as values.** The canonical form is
+    ASCII-only, and it refuses a non-ASCII key outright - so escaping
+    only the values would leave the tree in a shape the canonicaliser
+    rejects. The phone and the PC must produce trees that the
+    canonicaliser accepts, and they must produce the SAME tree.
     """
     if isinstance(value, str):
         return escape_for_canonical(value)
     if isinstance(value, Mapping):
-        return {key: escape_tree(item) for key, item in value.items()}
+        return {
+            escape_for_canonical(key): escape_tree(item)
+            for key, item in value.items()
+        }
     if isinstance(value, (list, tuple)):
         return [escape_tree(item) for item in value]
     return value
@@ -143,7 +152,23 @@ def build_approval_request(
     derived from that same proposal, so what is displayed and what is
     signed cannot drift apart.
     """
-    escaped = escape_tree(proposal)
+    # The display fields go INSIDE the proposal, not beside it.
+    #
+    # The proposal is what the human reads and what the phone signs.
+    # If the affected resources and the consequence summary lived
+    # beside the proposal, they would sit outside the hash and outside
+    # the signature: an attacker could change what the phone displays
+    # without invalidating the approval. The request would still
+    # verify, because the verifier only ever looked at the proposal.
+    #
+    # So they are part of the proposal, and the proposal is what gets
+    # hashed and signed. What the human sees is exactly what is
+    # protected.
+    full_proposal = dict(proposal)
+    full_proposal["affected_resources"] = list(affected_resources)
+    full_proposal["consequence_summary"] = consequence_summary
+
+    escaped = escape_tree(full_proposal)
     request = build_request(
         proposal=escaped,
         project=project,
@@ -153,8 +178,9 @@ def build_approval_request(
         expires_at=expires_at,
         request_id=request_id,
     )
-    # The display fields travel with the request. They are what the phone
-    # renders, and they are covered by the same hash.
+    # The display fields are also carried at the top level, for the
+    # phone's convenience. They are a COPY of what is inside the
+    # proposal, which is the authoritative copy.
     request = dict(request)
     request["affected_resources"] = list(affected_resources)
     request["consequence_summary"] = escape_for_canonical(consequence_summary)
@@ -224,7 +250,18 @@ def verify_approval(
     Delegates to the platform's own verifier, so the phone's answer is
     checked by exactly the same rules as everything else.
     """
-    escaped = escape_tree(proposal)
+    # The proposal that gets verified is the FULL proposal: the one the
+    # caller supplies, plus the display fields as the request carries
+    # them. If the request's copy of those fields disagrees with the
+    # caller's, the verification fails - the phone would be showing one
+    # thing while the signature covered another.
+    full_proposal = dict(proposal)
+    if "affected_resources" in request:
+        full_proposal["affected_resources"] = list(request["affected_resources"])
+    if "consequence_summary" in request:
+        full_proposal["consequence_summary"] = request["consequence_summary"]
+
+    escaped = escape_tree(full_proposal)
     escaped_request = dict(request)
     escaped_request["proposal"] = escaped
     return verify_authorization(
@@ -249,8 +286,20 @@ def verify_binding(
     it confirms the proposal it is about to display is the one that was
     authorised. It does **not** check the signature.
     """
+    # The proposal that was hashed is the FULL proposal - the caller's
+    # plus the display fields as the request carries them. Checking only
+    # the caller's copy would report "not bound" for a perfectly good
+    # approval, and would report "bound" for one whose displayed
+    # resources had been changed.
+    full_proposal = dict(proposal)
+    if "affected_resources" in request:
+        full_proposal["affected_resources"] = list(request["affected_resources"])
+    if "consequence_summary" in request:
+        full_proposal["consequence_summary"] = request["consequence_summary"]
     try:
-        expected = domain_hash(DOMAIN_AUTHORIZATION, {"proposal": escape_tree(proposal)})
+        expected = domain_hash(
+            DOMAIN_AUTHORIZATION, {"proposal": escape_tree(full_proposal)}
+        )
     except CanonicalisationError:
         return False
     return authorization.get("proposal_hash") == expected

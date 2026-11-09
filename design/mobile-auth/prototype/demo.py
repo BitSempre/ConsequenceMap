@@ -262,10 +262,11 @@ def main() -> int:
         consequence_summary="Deletes one harmless file."
     )
     lie_authorization = sign(display_lie_request)
-    # The request's own hash still matches its proposal, so this one
-    # verifies - which is exactly why the PHONE must show the proposal's
-    # real content and not a separate summary. This case therefore
-    # documents a DESIGN obligation, not a cryptographic one.
+    # The summary is inside the signed proposal, so the lie is protected
+    # - it is what the human actually approved. That is exactly why the
+    # PHONE must show the proposal's own fields: a signature cannot tell
+    # a human that the summary is untrue. This case documents a DESIGN
+    # obligation, not a cryptographic one.
     display_lie_ok = verify_approval(
         proposal=proposal,
         request=display_lie_request,
@@ -277,10 +278,43 @@ def main() -> int:
         display_lie_ok is not None,
     )
     print("        -> the phone MUST render the proposal's own fields.")
-    print("           The summary is part of the signed request, so it")
-    print("           cannot be changed - but it can still be a lie.")
+    print("           The summary is part of the signed proposal, so it")
+    print("           cannot be changed afterwards - but it can still be")
+    print("           a lie at the moment of approval.")
     print("           Mitigation: the phone shows the resources and the")
     print("           action verbatim, not the summary alone.")
+
+    # The display fields ARE protected against tampering: they are inside
+    # the proposal that was hashed and signed.
+    print()
+    print("8. the displayed fields cannot be tampered with after signing")
+    print("-" * 72)
+    tampered_display = dict(request)
+    tampered_display["affected_resources"] = list(
+        request["affected_resources"]
+    ) + ["secrets/keys.txt"]
+    expect_failure(
+        "an added affected resource is rejected",
+        lambda: verify_approval(
+            proposal=proposal,
+            request=tampered_display,
+            authorization=authorization,
+            verifier=verifier,
+        ),
+        (AuthorizationInvalid,),
+    )
+    tampered_summary = dict(request)
+    tampered_summary["consequence_summary"] = "Deletes one harmless file."
+    expect_failure(
+        "a changed consequence summary is rejected",
+        lambda: verify_approval(
+            proposal=proposal,
+            request=tampered_summary,
+            authorization=authorization,
+            verifier=verifier,
+        ),
+        (AuthorizationInvalid,),
+    )
 
     # ------------------------------------------------------------------
     print()
