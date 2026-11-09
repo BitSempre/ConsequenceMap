@@ -10,13 +10,13 @@
 | Suite | Tests | Result |
 |---|---|---|
 | `consequence_map/tests` (the plugin) | 449 | **PASS** |
-| `consequence_guard/tests` (the service) | 108 | **PASS** |
+| `consequence_guard/tests` (the service) | 122 | **PASS** |
 | Mobile protocol regression tests | 10 | **PASS** |
 | Mobile prototype demonstration | 13 cases | **PASS**, exit 0 |
 | Quality Guardian | — | `WARNING` (one pre-existing error) |
 
-**557 tests pass.** The baseline before this mission was 449
-plugin tests; the mission added 108 service tests and 10 protocol
+**571 tests pass.** The baseline before this mission was 449
+plugin tests; the mission added 122 service tests and 10 protocol
 tests.
 
 ## The tests that matter most
@@ -56,6 +56,8 @@ property**, and each one asserts that the **handler did not run**.
 | 7 | 22 (audit + analysis) | 1 | The audit trail's records could be rewritten after the fact |
 | 8 | independent review | 2 | The executor kept no audit trail; no clock-skew tolerance |
 | 9 | Red Team | 3 | **The operation was not bound to the signature; the scope check was vacuous; the nonce set was not durable** |
+| 10 | Probing | 1 | **The operation instance shared a state row** |
+| 11 | Independent reviews | 2 | **A closed authorisation schema; the RFC 8032 vectors** |
 
 **Thirty-four defects** across nine rounds, all fixed, all pinned by
 regression tests.
