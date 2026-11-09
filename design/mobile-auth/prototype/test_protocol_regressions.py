@@ -29,6 +29,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 from protocol import (  # noqa: E402
+    full_proposal,
     InMemoryPhoneSigner,
     InMemoryPhoneVerifier,
     build_approval_request,
@@ -56,11 +57,21 @@ def _past(seconds=60):
     return format_rfc3339(now_utc() - timedelta(seconds=seconds))
 
 
-PROPOSAL = {
-    "action": "delete the quarterly report",
-    "resources": ["reports/q3.md"],
-    "permissions": ["delete"],
-}
+AFFECTED = ["reports/q3.md"]
+SUMMARY = "Deletes the quarterly report."
+
+#: The proposal as the human sees it. The display fields are INSIDE it,
+#: so the proposal that is hashed and signed is exactly the proposal
+#: that was read.
+PROPOSAL = full_proposal(
+    {
+        "action": "delete the quarterly report",
+        "resources": ["reports/q3.md"],
+        "permissions": ["delete"],
+    },
+    AFFECTED,
+    SUMMARY,
+)
 
 
 class EscapeTests(unittest.TestCase):
@@ -81,16 +92,26 @@ class EscapeTests(unittest.TestCase):
 
 
 class DisplayBindingTests(unittest.TestCase):
-    """What the human sees is what is signed."""
+    """What the human sees is what is signed.
+
+    The display fields - the affected resources and the consequence
+    summary - are INSIDE the proposal. The proposal is what gets
+    hashed and signed, so the human approves exactly what is shown.
+
+    The test that matters most is
+    ``test_the_display_fields_are_inside_the_signed_proposal``: it
+    asserts the property directly, rather than inferring it from a
+    passing verification.
+    """
 
     def setUp(self):
         self.signer = InMemoryPhoneSigner("pk")
         self.verifier = InMemoryPhoneVerifier({"pk": self.signer._secret})
         self.request = build_approval_request(
             proposal=PROPOSAL, project="C", operation="file.delete",
-            affected_resources=["reports/q3.md"],
+            affected_resources=AFFECTED,
             requested_permissions=["files:write"],
-            consequence_summary="Deletes the quarterly report.",
+            consequence_summary=SUMMARY,
             requested_by="agent", expires_at=_future(),
         )
         authorization = build_authorization(
@@ -107,38 +128,61 @@ class DisplayBindingTests(unittest.TestCase):
             authorization=self.authorization, verifier=self.verifier,
         )
 
-    def test_an_added_affected_resource_is_rejected(self):
-        tampered = dict(self.request)
-        tampered["affected_resources"] = ["reports/q3.md", "secrets/keys.txt"]
+    def test_the_display_fields_are_inside_the_signed_proposal(self):
+        """The property, asserted directly."""
+        self.assertIn("affected_resources", self.request["proposal"])
+        self.assertIn("consequence_summary", self.request["proposal"])
+
+    def test_the_request_carries_no_duplicate_display_fields(self):
+        """There is one copy of the display fields: inside the proposal.
+
+        A second copy beside it would be a second thing that could
+        drift from the one that was signed.
+        """
+        self.assertNotIn("affected_resources", self.request)
+        self.assertNotIn("consequence_summary", self.request)
+
+    def test_a_changed_proposal_is_rejected(self):
+        """Changing what the human saw invalidates the approval."""
+        tampered = full_proposal(
+            dict(PROPOSAL, resources=["reports/q3.md", "secrets/keys.txt"]),
+            ["reports/q3.md", "secrets/keys.txt"],
+            SUMMARY,
+        )
         with self.assertRaises(AuthorizationInvalid):
             verify_approval(
-                proposal=PROPOSAL, request=tampered,
+                proposal=tampered, request=self.request,
                 authorization=self.authorization, verifier=self.verifier,
             )
 
     def test_a_changed_consequence_summary_is_rejected(self):
-        tampered = dict(self.request)
-        tampered["consequence_summary"] = "Deletes one harmless file."
+        tampered = full_proposal(
+            PROPOSAL, AFFECTED, "Deletes one harmless file."
+        )
         with self.assertRaises(AuthorizationInvalid):
             verify_approval(
-                proposal=PROPOSAL, request=tampered,
+                proposal=tampered, request=self.request,
                 authorization=self.authorization, verifier=self.verifier,
             )
 
     def test_two_requests_with_different_resources_have_different_hashes(self):
         other = build_approval_request(
-            proposal=PROPOSAL, project="C", operation="file.delete",
+            proposal=full_proposal(
+                PROPOSAL, ["reports/q3.md", "secrets/keys.txt"], SUMMARY
+            ),
+            project="C", operation="file.delete",
             affected_resources=["reports/q3.md", "secrets/keys.txt"],
             requested_permissions=["files:write"],
-            consequence_summary="Deletes the quarterly report.",
+            consequence_summary=SUMMARY,
             requested_by="agent", expires_at=_future(),
         )
         self.assertNotEqual(self.request["proposal_hash"], other["proposal_hash"])
 
     def test_two_requests_with_different_summaries_have_different_hashes(self):
         other = build_approval_request(
-            proposal=PROPOSAL, project="C", operation="file.delete",
-            affected_resources=["reports/q3.md"],
+            proposal=full_proposal(PROPOSAL, AFFECTED, "Deletes one harmless file."),
+            project="C", operation="file.delete",
+            affected_resources=AFFECTED,
             requested_permissions=["files:write"],
             consequence_summary="Deletes one harmless file.",
             requested_by="agent", expires_at=_future(),
@@ -150,16 +194,30 @@ class DisplayBindingTests(unittest.TestCase):
             proposal=PROPOSAL, request=self.request,
             authorization=self.authorization,
         ))
-        tampered = dict(self.request)
-        tampered["affected_resources"] = ["reports/q3.md", "secrets/keys.txt"]
+        tampered = full_proposal(
+            PROPOSAL, ["reports/q3.md", "secrets/keys.txt"], SUMMARY
+        )
         self.assertFalse(verify_binding(
-            proposal=PROPOSAL, request=tampered,
+            proposal=tampered, request=self.request,
             authorization=self.authorization,
         ))
 
-    def test_the_display_fields_are_inside_the_signed_proposal(self):
-        self.assertIn("affected_resources", self.request["proposal"])
-        self.assertIn("consequence_summary", self.request["proposal"])
+    def test_the_builder_refuses_a_mismatched_display_field(self):
+        """The proposal is the authority.
+
+        If the caller states one set of affected resources and passes a
+        proposal with another, the builder refuses rather than picking
+        one. Merging them would create a proposal the caller did not
+        intend.
+        """
+        with self.assertRaises(ValueError):
+            build_approval_request(
+                proposal=PROPOSAL, project="C", operation="file.delete",
+                affected_resources=["something-else"],
+                requested_permissions=["files:write"],
+                consequence_summary=SUMMARY,
+                requested_by="agent", expires_at=_future(),
+            )
 
 
 if __name__ == "__main__":

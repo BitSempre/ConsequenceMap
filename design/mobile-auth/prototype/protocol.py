@@ -61,6 +61,7 @@ __all__ = [
     "escape_for_canonical",
     "canonical_payload",
     "build_approval_request",
+    "full_proposal",
     "verify_approval",
     "verify_binding",
     "phone_signing_payload",
@@ -133,6 +134,27 @@ def canonical_payload(proposal: Mapping[str, Any]) -> bytes:
     return canonical_bytes(DOMAIN_AUTHORIZATION, {"proposal": escaped})
 
 
+def full_proposal(
+    proposal: Mapping[str, Any],
+    affected_resources: Sequence[str],
+    consequence_summary: str,
+) -> Mapping[str, Any]:
+    """The proposal as the human sees it.
+
+    The display fields are PART of the proposal, not beside it. The
+    proposal is what gets hashed and signed, so the human approves
+    exactly what is shown.
+
+    Every caller that builds, verifies or compares a proposal uses
+    this function, so there is one definition of "the full proposal"
+    and no chance of two copies drifting apart.
+    """
+    complete = dict(proposal)
+    complete["affected_resources"] = list(affected_resources)
+    complete["consequence_summary"] = consequence_summary
+    return complete
+
+
 def build_approval_request(
     *,
     proposal: Mapping[str, Any],
@@ -164,11 +186,31 @@ def build_approval_request(
     # So they are part of the proposal, and the proposal is what gets
     # hashed and signed. What the human sees is exactly what is
     # protected.
-    full_proposal = dict(proposal)
-    full_proposal["affected_resources"] = list(affected_resources)
-    full_proposal["consequence_summary"] = consequence_summary
+    # The proposal the caller passes is ALREADY the full proposal - the
+    # one with the display fields inside it, produced by
+    # full_proposal(). The affected_resources and consequence_summary
+    # arguments are kept because the caller needs to state what it is
+    # asking for, and they are CHECKED against the proposal rather
+    # than merged into it.
+    #
+    # Merging would be a second definition of the same thing, and the
+    # two could drift: the proposal that is hashed would not be the
+    # proposal the caller thinks it is.
+    complete = dict(proposal)
+    if "affected_resources" in complete:
+        if list(complete["affected_resources"]) != list(affected_resources):
+            raise ValueError(
+                "the proposal's affected_resources do not match the ones "
+                "requested: the proposal is the authority"
+            )
+    if "consequence_summary" in complete:
+        if complete["consequence_summary"] != consequence_summary:
+            raise ValueError(
+                "the proposal's consequence_summary does not match the one "
+                "requested: the proposal is the authority"
+            )
 
-    escaped = escape_tree(full_proposal)
+    escaped = escape_tree(complete)
     request = build_request(
         proposal=escaped,
         project=project,
@@ -178,12 +220,16 @@ def build_approval_request(
         expires_at=expires_at,
         request_id=request_id,
     )
-    # The display fields are also carried at the top level, for the
-    # phone's convenience. They are a COPY of what is inside the
-    # proposal, which is the authoritative copy.
-    request = dict(request)
-    request["affected_resources"] = list(affected_resources)
-    request["consequence_summary"] = escape_for_canonical(consequence_summary)
+    # The display fields are NOT copied to the top level of the
+    # request.
+    #
+    # They are already inside the proposal, which is what gets hashed
+    # and signed. Copying them out would be a second copy that can
+    # drift from the authoritative one - and the request now has a
+    # CLOSED schema, so an extra field is refused outright.
+    #
+    # The phone reads them from the proposal, which is where the human
+    # saw them.
     return request
 
 
@@ -255,13 +301,12 @@ def verify_approval(
     # them. If the request's copy of those fields disagrees with the
     # caller's, the verification fails - the phone would be showing one
     # thing while the signature covered another.
-    full_proposal = dict(proposal)
-    if "affected_resources" in request:
-        full_proposal["affected_resources"] = list(request["affected_resources"])
-    if "consequence_summary" in request:
-        full_proposal["consequence_summary"] = request["consequence_summary"]
-
-    escaped = escape_tree(full_proposal)
+    # The proposal the caller passes must already be the FULL proposal
+    # - the one with the display fields inside it, as produced by
+    # full_proposal(). The request's schema is closed, so there is
+    # nowhere to read a second copy from, and there is nothing to
+    # drift.
+    escaped = escape_tree(proposal)
     escaped_request = dict(request)
     escaped_request["proposal"] = escaped
     return verify_authorization(
@@ -291,14 +336,9 @@ def verify_binding(
     # the caller's copy would report "not bound" for a perfectly good
     # approval, and would report "bound" for one whose displayed
     # resources had been changed.
-    full_proposal = dict(proposal)
-    if "affected_resources" in request:
-        full_proposal["affected_resources"] = list(request["affected_resources"])
-    if "consequence_summary" in request:
-        full_proposal["consequence_summary"] = request["consequence_summary"]
     try:
         expected = domain_hash(
-            DOMAIN_AUTHORIZATION, {"proposal": escape_tree(full_proposal)}
+            DOMAIN_AUTHORIZATION, {"proposal": escape_tree(proposal)}
         )
     except CanonicalisationError:
         return False

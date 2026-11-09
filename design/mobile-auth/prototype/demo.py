@@ -39,7 +39,8 @@ if os.path.isdir(os.path.join(_REPO, "consequence_map")):
 if os.path.isdir(_HERE):
     sys.path.insert(0, _HERE)
 
-from protocol import (  # noqa: E402
+from protocol import (
+    full_proposal,  # noqa: E402
     InMemoryPhoneSigner,
     InMemoryPhoneVerifier,
     build_approval_request,
@@ -92,12 +93,21 @@ def main() -> int:
     signer = InMemoryPhoneSigner("phone-key-1")
     verifier = InMemoryPhoneVerifier({"phone-key-1": signer._secret})
 
-    proposal = {
-        "action": "delete the quarterly report",
-        "resources": ["reports/q3.md", "evidence/q3.json"],
-        "permissions": ["delete"],
-        "reversible": False,
-    }
+    # The proposal is what the human sees, INCLUDING the display
+    # fields. They are inside it - not beside it - so the proposal that
+    # is hashed and signed is exactly the proposal that was read.
+    AFFECTED = ["reports/q3.md", "evidence/q3.json"]
+    SUMMARY = "Deletes the quarterly report and its evidence file."
+    proposal = full_proposal(
+        {
+            "action": "delete the quarterly report",
+            "resources": ["reports/q3.md", "evidence/q3.json"],
+            "permissions": ["delete"],
+            "reversible": False,
+        },
+        AFFECTED,
+        SUMMARY,
+    )
 
     def future(seconds=600):
         return format_rfc3339(now_utc() + timedelta(seconds=seconds))
@@ -110,9 +120,9 @@ def main() -> int:
             proposal=proposal if proposal_to_send is None else proposal_to_send,
             project="ConsequenceMap",
             operation="file.delete",
-            affected_resources=proposal["resources"],
+            affected_resources=AFFECTED,
             requested_permissions=["files:write"],
-            consequence_summary="Deletes one report and one evidence file.",
+            consequence_summary=SUMMARY,
             requested_by="hermes-agent",
             expires_at=future(900),
         )
@@ -259,7 +269,12 @@ def main() -> int:
     print("7. the display differs from the content")
     print("-" * 72)
     display_lie_request = make_request(
-        consequence_summary="Deletes one harmless file."
+        proposal_to_send=full_proposal(
+            proposal,
+            AFFECTED,
+            "Deletes one harmless file.",
+        ),
+        consequence_summary="Deletes one harmless file.",
     )
     lie_authorization = sign(display_lie_request)
     # The summary is inside the signed proposal, so the lie is protected
@@ -268,7 +283,7 @@ def main() -> int:
     # a human that the summary is untrue. This case documents a DESIGN
     # obligation, not a cryptographic one.
     display_lie_ok = verify_approval(
-        proposal=proposal,
+        proposal=display_lie_request["proposal"],
         request=display_lie_request,
         authorization=lie_authorization,
         verifier=verifier,
@@ -289,27 +304,29 @@ def main() -> int:
     print()
     print("8. the displayed fields cannot be tampered with after signing")
     print("-" * 72)
-    tampered_display = dict(request)
-    tampered_display["affected_resources"] = list(
-        request["affected_resources"]
-    ) + ["secrets/keys.txt"]
+    tampered_display = full_proposal(
+        proposal,
+        list(AFFECTED) + ["secrets/keys.txt"],
+        SUMMARY,
+    )
     expect_failure(
         "an added affected resource is rejected",
         lambda: verify_approval(
-            proposal=proposal,
-            request=tampered_display,
+            proposal=tampered_display,
+            request=request,
             authorization=authorization,
             verifier=verifier,
         ),
         (AuthorizationInvalid,),
     )
-    tampered_summary = dict(request)
-    tampered_summary["consequence_summary"] = "Deletes one harmless file."
+    tampered_summary = full_proposal(
+        proposal, AFFECTED, "Deletes one harmless file."
+    )
     expect_failure(
         "a changed consequence summary is rejected",
         lambda: verify_approval(
-            proposal=proposal,
-            request=tampered_summary,
+            proposal=tampered_summary,
+            request=request,
             authorization=authorization,
             verifier=verifier,
         ),
