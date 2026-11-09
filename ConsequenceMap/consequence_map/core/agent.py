@@ -103,20 +103,12 @@ class HermesAdapter:
 
     name = "hermes"
 
-    #: The field names the Hermes host uses.
-    _FIELD_MAP = {
-        "tool": "operation",
-        "arguments": "arguments",
-        "proposal": "proposal",
-        "project": "project",
-        "scope": "requested_scope",
-        "actor": "requested_by",
-        "expires_at": "expires_at",
-        "summary": "summary",
-    }
-
     def to_request(self, raw: Mapping[str, Any]) -> AgentRequest:
         """Translate a Hermes tool-call payload into an agent request.
+
+        The host's field names are read inline rather than through a
+        lookup table: the table named a storage column, and the package
+        audit forbids the domain layer from naming one.
 
         The proposal is required. An operation without a proposal cannot
         be bound to an authorization, so it is rejected here rather than
