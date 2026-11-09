@@ -60,6 +60,7 @@ __all__ = [
     "PROTOCOL_VERSION",
     "MAX_REQUEST_BYTES",
     "MAX_RESPONSE_BYTES",
+    "REQUEST_DEADLINE_SECONDS",
     "MESSAGE_TYPES",
     "DECISION_ALLOW",
     "DECISION_DENY",
@@ -84,6 +85,17 @@ MAX_REQUEST_BYTES = 64 * 1024
 
 #: The largest response the service will produce, in bytes.
 MAX_RESPONSE_BYTES = 64 * 1024
+
+#: The longest the service will spend on one request, in seconds.
+#:
+#: A deadline is not a performance nicety. Without one, a request that
+#: makes the service wait - on a lock, on a disk, on a handler - holds
+#: the connection open indefinitely, and a caller can open many of
+#: them. The deadline bounds how much a caller can tie up.
+#:
+#: It is long enough for a slow disk and a legitimate handler, and
+#: short enough that a hung request is refused rather than waited on.
+REQUEST_DEADLINE_SECONDS = 30
 
 #: The message types this protocol defines.
 MESSAGE_TYPES = frozenset({"execution.request", "execution.response"})

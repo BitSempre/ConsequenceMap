@@ -130,6 +130,20 @@ Stated so the report is not read as more than it is:
 3. **The mobile applications.** They do not exist. The protocol and
    the reference implementation do.
 
+### The eleventh round: the two independent reviews
+
+Two further independent reviews ran — a **cryptography engineer** and a
+**Windows security engineer** — against the guard's specification.
+Their findings were checked against the code.
+
+| Finding | Verdict |
+|---|---|
+| "The authorisation should strictly validate that no fields are added or removed" | **Confirmed and fixed (D-26).** The signed payload already made an added field break the signature, but a field the verifier ignores is authenticated-and-ignored — the exact pattern the platform refuses elsewhere. The authorisation now has a closed schema. |
+| "There should be an RFC 8032 test vector" | **Confirmed and implemented (D-27).** A suite that only checks "my signer agrees with my verifier" proves the two halves agree, not that either is Ed25519. The official vectors are now in the suite. |
+| "The interactive user must be DENIED on the pipe" | **Rejected.** That would stop the **plugin** from connecting — the plugin runs as the interactive user. The client-token check is what distinguishes an authorised caller from the agent, which shares that user. |
+| "Keep nonces for 30 seconds" | **Rejected.** The retention window must be at least the maximum authorisation validity, or a live authorisation could be presented again after its nonce aged out. |
+| "The transitive dependencies are six and importlib-metadata" | **Rejected.** Measured from the installed distribution: `cryptography` 50.0.1 requires `cffi>=2.0.0` → `pycparser`, plus `typing-extensions` only below Python 3.11. `six` and `importlib-metadata` are stale entries from older releases. |
+
 ## The verdict
 
 **No unresolved critical or high bypass in the logic that was

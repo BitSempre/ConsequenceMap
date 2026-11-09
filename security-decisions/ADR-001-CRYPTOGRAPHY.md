@@ -42,9 +42,17 @@ for the user. That judgement stays with the human.
 - Version pin: `cryptography==50.0.1`
 - Licence: **Apache-2.0 OR BSD-3-Clause** — dual-licensed, so it is
   compatible with a proprietary product *and* with Apache-2.0.
-- Transitive dependencies: `cffi>=1.14` (MIT) and `pycparser` (BSD-3-Clause).
-  Both are build-time/ABI companions of the Rust extension, not
-  additional attack surface of their own.
+- Transitive dependencies, **measured on this host**:
+  `cffi>=2.0.0` (MIT-0) → `pycparser` (BSD-3-Clause). Both are the
+  ABI companion of the Rust extension, not additional attack surface of
+  their own. `typing-extensions>=4.13.2` is required only on Python
+  below 3.11.
+
+  **Note on a common error:** `six` and `importlib-metadata` are
+  **not** dependencies of `cryptography` 50.x. They were required by
+  older releases and are frequently listed by stale documentation. The
+  list above was read from the installed distribution's metadata, not
+  from a website.
 - Python 3.14: supported by 50.0.1; verified in this environment.
 
 ### Why Ed25519
@@ -111,6 +119,23 @@ rejects duplicate keys, rejects floats, rejects non-ASCII, and has a
 depth limit. One canonical form is used by the whole system: two would
 be two sets of rules, and they would eventually disagree.
 
+### Validation against an external reference
+
+The implementation is validated against the **official RFC 8032
+Section 7.1 test vectors** (TEST 1, TEST 2 and TEST 3), transcribed
+verbatim from the RFC.
+
+This matters for a specific reason: a test suite that only checks
+"my signer agrees with my verifier" proves that the two halves agree.
+It does not prove that either of them is Ed25519. The RFC vectors do
+that — against a standard that was itself "double checked by Bob
+Bradley using three separate implementations (one based on TweetNaCl
+and two different implementations based on code from SUPERCOP)".
+
+The vectors live in `consequence_guard/tests/test_rfc8032_vectors.py`
+and cover the public-key derivation, the signature, the verification,
+and the negative cases the RFC's own driver asserts.
+
 ### Algorithm agility
 
 The algorithm is named in the document. Only algorithms on an explicit
@@ -118,6 +143,20 @@ The algorithm is named in the document. Only algorithms on an explicit
 **refused outright** — not reported as a failed signature. A document
 we do not understand is not a document we failed to verify, and
 collapsing the two hides an attack.
+
+### The authorisation has a closed schema
+
+The signed payload is the document minus **exactly** the field named
+`signature`. That already makes an added field break the signature.
+
+The authorisation document is nevertheless **also** checked for
+unknown fields, and refused if it has any. The reason is that the
+two defences fail differently: the signature is *cryptographic*, and a
+field the verifier does not understand is *authenticated but ignored* —
+and a field that is ignored is a field a signer, or a bug, could add
+without anyone noticing. That is exactly the pattern the rest of the
+platform refuses: *a field the service does not understand might be
+one it would have honoured*.
 
 ### Key handling
 

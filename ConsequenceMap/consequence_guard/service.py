@@ -71,6 +71,7 @@ from .crypto import (
 )
 from .protocol import (
     DECISION_ALLOW,
+    REQUEST_DEADLINE_SECONDS,
     DECISION_DENY,
     DECISION_INDETERMINATE,
     MessageTooLarge,
@@ -256,11 +257,18 @@ class GuardService:
         store: GuardStore,
         verifier: Ed25519Verifier,
         clock=None,
+        deadline_seconds: int = REQUEST_DEADLINE_SECONDS,
     ) -> None:
         self.policy = policy
         self.store = store
         self.verifier = verifier
         self._clock = clock
+        # How long the service will spend on one request. A deadline is
+        # not a performance nicety: without one, a request that makes
+        # the service wait - on a lock, on a disk, on a handler - holds
+        # the connection open indefinitely, and a caller can open many
+        # of them.
+        self.deadline_seconds = int(deadline_seconds)
 
     def _now(self) -> str:
         if self._clock is not None:

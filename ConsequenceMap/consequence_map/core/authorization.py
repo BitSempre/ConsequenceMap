@@ -331,10 +331,34 @@ def build_authorization(
 
 
 def _require_fields(document: Mapping[str, Any], fields: Sequence[str], what: str) -> None:
+    """Require the mandatory fields, and refuse the unknown ones.
+
+    Both halves matter, and for different reasons.
+
+    **Presence** is what makes the document mean something: a
+    document without a nonce or an expiry cannot be verified.
+
+    **Absence** is what makes the document mean only what it says. A
+    field the verifier does not understand is authenticated but
+    IGNORED - and a field that is ignored is a field that a signer
+    (or a bug) could add without anyone noticing. That is exactly the
+    pattern the rest of the platform refuses: *a field the service
+    does not understand might be one it would have honoured*.
+
+    The signed payload is the document minus exactly the field named
+    ``signature``, so an added field already breaks the signature.
+    This check is the second, independent defence: it turns a silent
+    semantic gap into an explicit refusal.
+    """
     missing = [name for name in fields if name not in document]
     if missing:
         raise AuthorizationInvalid(
             "%s is missing mandatory field(s): %s" % (what, ", ".join(missing))
+        )
+    unexpected = sorted(set(document) - set(fields))
+    if unexpected:
+        raise AuthorizationInvalid(
+            "%s has unknown field(s): %s" % (what, ", ".join(unexpected))
         )
 
 
