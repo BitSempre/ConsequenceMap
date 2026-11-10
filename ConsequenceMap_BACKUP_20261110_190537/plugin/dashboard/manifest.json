@@ -1,0 +1,14 @@
+{
+  "name": "consequence-map",
+  "label": "ConsequenceMap",
+  "description": "See what happens before it happens. The forecast, the decision, and the comparison with what actually happened.",
+  "icon": "Sparkles",
+  "version": "0.3.0",
+  "tab": {
+    "path": "/consequence-map",
+    "position": "after:analytics"
+  },
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

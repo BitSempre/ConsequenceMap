@@ -1,0 +1,9 @@
+{
+ "auto_repair": false,
+ "reason": "post-incident security audit 2026-11-08: automatic repair suspended pending owner decision; detection, testing and reporting remain active",
+ "suspended_at": "2026-11-08T12:45:00Z",
+ "suspended_by": "post-incident security audit",
+ "scope": "automatic N1 repair only; detection, test execution, reporting and baseline recording are unaffected",
+ "reversible": true,
+ "reactivation_requires": "explicit owner authorisation"
+}

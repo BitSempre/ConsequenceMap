@@ -60,6 +60,42 @@ def register(ctx: Any) -> None:
     _ensure_importable()
     try:
         from consequence_map.hooks import register as register_hooks
+        from consequence_map.hooks import (
+            RepositoryAuthorizationSink,
+            HookState,
+        )
+
+        # Injete o provedor do Hermes para que as inserções usem a mesma conexão
+        # que o host cria através do sqlite_util.transaction.
+        try:
+            from hermes_cli.sqlite_util import transaction as hermes_transaction
+            def hermes_provider(path):
+                return hermes_transaction(provider=path)
+            db_module.set_connection_provider(hermes_provider)
+        except Exception:
+            logger.warning(
+                "ConsequenceMap: não foi possível injetar o provedor do Hermes",
+                exc_info=True,
+            )
+        # The sink writes to the plugin's own database. If the
+        # database cannot be opened, the sink counts the failure and
+        # the hooks keep working: a hook must never fail because the
+        # storage is unavailable.
+        try:
+            from consequence_map.storage import db as db_module
+            from consequence_map.storage.migrations import apply_migrations
+            from consequence_map.storage.repository import Repository
+
+            connection = db_module.connect()
+            apply_migrations(connection)
+            repository = Repository(connection)
+            HookState.STATE.sink = RepositoryAuthorizationSink(repository)
+        except Exception:
+            logger.warning(
+                "ConsequenceMap: the database is unavailable; the "
+                "authorization will not be recorded",
+                exc_info=True,
+            )
 
         register_hooks(ctx)
         logger.info("ConsequenceMap: registered")

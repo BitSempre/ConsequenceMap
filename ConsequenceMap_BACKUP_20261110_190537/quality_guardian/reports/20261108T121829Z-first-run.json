@@ -1,0 +1,390 @@
+{
+  "trigger": "first-run",
+  "verdict": "PASS",
+  "changed_files": [
+    "consequence_map/__init__.py",
+    "consequence_map/config.py",
+    "consequence_map/dependencies.py",
+    "consequence_map/domain/__init__.py",
+    "consequence_map/domain/copy.py",
+    "consequence_map/domain/enums.py",
+    "consequence_map/domain/records.py",
+    "consequence_map/domain/serialization.py",
+    "consequence_map/domain/validation.py",
+    "consequence_map/redaction/__init__.py",
+    "consequence_map/redaction/boundary.py",
+    "consequence_map/storage/__init__.py",
+    "consequence_map/storage/db.py",
+    "consequence_map/storage/migrations.py",
+    "consequence_map/storage/repository.py",
+    "consequence_map/storage/schema.py",
+    "consequence_map/storage/triggers.py",
+    "consequence_map/tests/__init__.py",
+    "consequence_map/tests/fixtures.py",
+    "consequence_map/tests/test_coverage_gaps.py",
+    "consequence_map/tests/test_enums.py",
+    "consequence_map/tests/test_import_audit.py",
+    "consequence_map/tests/test_integration.py",
+    "consequence_map/tests/test_migrations.py",
+    "consequence_map/tests/test_records.py",
+    "consequence_map/tests/test_redaction.py",
+    "consequence_map/tests/test_repository.py",
+    "consequence_map/tests/test_schema.py",
+    "consequence_map/tests/test_serialization.py",
+    "consequence_map/tests/test_static_audits.py",
+    "consequence_map/tests/test_triggers.py",
+    "consequence_map/tests/test_validation.py",
+    "docs/PHASE-2A-CRITERIA-MATRIX.md",
+    "docs/PHASE-2A-IMPLEMENTATION-REPORT.md",
+    "docs/PHASE-2A-MANIFEST.md",
+    "evidence/_runner.py",
+    "evidence/criteria-matrix.json",
+    "evidence/criterion-test-map.json",
+    "evidence/determinism-check.json",
+    "evidence/test-status.json"
+  ],
+  "tests_executed": 214,
+  "test_runs": [
+    {
+      "module": "test_enums",
+      "passed": 13,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.251,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "13 test(s) passed"
+    },
+    {
+      "module": "test_validation",
+      "passed": 22,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.266,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "22 test(s) passed"
+    },
+    {
+      "module": "test_records",
+      "passed": 61,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.366,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "61 test(s) passed"
+    },
+    {
+      "module": "test_serialization",
+      "passed": 13,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 1.075,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "13 test(s) passed"
+    },
+    {
+      "module": "test_schema",
+      "passed": 9,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 1.626,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "9 test(s) passed"
+    },
+    {
+      "module": "test_triggers",
+      "passed": 19,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 7.328,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "19 test(s) passed"
+    },
+    {
+      "module": "test_repository",
+      "passed": 11,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 4.887,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "11 test(s) passed"
+    },
+    {
+      "module": "test_migrations",
+      "passed": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 3.673,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "10 test(s) passed"
+    },
+    {
+      "module": "test_redaction",
+      "passed": 14,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 1.79,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "14 test(s) passed"
+    },
+    {
+      "module": "test_integration",
+      "passed": 6,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 13.318,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "6 test(s) passed"
+    },
+    {
+      "module": "test_static_audits",
+      "passed": 9,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.592,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "9 test(s) passed"
+    },
+    {
+      "module": "test_import_audit",
+      "passed": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.543,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "10 test(s) passed"
+    },
+    {
+      "module": "test_coverage_gaps",
+      "passed": 17,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.482,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "17 test(s) passed"
+    }
+  ],
+  "checks": [
+    {
+      "name": "hermes-runtime-compatibility",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "installed (0, 22, 5) vs required >=0.22.5",
+      "repairable": false,
+      "evidence": {
+        "installed": "0.22.5"
+      }
+    },
+    {
+      "name": "production-stdlib-only",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "PRODUCTION_DEPENDENCIES is empty and no pyproject.toml exists",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "phase-2a-manifest-integrity",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "52 manifest entries verified, 0 mismatched",
+      "repairable": false,
+      "evidence": {
+        "checked": 52,
+        "absent_from_disk": 0
+      }
+    },
+    {
+      "name": "tests:test_enums",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "13 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_enums",
+        "passed": 13
+      }
+    },
+    {
+      "name": "tests:test_validation",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "22 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_validation",
+        "passed": 22
+      }
+    },
+    {
+      "name": "tests:test_records",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "61 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_records",
+        "passed": 61
+      }
+    },
+    {
+      "name": "tests:test_serialization",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "13 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_serialization",
+        "passed": 13
+      }
+    },
+    {
+      "name": "tests:test_schema",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "9 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_schema",
+        "passed": 9
+      }
+    },
+    {
+      "name": "tests:test_triggers",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "19 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_triggers",
+        "passed": 19
+      }
+    },
+    {
+      "name": "tests:test_repository",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "11 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_repository",
+        "passed": 11
+      }
+    },
+    {
+      "name": "tests:test_migrations",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "10 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_migrations",
+        "passed": 10
+      }
+    },
+    {
+      "name": "tests:test_redaction",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "14 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_redaction",
+        "passed": 14
+      }
+    },
+    {
+      "name": "tests:test_integration",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "6 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_integration",
+        "passed": 6
+      }
+    },
+    {
+      "name": "tests:test_static_audits",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "9 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_static_audits",
+        "passed": 9
+      }
+    },
+    {
+      "name": "tests:test_import_audit",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "10 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_import_audit",
+        "passed": 10
+      }
+    },
+    {
+      "name": "tests:test_coverage_gaps",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "17 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_coverage_gaps",
+        "passed": 17
+      }
+    },
+    {
+      "name": "tests-preserved",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "no test file was removed",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "state-comparison",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "0 file(s) differ from the pre-cycle state",
+      "repairable": false,
+      "evidence": {
+        "changed": []
+      }
+    }
+  ],
+  "repairs": [],
+  "repair_attempts": 0,
+  "stopped_reason": null,
+  "unresolved": [],
+  "human_decision_required": "",
+  "generated_at": "2026-11-08T12:18:29+00:00"
+}

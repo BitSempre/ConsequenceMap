@@ -1,0 +1,159 @@
+{
+  "trigger": "manual",
+  "verdict": "FAIL",
+  "changed_files": [
+    "consequence_map/core/authorization.py",
+    "consequence_map/core/canonical.py",
+    "consequence_map/tests/test_authorization.py",
+    "consequence_map/tests/test_static_audits.py"
+  ],
+  "tests_executed": 19,
+  "test_runs": [
+    {
+      "module": "test_static_audits",
+      "passed": 7,
+      "failed": 0,
+      "errors": 2,
+      "skipped": 0,
+      "duration": 0.36,
+      "timed_out": false,
+      "verdict": "FAIL",
+      "detail": "0 failure(s), 2 error(s)"
+    },
+    {
+      "module": "test_import_audit",
+      "passed": 9,
+      "failed": 0,
+      "errors": 1,
+      "skipped": 0,
+      "duration": 0.437,
+      "timed_out": false,
+      "verdict": "FAIL",
+      "detail": "0 failure(s), 1 error(s)"
+    }
+  ],
+  "checks": [
+    {
+      "name": "hermes-runtime-compatibility",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "installed (0, 22, 5) vs required >=0.22.5",
+      "repairable": false,
+      "evidence": {
+        "installed": "0.22.5"
+      }
+    },
+    {
+      "name": "production-stdlib-only",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "PRODUCTION_DEPENDENCIES is empty and no pyproject.toml exists",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "tests:test_static_audits",
+      "verdict": "FAIL",
+      "kind": "IMPLEMENTATION",
+      "detail": "0 failure(s), 2 error(s)",
+      "repairable": false,
+      "evidence": {
+        "module": "test_static_audits",
+        "failed": 0,
+        "errors": 2
+      }
+    },
+    {
+      "name": "tests:test_import_audit",
+      "verdict": "FAIL",
+      "kind": "IMPLEMENTATION",
+      "detail": "0 failure(s), 1 error(s)",
+      "repairable": false,
+      "evidence": {
+        "module": "test_import_audit",
+        "failed": 0,
+        "errors": 1
+      }
+    },
+    {
+      "name": "formatting-hygiene",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "no trailing whitespace or final-newline defect in the changed files",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "phase-2a-manifest-integrity",
+      "verdict": "WARNING",
+      "kind": "DOCUMENTATION",
+      "detail": "1 manifest divergence(s), all documented in an addendum \u2014 a known, recorded state, not a new regression",
+      "repairable": false,
+      "evidence": {
+        "documented": [
+          "consequence_map/domain/copy.py"
+        ]
+      }
+    },
+    {
+      "name": "tests-preserved",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "no test file was removed",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "state-comparison",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "0 file(s) differ from the pre-cycle state",
+      "repairable": false,
+      "evidence": {
+        "changed": []
+      }
+    }
+  ],
+  "repairs": [
+    {
+      "path": "",
+      "level": 1,
+      "kind": "IMPLEMENTATION",
+      "description": "module test_static_audits failed; no deterministic mechanical fix was identified \u2014 Level 2, requires an investigation",
+      "applied": false,
+      "before_hash": "",
+      "after_hash": "",
+      "reverted": false,
+      "error": ""
+    },
+    {
+      "path": "",
+      "level": 1,
+      "kind": "IMPLEMENTATION",
+      "description": "module test_import_audit failed; no deterministic mechanical fix was identified \u2014 Level 2, requires an investigation",
+      "applied": false,
+      "before_hash": "",
+      "after_hash": "",
+      "reverted": false,
+      "error": ""
+    }
+  ],
+  "repair_attempts": 0,
+  "stopped_reason": null,
+  "unresolved": [
+    {
+      "name": "tests:test_static_audits",
+      "verdict": "FAIL",
+      "kind": "IMPLEMENTATION",
+      "detail": "0 failure(s), 2 error(s)"
+    },
+    {
+      "name": "tests:test_import_audit",
+      "verdict": "FAIL",
+      "kind": "IMPLEMENTATION",
+      "detail": "0 failure(s), 1 error(s)"
+    }
+  ],
+  "human_decision_required": "",
+  "generated_at": "2026-11-09T15:51:15+00:00"
+}

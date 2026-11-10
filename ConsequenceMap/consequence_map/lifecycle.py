@@ -164,7 +164,6 @@ class Lifecycle:
         items: Optional[List[R.ComparisonItem]] = None,
         unknown_dimensions: Optional[List[str]] = None,
         resolved_unknown_dimensions: Optional[List[str]] = None,
-        accuracy_note: str = "",
     ) -> R.Comparison:
         """Build the comparison and record it.
 
@@ -182,7 +181,12 @@ class Lifecycle:
             created_at=created_at,
             verdict=verdict,
             counts=counts,
-            accuracy_note=accuracy_note or _default_note(
+            # The note is DERIVED, never supplied. C-5 requires a
+            # comparison with no UNEXPECTED item to say so; a note
+            # that a caller could write would make that statement
+            # something the caller chooses rather than something the
+            # verification established.
+            accuracy_note=_default_note(
                 verdict,
                 has_unexpected=bool(counts.get("UNEXPECTED")),
             ),

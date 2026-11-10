@@ -236,9 +236,22 @@ class Correlator:
             if known is not None and known == forecast_id:
                 matched = forecast_id
             elif forecast_id in self._pending:
-                # The pattern is this plugin's and names a pending
-                # escalation. The host added the prefix, so the
-                # forecast identity came from the plugin itself.
+                # The pattern names a pending escalation. The forecast
+                # identity came from the plugin itself, because only
+                # an escalation the plugin made is pending here.
+                #
+                # The rule must ALSO be one the plugin escalated with.
+                # A pattern key naming a pending forecast with a
+                # DIFFERENT rule is not the key the plugin produced,
+                # and accepting it would let a caller supply the
+                # forecast id and choose the rule.
+                pending = self._pending[forecast_id]
+                if pending.rule != rule:
+                    # The rule does not match the one the plugin
+                    # escalated with. This is not the key the plugin
+                    # produced, so it is not attributed.
+                    self._orphans += 1
+                    return None
                 matched = forecast_id
 
         if matched is None and observed_tool:
@@ -279,6 +292,7 @@ class Correlator:
             pattern_key=pattern_key,
             tool_call_id=tool_call_id,
             escalation_expected=True,
+            pending_forecasts=tuple(self._pending),
         )
         if forecast_id is None:
             return None
@@ -298,6 +312,7 @@ class Correlator:
             pattern_key=pattern_key,
             tool_call_id=tool_call_id,
             escalation_expected=True,
+            pending_forecasts=tuple(self._pending),
         )
         if forecast_id is None:
             return None

@@ -1,0 +1,52 @@
+{
+  "trigger": "no-change",
+  "verdict": "PASS",
+  "changed_files": [],
+  "tests_executed": 0,
+  "test_runs": [],
+  "checks": [
+    {
+      "name": "hermes-runtime-compatibility",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "installed (0, 22, 5) vs required >=0.22.5",
+      "repairable": false,
+      "evidence": {
+        "installed": "0.22.5"
+      }
+    },
+    {
+      "name": "production-stdlib-only",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "PRODUCTION_DEPENDENCIES is empty and no pyproject.toml exists",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "phase-2a-manifest-integrity",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "52 manifest entries verified, 0 mismatched",
+      "repairable": false,
+      "evidence": {
+        "checked": 52,
+        "absent_from_disk": 0
+      }
+    },
+    {
+      "name": "change-detection",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "no real content change was detected; no test was executed",
+      "repairable": false,
+      "evidence": {}
+    }
+  ],
+  "repairs": [],
+  "repair_attempts": 0,
+  "stopped_reason": null,
+  "unresolved": [],
+  "human_decision_required": "",
+  "generated_at": "2026-11-08T12:18:36+00:00"
+}

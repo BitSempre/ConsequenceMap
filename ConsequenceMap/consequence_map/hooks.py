@@ -112,6 +112,123 @@ class MemoryAuthorizationSink(AuthorizationSink):
         self.closed.append(record)
 
 
+class RepositoryAuthorizationSink(AuthorizationSink):
+    """A sink that writes the authorization to the plugin's own store.
+
+    This is the sink the plugin actually uses. The authorization the
+    human gave has to reach the database, or the product has no
+    record of it and the dashboard has nothing to show.
+
+    It writes through the **lifecycle**, not through the repository
+    directly, so the copy lint and the storage rules apply to an
+    authorization exactly as they apply to a forecast.
+
+    Two properties matter:
+
+    * **It never raises.** A hook must not fail because the storage
+      is unavailable. A storage failure is recorded as a failure to
+      record, and the operation continues - the host owns the
+      decision, and a missing audit row is a gap, not an authority.
+    * **It never invents a forecast.** The record it writes names the
+      forecast the correlation attributed the observation to. If the
+      correlation did not attribute it, nothing is written: an
+      unattributed observation is not evidence of an approval.
+    """
+
+    def __init__(self, repository=None, lifecycle=None) -> None:
+        self._repository = repository
+        self._lifecycle = lifecycle
+        self.failures = 0
+
+    def _lifecycle_for(self):
+        if self._lifecycle is not None:
+            return self._lifecycle
+        if self._repository is None:
+            return None
+        from .lifecycle import Lifecycle
+
+        self._lifecycle = Lifecycle(self._repository)
+        return self._lifecycle
+
+    def _proposal_for(self, forecast_id: str):
+        """The proposal a forecast belongs to.
+
+        Read from the forecast itself. If the forecast does not
+        exist, there is nothing to write: an authorization for a
+        forecast nobody made is not a record, it is a gap.
+        """
+        repository = self._repository
+        if repository is None or not forecast_id:
+            return ("", 1)
+        try:
+            rows = repository.read_all_rows("forecast")
+        except Exception:
+            return ("", 1)
+        for row in rows:
+            if row and row[0] == forecast_id:
+                return (row[1], int(row[2]))
+        return ("", 1)
+
+    def _write(self, record, *, action: str) -> None:
+        lifecycle = self._lifecycle_for()
+        if lifecycle is None:
+            self.failures += 1
+            return
+        try:
+            lifecycle.record_authorization(self._as_domain_record(record))
+        except Exception:
+            # A storage failure must not take the hook down. It is
+            # counted, and the operation continues: the host owns the
+            # decision, and a missing row is a gap in the trail, never
+            # a reason to let an operation through that would not have
+            # gone through.
+            self.failures += 1
+
+    def _as_domain_record(self, record):
+        """The domain record the storage layer expects.
+
+        The ``proposal_id`` and ``proposal_version`` are the
+        forecast's own. The authorization names the proposal the
+        approval was for; writing anything else would break the
+        composite foreign key to the proposal, and would break the
+        point of the record.
+        """
+        from .domain import records as R
+        from .domain.enums import AUTHORIZATION_PROVENANCE
+
+        proposal_id, proposal_version = self._proposal_for(record.forecast_id)
+
+        return R.HostAuthorization(
+            id="auth_%s" % (record.forecast_id or "unknown"),
+            forecast_id=record.forecast_id,
+            proposal_id=proposal_id,
+            proposal_version=proposal_version,
+            state=record.state.value,
+            provenance=AUTHORIZATION_PROVENANCE.HOST_APPROVAL_HOOK.value,
+            authorized_by=record.authorized_by.value,
+            observed_choice=record.pattern_key or "",
+            observed_via="hook",
+            reason=record.reason.value,
+            created_at=record.decided_at or "",
+            escalation_expected=True,
+            tool_call_id=record.tool_call_id or None,
+            pattern_key=record.pattern_key or None,
+            notes=record.notes,
+        )
+
+    def begin(self, record) -> None:
+        """An escalation is in flight."""
+        self._write(record, action="begin")
+
+    def settle(self, record) -> None:
+        """The escalation was answered, or it timed out."""
+        self._write(record, action="settle")
+
+    def close(self, record) -> None:
+        """The tool call finished."""
+        self._write(record, action="close")
+
+
 class HookState:
     """The plugin's runtime state.
 

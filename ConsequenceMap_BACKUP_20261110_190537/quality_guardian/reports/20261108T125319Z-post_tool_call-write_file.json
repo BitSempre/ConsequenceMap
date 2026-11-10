@@ -1,0 +1,165 @@
+{
+  "trigger": "post_tool_call:write_file",
+  "verdict": "NOT_VERIFIED",
+  "changed_files": [
+    "qg_probe_ws.py"
+  ],
+  "tests_executed": 19,
+  "test_runs": [
+    {
+      "module": "test_static_audits",
+      "passed": 9,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.67,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "9 test(s) passed"
+    },
+    {
+      "module": "test_import_audit",
+      "passed": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 0.61,
+      "timed_out": false,
+      "verdict": "PASS",
+      "detail": "10 test(s) passed"
+    }
+  ],
+  "checks": [
+    {
+      "name": "hermes-runtime-compatibility",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "installed (0, 22, 5) vs required >=0.22.5",
+      "repairable": false,
+      "evidence": {
+        "installed": "0.22.5"
+      }
+    },
+    {
+      "name": "production-stdlib-only",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "PRODUCTION_DEPENDENCIES is empty and no pyproject.toml exists",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "tests:test_static_audits",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "9 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_static_audits",
+        "passed": 9
+      }
+    },
+    {
+      "name": "tests:test_import_audit",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "10 test(s) passed",
+      "repairable": false,
+      "evidence": {
+        "module": "test_import_audit",
+        "passed": 10
+      }
+    },
+    {
+      "name": "formatting-hygiene",
+      "verdict": "WARNING",
+      "kind": "IMPLEMENTATION",
+      "detail": "1 line(s) with trailing whitespace across 1 file(s)",
+      "repairable": true,
+      "evidence": {
+        "issues": [
+          {
+            "path": "qg_probe_ws.py",
+            "trailing_whitespace_lines": 1,
+            "missing_final_newline": false,
+            "extra_final_newline": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "repair-capability",
+      "verdict": "NOT_VERIFIED",
+      "kind": "IMPLEMENTATION",
+      "detail": "automatic repair is suspended by the repair policy (post-incident security audit 2026-11-08: automatic repair suspended pending owner decision; detection, testing and reporting remain active); 1 repair(s) were proposed but not applied",
+      "repairable": false,
+      "evidence": {
+        "policy": {
+          "auto_repair": false,
+          "reason": "post-incident security audit 2026-11-08: automatic repair suspended pending owner decision; detection, testing and reporting remain active",
+          "suspended_at": "2026-11-08T12:45:00Z",
+          "suspended_by": "post-incident security audit",
+          "scope": "automatic N1 repair only; detection, test execution, reporting and baseline recording are unaffected",
+          "reversible": true,
+          "reactivation_requires": "explicit owner authorisation",
+          "source": "C:\\Users\\Utente\\Desktop\\ConsequenceMap\\quality_guardian\\state\\repair-policy.json"
+        }
+      }
+    },
+    {
+      "name": "phase-2a-manifest-integrity",
+      "verdict": "WARNING",
+      "kind": "DOCUMENTATION",
+      "detail": "1 manifest divergence(s), all documented in an addendum \u2014 a known, recorded state, not a new regression",
+      "repairable": false,
+      "evidence": {
+        "documented": [
+          "consequence_map/domain/copy.py"
+        ]
+      }
+    },
+    {
+      "name": "tests-preserved",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "no test file was removed",
+      "repairable": false,
+      "evidence": {}
+    },
+    {
+      "name": "state-comparison",
+      "verdict": "PASS",
+      "kind": null,
+      "detail": "0 file(s) differ from the pre-cycle state",
+      "repairable": false,
+      "evidence": {
+        "changed": []
+      }
+    }
+  ],
+  "repairs": [
+    {
+      "path": "qg_probe_ws.py",
+      "level": 1,
+      "kind": "IMPLEMENTATION",
+      "description": "mechanical formatting: 1 line(s) with trailing whitespace, final-newline normalised",
+      "applied": false,
+      "before_hash": "",
+      "after_hash": "",
+      "reverted": false,
+      "error": "automatic repair is suspended: post-incident security audit 2026-11-08: automatic repair suspended pending owner decision; detection, testing and reporting remain active"
+    }
+  ],
+  "repair_attempts": 0,
+  "stopped_reason": null,
+  "unresolved": [
+    {
+      "name": "repair-capability",
+      "verdict": "NOT_VERIFIED",
+      "kind": "IMPLEMENTATION",
+      "detail": "automatic repair is suspended by the repair policy (post-incident security audit 2026-11-08: automatic repair suspended pending owner decision; detection, testing and reporting remain active); 1 repair(s) were proposed but not applied"
+    }
+  ],
+  "human_decision_required": "",
+  "generated_at": "2026-11-08T12:53:19+00:00"
+}
