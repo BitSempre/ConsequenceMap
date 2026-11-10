@@ -65,9 +65,11 @@ the lint still passes unchanged.
 
 Nothing else covered by the Phase 2A manifest changed. In particular:
 
-- `storage/schema.py`, `storage/triggers.py`, `storage/db.py` and
-  `storage/migrations.py` — **byte-identical**. The 45-trigger family, the
-  composite foreign keys and the journal-mode settings are untouched.
+- `storage/schema.py` — **CHANGED**. See addendum **A-3**: five foreign
+  keys were added so the decision chain cannot dangle.
+- `storage/triggers.py`, `storage/db.py` and `storage/migrations.py` —
+  **byte-identical**. The 45-trigger family and the journal-mode
+  settings are untouched.
 - `domain/enums.py`, `domain/validation.py`, `domain/serialization.py` —
   **byte-identical**. The eighteen enumerations, the closed sets and the
   validation rules are untouched.
