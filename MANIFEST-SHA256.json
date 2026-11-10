@@ -1,6 +1,6 @@
 {
  "branch": "feature/platform-v1",
- "commits": 47,
+ "commits": 49,
  "files": {
   "ConsequenceMap/.gitignore": "7d5015c17c4b5fed6f797558dc1e5af7e2fe8d6122347029ef7d76d2db3ea286",
   "ConsequenceMap/consequence_guard/__init__.py": "cc259ade38c2251513bd37ec42b2c32d8a1afcccf1555eba57ec0b76a5b4f0fe",
@@ -12,7 +12,7 @@
   "ConsequenceMap/consequence_guard/recovery.py": "9d8b89d3aa2fb91bc6f3c2e2546d88f652e8107f7f9081d37430d59bcbe40a98",
   "ConsequenceMap/consequence_guard/recovery_after_crash.py": "8cedb2ffba9ab7016ecd68559e79d592813952c5e29051e383aa89174443933b",
   "ConsequenceMap/consequence_guard/service.py": "495f11b4a397ff42572f4634d43337e9033d78c7dff9f5f6143ef20b5c914d4a",
-  "ConsequenceMap/consequence_guard/store.py": "a623e74b4c943b935581b162cadac9949c3128274f8c4d2b328b42c81a3d3c2f",
+  "ConsequenceMap/consequence_guard/store.py": "63937e32f6b5e870a3fe68978a78190a6e681fb4f096e52caca05e7f33d383ec",
   "ConsequenceMap/consequence_guard/tests/__init__.py": "3da4712758fa652a6cff79a0515c176f9cbd5db530cc94609b1d8b4194838fb1",
   "ConsequenceMap/consequence_guard/tests/test_binding.py": "5410656909bb580612587fa5b2224f86046647bc081fc543b173c530a5a95b79",
   "ConsequenceMap/consequence_guard/tests/test_crypto.py": "96b0baa65d823a0399063c23d37c575a24f52a139882b6e21a18db76760dc7d0",
@@ -73,9 +73,9 @@
   "ConsequenceMap/consequence_map/tests/test_host_load.py": "eb3856f50d9d353ff37b6857c479cc2aa70dbe093a5dc29a8f8c2a159deb92dc",
   "ConsequenceMap/consequence_map/tests/test_import_audit.py": "5fae8e8a9eb5295ab7b125481e9a189d616f611dbfe921d5091a32ae60333f8e",
   "ConsequenceMap/consequence_map/tests/test_integration.py": "57222fcb239818b014a73ec4ae5f6915c36fb95f316041f9c71a5c927efcdfc0",
-  "ConsequenceMap/consequence_map/tests/test_lifecycle.py": "5480862fcf0310aba061f4e59415b9501612e8c4f16457c0d680889f10a8737d",
+  "ConsequenceMap/consequence_map/tests/test_lifecycle.py": "26e2baf3e34b4c1c4f8fd5f54a57aed4b6de0e07e08177cf3899ae741cd75cc8",
   "ConsequenceMap/consequence_map/tests/test_migrations.py": "efafa09cbdf822988cb670a6d00ddb6c1876f030b0f67027ad4f04a4bef0a8ff",
-  "ConsequenceMap/consequence_map/tests/test_phase2b.py": "0e0f7db2c710589dc93733e6c92bdd51f7a53bb167e436301450882c9234d47d",
+  "ConsequenceMap/consequence_map/tests/test_phase2b.py": "7de70ea40f60902c13bd3704291a6b5548264014c7301a7f11127d6fc3ba4aab",
   "ConsequenceMap/consequence_map/tests/test_plugin_integration.py": "64b9af6d5eb6ad256a982380ff2985ce479b2f1fca56677a58e285d9bc06e0b1",
   "ConsequenceMap/consequence_map/tests/test_records.py": "6aa583dd3321467794408494161f525e3663a031a2edf9cb71c4c56c022b9988",
   "ConsequenceMap/consequence_map/tests/test_redaction.py": "a83e265340bfe998deb03e8bc38b614fab2ac8be4200e4ae0af1afc03041f5e3",
@@ -248,7 +248,7 @@
   "security-decisions/ADR-002-WINDOWS-SERVICE-IDENTITY.md": "52092564b253d0f45efa08add99372b48c89978efc248f72837bd78dce983c68",
   "security-decisions/SECURITY-DECISIONS-D22-D28.md": "a6e8499d0023627da507a84906ab46d50738b709d1116b78d747764d6921fe6a"
  },
- "generated_at": "2026-11-10T16:29:29Z",
- "head": "a2b9c0aada2b735d48049fd0656845d75c541767",
+ "generated_at": "2026-11-10T16:45:27Z",
+ "head": "f27e832f1049941fdda5a6e773cfd4cfb7cdb87b",
  "project": "ConsequenceMap Security Platform v1 - with the Phase 2B product loop"
 }
