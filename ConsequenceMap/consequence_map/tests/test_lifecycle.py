@@ -160,6 +160,58 @@ class TheWholeChainTests(LifecycleTestCase):
         self.assertEqual(comparison.verdict, "INCONCLUSIVE")
         self.assertIn("inconclusive", comparison.accuracy_note)
 
+    def test_an_unverified_outcome_with_no_observation_is_inconclusive(self):
+        """The UNVERIFIED rule stands on its own.
+
+        The other test used an outcome whose observation was already
+        NOT_VERIFIABLE, so the two rules agreed. This one has no
+        observation at all: only the verification method says the
+        outcome could not be verified, and the verdict must still be
+        INCONCLUSIVE. A forecast is never confirmed by an outcome
+        nobody can vouch for.
+        """
+        self.lifecycle.record_forecast(self.forecast)
+        self.lifecycle.seal_forecast(self.forecast.id)
+        outcome = R.Outcome(
+            id="out_202020202020", forecast_id=self.forecast.id,
+            execution_id="exe_555555555555", recorded_at=TS,
+            recorded_by="plugin", verification_method="UNVERIFIED",
+            summary="the outcome could not be verified")
+        verdict, counts = derive_verdict(outcome)
+        self.assertEqual(verdict, "INCONCLUSIVE")
+        self.assertEqual(counts, {})
+
+    def test_an_unverified_outcome_is_inconclusive_even_if_it_claims_an_observation(self):
+        """The UNVERIFIED rule stands on its own, whatever the observations say.
+
+        The domain refuses to STORE an UNVERIFIED outcome carrying an
+        OBSERVED observation (rule O-1). But derive_verdict can be
+        called with a record that never went through validation, and
+        the rule must hold there too: an outcome nobody can vouch for
+        is INCONCLUSIVE, whatever it claims to have seen.
+
+        Without this test the verdict is right by accident - the final
+        fallback also returns INCONCLUSIVE - and removing the explicit
+        rule would change nothing the tests could see.
+        """
+        self.lifecycle.record_forecast(self.forecast)
+        self.lifecycle.seal_forecast(self.forecast.id)
+        outcome = R.Outcome(
+            id="out_212121212121", forecast_id=self.forecast.id,
+            execution_id="exe_555555555555", recorded_at=TS,
+            recorded_by="plugin", verification_method="UNVERIFIED",
+            summary="the outcome could not be verified",
+            observations=[
+                R.OutcomeObservation(
+                    id="ob_222222222222", target="reports/daily.md",
+                    observation="the file was rewritten", label="OBSERVED",
+                    evidence_source_kind="FILESYSTEM", evidence_ref="digest:x",
+                    confidence="HIGH"),
+            ])
+        verdict, counts = derive_verdict(outcome)
+        self.assertEqual(verdict, "INCONCLUSIVE")
+        self.assertEqual(counts["OBSERVED"], 1)
+
     def test_a_diverged_outcome_says_so(self):
         self.lifecycle.record_forecast(self.forecast)
         self.lifecycle.seal_forecast(self.forecast.id)

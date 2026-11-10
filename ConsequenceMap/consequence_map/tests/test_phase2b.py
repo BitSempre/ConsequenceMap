@@ -197,6 +197,40 @@ class AuthorizationStateTests(unittest.TestCase):
         self.assertEqual(record.state, AUTHORIZATION_STATE.UNKNOWN)
         self.assertFalse(record.is_approval)
 
+    def test_an_approval_is_authorized_by_the_user(self):
+        """The author of an approval is the USER.
+
+        This is asserted separately from the refusal's author: an
+        approval and a refusal are both the user, but they are
+        different facts and a mutation to one must not be masked by a
+        test that only checks the other.
+        """
+        approval = self.machine.from_choice("once")
+        self.assertEqual(approval.authorized_by, AUTHORIZED_BY.USER)
+
+    def test_every_state_has_the_author_it_should(self):
+        """The author of each state, asserted as a table.
+
+        A single wrong author is a security defect: a timeout that
+        claims an author pretends somebody answered.
+        """
+        expected = {
+            "once": AUTHORIZED_BY.USER,
+            "session": AUTHORIZED_BY.USER,
+            "always": AUTHORIZED_BY.USER,
+            "deny": AUTHORIZED_BY.USER,
+            "timeout": AUTHORIZED_BY.NONE,
+            "cancelled": AUTHORIZED_BY.NONE,
+            "notify_failed": AUTHORIZED_BY.NONE,
+            "smart_approve": AUTHORIZED_BY.GUARDIAN_LLM,
+            "smart_deny": AUTHORIZED_BY.GUARDIAN_LLM,
+        }
+        for choice, author in expected.items():
+            with self.subTest(choice=choice):
+                self.assertEqual(
+                    self.machine.from_choice(choice).authorized_by, author
+                )
+
     def test_a_timeout_is_not_a_refusal(self):
         """The confusion the specification names as high-risk."""
         timeout = self.machine.from_choice("timeout")

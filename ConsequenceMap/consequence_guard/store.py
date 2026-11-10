@@ -210,7 +210,17 @@ class GuardStore:
     #: The domain under which audit records are hashed.
     AUDIT_DOMAIN = "consequencemap.guard.audit.v1"
 
-    def __init__(self, path: str, timeout: float = 10.0) -> None:
+    def __init__(self, path: str, timeout: float = 30.0) -> None:
+        """Open the store.
+
+        ``timeout`` is how long a writer waits for the SQLite write
+        lock before giving up. The default is 30 seconds rather than
+        10: the store is the authority that decides whether a
+        protected operation may proceed, and a busy machine must not
+        turn a contended write into a failure that looks like a
+        refusal. The wait is bounded, so a genuinely stuck lock still
+        surfaces - it simply surfaces later, and as the timeout it is.
+        """
         self.path = path
         self._timeout = timeout
         self._lock = threading.RLock()
