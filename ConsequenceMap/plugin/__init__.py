@@ -1,0 +1,67 @@
+"""ConsequenceMap - Decision Intelligence for AI Agents.
+
+The Hermes plugin entry point. The host calls :func:`register` with a
+``PluginContext``; the five hooks and the command palette entry are
+registered there.
+
+The package under ``consequence_map/`` is the implementation. This
+module is only the adapter: it wires the host's context to the
+package and does nothing else.
+"""
+from __future__ import annotations
+
+import logging
+import os
+import sys
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+#: The plugin folder, so the package can be imported whether the plugin
+#: was installed as a directory or imported in place.
+_PLUGIN_ROOT = os.path.dirname(os.path.abspath(__file__))
+#: The project root: the folder that holds the ``consequence_map``
+#: package. The plugin may live inside it (``<root>/plugin``) or beside
+#: it (``<root>/../plugin``), so both are considered.
+_PROJECT_ROOT = os.path.dirname(_PLUGIN_ROOT)
+#: The directories that may hold the ``consequence_map`` package. What
+#: goes on ``sys.path`` is the **directory that contains** the package,
+#: not the package itself.
+_PACKAGE_PARENTS = (
+    # Installed layout: the package sits inside the plugin folder.
+    _PLUGIN_ROOT,
+    # Development layout: the plugin folder sits inside the project
+    # root, and the package is a sibling of the plugin folder.
+    _PROJECT_ROOT,
+    os.path.dirname(_PROJECT_ROOT),
+)
+
+
+def _ensure_importable() -> None:
+    """Make the package importable without installing it.
+
+    The directory that holds the ``consequence_map`` package is put on
+    ``sys.path``. The plugin works from a checkout and from an
+    installed folder, without either arrangement needing a path edit.
+    """
+    for parent in _PACKAGE_PARENTS:
+        package = os.path.join(parent, "consequence_map")
+        if os.path.isdir(package) and parent not in sys.path:
+            sys.path.insert(0, parent)
+            return
+
+
+def register(ctx: Any) -> None:
+    """Register the five hooks and the command.
+
+    The host calls this once, with its plugin context. A failure here
+    must not take the host down: the plugin logs and returns.
+    """
+    _ensure_importable()
+    try:
+        from consequence_map.hooks import register as register_hooks
+
+        register_hooks(ctx)
+        logger.info("ConsequenceMap: registered")
+    except Exception:
+        logger.exception("ConsequenceMap: registration failed")
