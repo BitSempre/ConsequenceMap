@@ -1,6 +1,6 @@
 {
  "branch": "feature/platform-v1",
- "commits": 45,
+ "commits": 47,
  "files": {
   "ConsequenceMap/.gitignore": "7d5015c17c4b5fed6f797558dc1e5af7e2fe8d6122347029ef7d76d2db3ea286",
   "ConsequenceMap/consequence_guard/__init__.py": "cc259ade38c2251513bd37ec42b2c32d8a1afcccf1555eba57ec0b76a5b4f0fe",
@@ -27,7 +27,7 @@
   "ConsequenceMap/consequence_guard/tests/test_service.py": "149d0f977a7d8cce0dd5ef31a44e89c063e2da6e38fffa2cb17976fd4e706abd",
   "ConsequenceMap/consequence_guard/tests/test_store.py": "c1539004a77edb846cc4d829b98de57f8f596e6f6d485895a90b417fe66ecebe",
   "ConsequenceMap/consequence_map/__init__.py": "b0e8d5482de8d31b554d94158bf411373b52bf89137e7286908e82c68c2b6e78",
-  "ConsequenceMap/consequence_map/authorization.py": "a7b358244f63e3fe9d606344e343d18017cf51c8cb17620faaf60930069cba03",
+  "ConsequenceMap/consequence_map/authorization.py": "a5209ad53d7ebe4526cf5d5f1b5cd389f6858e5b158c9b079397a9b83666d1d1",
   "ConsequenceMap/consequence_map/config.py": "aa4766508174f71023cd8d6a54d5b7dcf4c45ca07c786b299ff815320f5eb52f",
   "ConsequenceMap/consequence_map/core/__init__.py": "717f327d693fceb87489b55e5745e7741e0745790ea96cc10725e1252e51fbff",
   "ConsequenceMap/consequence_map/core/agent.py": "fe7cd46b7bb14f66b4016a04ef6e5d2842b9fe61967f727bea1eb6b0690db864",
@@ -47,7 +47,7 @@
   "ConsequenceMap/consequence_map/domain/records.py": "414579aabe042fac85a1a149e6606753648178eb04c1f9dc104a0ae8190c5aa9",
   "ConsequenceMap/consequence_map/domain/serialization.py": "13f86d77215162a3eb910b513b100aee3322931401fc2cd666abefec5389295e",
   "ConsequenceMap/consequence_map/domain/validation.py": "b32de602aa5fd6c320c9ef02c24c742c67a23a129d4c4533ed7697527d10e3bd",
-  "ConsequenceMap/consequence_map/hooks.py": "eba3f12f08fa815c7c8700abb117ad7314466b476fd1fe39a84d9c74d593a3c6",
+  "ConsequenceMap/consequence_map/hooks.py": "6a68269248431fdca6d7efdbf1dce755adad79e1fd579f0bfac72f884a95bd71",
   "ConsequenceMap/consequence_map/lifecycle.py": "631d1de2450fadec5583ad565912f3414c814c114dcd0e2b3edc5e0afb9abdf2",
   "ConsequenceMap/consequence_map/paths.py": "688cd28d320f48f3f6998a5eef2f28eafd4d7b6ce725c98f152736b4fdd7ca8a",
   "ConsequenceMap/consequence_map/redaction/__init__.py": "97b7c152fe11326d6cb9ff56bf904d2102fac9495b8c73ca6a2717bcdef079ee",
@@ -75,7 +75,7 @@
   "ConsequenceMap/consequence_map/tests/test_integration.py": "57222fcb239818b014a73ec4ae5f6915c36fb95f316041f9c71a5c927efcdfc0",
   "ConsequenceMap/consequence_map/tests/test_lifecycle.py": "5480862fcf0310aba061f4e59415b9501612e8c4f16457c0d680889f10a8737d",
   "ConsequenceMap/consequence_map/tests/test_migrations.py": "efafa09cbdf822988cb670a6d00ddb6c1876f030b0f67027ad4f04a4bef0a8ff",
-  "ConsequenceMap/consequence_map/tests/test_phase2b.py": "5c0e59d552cf670925767a32549f892f5f37fdb2c296b4a1468a5499b9733f67",
+  "ConsequenceMap/consequence_map/tests/test_phase2b.py": "0e0f7db2c710589dc93733e6c92bdd51f7a53bb167e436301450882c9234d47d",
   "ConsequenceMap/consequence_map/tests/test_plugin_integration.py": "64b9af6d5eb6ad256a982380ff2985ce479b2f1fca56677a58e285d9bc06e0b1",
   "ConsequenceMap/consequence_map/tests/test_records.py": "6aa583dd3321467794408494161f525e3663a031a2edf9cb71c4c56c022b9988",
   "ConsequenceMap/consequence_map/tests/test_redaction.py": "a83e265340bfe998deb03e8bc38b614fab2ac8be4200e4ae0af1afc03041f5e3",
@@ -248,7 +248,7 @@
   "security-decisions/ADR-002-WINDOWS-SERVICE-IDENTITY.md": "52092564b253d0f45efa08add99372b48c89978efc248f72837bd78dce983c68",
   "security-decisions/SECURITY-DECISIONS-D22-D28.md": "a6e8499d0023627da507a84906ab46d50738b709d1116b78d747764d6921fe6a"
  },
- "generated_at": "2026-11-10T16:15:51Z",
- "head": "764497b830b3160cf6581b5eac06159e1fbb3f85",
+ "generated_at": "2026-11-10T16:29:29Z",
+ "head": "a2b9c0aada2b735d48049fd0656845d75c541767",
  "project": "ConsequenceMap Security Platform v1 - with the Phase 2B product loop"
 }
