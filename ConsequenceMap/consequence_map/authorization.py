@@ -146,6 +146,7 @@ class AuthorizationRecord:
         "tool_call_id",
         "pattern_key",
         "decided_at",
+        "observed_choice",
     )
 
     def __init__(
@@ -160,6 +161,7 @@ class AuthorizationRecord:
         provenance: AUTHORIZATION_PROVENANCE = AUTHORIZATION_PROVENANCE.NOT_APPLICABLE,
         notes: str = "",
         decided_at: Optional[str] = None,
+        observed_choice: str = "",
     ) -> None:
         self.state = state
         self.authorized_by = decided_by or author_for_state(state)
@@ -170,6 +172,7 @@ class AuthorizationRecord:
         self.tool_call_id = tool_call_id
         self.pattern_key = pattern_key
         self.decided_at = decided_at
+        self.observed_choice = observed_choice
 
     @property
     def is_approval(self) -> bool:
@@ -246,6 +249,7 @@ class AuthorizationMachine:
             pattern_key=pattern_key,
             provenance=provenance_for_source("approval_hook"),
             decided_at=decided_at,
+            observed_choice=str(choice),
         )
 
     def from_tool_fate(

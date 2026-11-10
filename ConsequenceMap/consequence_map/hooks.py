@@ -195,6 +195,7 @@ class RepositoryAuthorizationSink(AuthorizationSink):
         """
         from .domain import records as R
         from .domain.enums import AUTHORIZATION_PROVENANCE
+        from .domain.validation import now_timestamp
 
         proposal_id, proposal_version = self._proposal_for(record.forecast_id)
 
@@ -206,10 +207,10 @@ class RepositoryAuthorizationSink(AuthorizationSink):
             state=record.state.value,
             provenance=AUTHORIZATION_PROVENANCE.HOST_APPROVAL_HOOK.value,
             authorized_by=record.authorized_by.value,
-            observed_choice=record.pattern_key or "",
+            observed_choice=record.observed_choice or "",
             observed_via="hook",
             reason=record.reason.value,
-            created_at=record.decided_at or "",
+            created_at=record.decided_at or now_timestamp(),
             escalation_expected=True,
             tool_call_id=record.tool_call_id or None,
             pattern_key=record.pattern_key or None,

@@ -100,16 +100,16 @@ class SinkWritesTests(unittest.TestCase):
         self.sink.settle(record)
         rows = self.repository.read_all_rows("host_authorization")
         self.assertEqual(len(rows), 1, "the answer was not recorded")
-        self.assertEqual(rows[0][3], forecast.id)
+        self.assertEqual(rows[0][1], forecast.id)
 
     def test_the_record_names_the_proposal_the_forecast_belongs_to(self):
         """The composite foreign key to the proposal must hold."""
         forecast = self._forecast()
-        record = self.machine.from_choice("once", forecast_id=forecast.id)
+        record = self.machine.from_choice("once", forecast_id=forecast.id, tool_call_id="tc_2")
         self.sink.settle(record)
         rows = self.repository.read_all_rows("host_authorization")
-        self.assertEqual(rows[0][4], forecast.proposal_id)
-        self.assertEqual(rows[0][5], forecast.proposal_version)
+        self.assertEqual(rows[0][2], forecast.proposal_id)
+        self.assertEqual(rows[0][3], forecast.proposal_version)
 
     def test_a_storage_failure_does_not_raise(self):
         """A hook must never fail because the storage is unavailable."""
@@ -159,11 +159,56 @@ class AmbiguityTests(unittest.TestCase):
         self.assertIsNone(result, "an ambiguous match must not attribute")
 
     def test_the_hook_path_passes_the_pending_forecasts(self):
-        """The check is not merely present: it is reached."""
-        import inspect
+        """The check is not merely present: it is reached.
 
-        source = inspect.getsource(hooks.on_post_approval_response)
-        self.assertIn("pending", source.lower())
+        The proof is behavioural, not textual: two escalations in
+        flight for the same tool call are ambiguous, so the hook must
+        record no approval for either of them. A source-text
+        assertion cannot prove this - the check may live in the
+        correlator, and it does.
+        """
+        from .. import hooks
+
+        hooks.STATE.reset()
+        sink = hooks.MemoryAuthorizationSink()
+        hooks.STATE.sink = sink
+        correlator = hooks.STATE.correlator
+        first = expected_pattern_key("fc_one", "E-HIGH")
+        second = expected_pattern_key("fc_two", "E-HIGH")
+        correlator.register(
+            forecast_id="fc_one", rule="E-HIGH", pattern_key=first,
+            tool_call_id="tc_1",
+        )
+        correlator.register(
+            forecast_id="fc_two", rule="E-HIGH", pattern_key=second,
+            tool_call_id="tc_1",
+        )
+        hooks.on_post_approval_response(
+            pattern_key=first, tool_call_id="tc_1", choice="once",
+        )
+        self.assertEqual(sink.settled, [], "an ambiguous match was recorded")
+        self.assertEqual(correlator.ambiguities, 1)
+
+    def test_the_hook_path_still_records_an_unambiguous_answer(self):
+        """The check must not swallow a legitimate answer."""
+        from .. import hooks
+
+        hooks.STATE.reset()
+        sink = hooks.MemoryAuthorizationSink()
+        hooks.STATE.sink = sink
+        pattern = expected_pattern_key("fc_solo", "E-HIGH")
+        hooks.STATE.correlator.register(
+            forecast_id="fc_solo", rule="E-HIGH", pattern_key=pattern,
+            tool_call_id="tc_2",
+        )
+        hooks.on_post_approval_response(
+            pattern_key=pattern, tool_call_id="tc_2", choice="once",
+        )
+        self.assertEqual(len(sink.settled), 1)
+        self.assertEqual(
+            sink.settled[0].state, AUTHORIZATION_STATE.HUMAN_APPROVED
+        )
+        self.assertEqual(hooks.STATE.correlator.ambiguities, 0)
 
     def test_an_unambiguous_observation_still_attributes(self):
         pattern = expected_pattern_key("fc_one", "E-HIGH")
