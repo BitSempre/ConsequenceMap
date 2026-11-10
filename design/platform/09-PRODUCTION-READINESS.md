@@ -168,11 +168,26 @@ and the time a human has to answer. It is one constant:
 | 13. Validity and clock skew are enforced by the service | **Yes** |
 | 14. The agent cannot run arbitrary commands through the service | **Yes** — the arguments are derived |
 | 15. The production tree is byte-identical | **Yes** — 96 files, 0 altered |
-| 16. No unresolved critical or high bypass from the Red Team | **Yes** — across eleven rounds: 39 defects found and fixed, and **eight** findings examined and rejected with the reasoning recorded |
+| 16. No unresolved critical or high bypass from the Red Team | **Yes** — across twelve rounds: 42 defects found and fixed, and **eight** findings examined and rejected with the reasoning recorded |
 
 **13 of 16 criteria are met. 3 are not, and each names a specific
 missing thing: an installed service, an applied ACL, and an external
 anchor.**
+
+**The twelfth round.** Two further Red Team reports arrived, written
+against a specification that predates several fixes. Four of their
+findings had already been fixed; the reports were not wrong about
+the specification, they were describing an earlier state. Three were
+confirmed and fixed against the code, each with a test that fails
+before the fix:
+
+- **D-28**: the audit entry and the operation record were two
+  transactions. They are now one.
+- **D-29**: an exception was swallowed when an outcome could not be
+  recorded. It now propagates, and the service refuses.
+- **D-30**: a field the policy required could be missing from the
+  proposal, and the handler would run with it missing. The operation
+  is now refused — before the authorisation is consumed.
 
 **The eleventh round.** Two further independent reviews ran — a
 cryptography engineer and a Windows security engineer — and their

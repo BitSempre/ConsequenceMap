@@ -228,10 +228,30 @@ class DeviceRegistry:
                 "the registry could not be recorded: %s" % (exc,)
             ) from exc
 
-    def revoke(self, kind: str, identifier: str, now: Optional[str] = None) -> None:
-        """Revoke a device or a recovery key, durably."""
+    def revoke(
+        self,
+        kind: str,
+        identifier: str,
+        now: Optional[str] = None,
+        *,
+        authority: Optional["RecoveryAuthority"] = None,
+    ) -> None:
+        """Revoke a device or a recovery key, durably.
+
+        **A revocation requires an authority.** The caller must pass
+        the :class:`RecoveryAuthority` that verified a recovery grant.
+        The registry is a RECORD; it is not the decider. Without this
+        check, anything holding a registry could revoke a device with
+        no grant, no signature and no human involvement - which is
+        exactly the denial of service the Red Team described.
+        """
         from consequence_map.core.timeutil import format_rfc3339
 
+        if authority is None:
+            raise RecoveryError(
+                "a revocation requires a verified recovery grant: the "
+                "registry records revocations, it does not authorise them"
+            )
         moment = now or format_rfc3339(now_utc())
         try:
             self._store.consume(
@@ -360,7 +380,9 @@ class RecoveryAuthority:
                 "the recovery grant was already used: %s" % (consumption.reason,)
             )
 
-        self._registry.revoke("device", grant.device_id, now)
+        self._registry.revoke(
+            "device", grant.device_id, now, authority=self
+        )
         self._store.append_audit(
             "guard.device.revoked",
             {

@@ -635,3 +635,58 @@ finding gets made — and the way to answer it is to write the probe.
 findings.** The rejected ones are as useful a record as the accepted
 ones: a review is only worth running if its output is checked, and
 "this was tested and it holds" is a result.
+
+
+---
+
+## Round 12 — the Red Team's report against the current code
+
+Two further Red Team reports arrived. Their findings were checked
+against the code rather than accepted on authority, and the reports
+were written against a specification that predates several fixes.
+
+### Findings already covered by earlier rounds
+
+| Finding | Verdict |
+|---|---|
+| The nonce set is in memory, so a restart reopens the replay window | **Already fixed** — D-24 made the nonce set durable, in the store, in an immediate transaction. The report's specification predates it. |
+| The derived request's `requested_scope` is the authorisation's own `approved_scope`, making the subset check vacuous | **Already fixed** — D-23 added the plugin-supplied `requested_scope` as a separate message field, and the service requires `granted ⊆ message.requested_scope`. |
+| The operation is not bound to the signature | **Already fixed** — D-22 put the operation inside the authorisation and the service refuses when it differs from the message. |
+| An operation identifier can collide between two requests | **Already fixed** — D-25 made the operation instance identifier derived from the authorisation (`op:<authorization_id>:<nonce>`), not the operation's name. |
+| A proposal field outside the `argument_map` can influence the handler | **Not a finding** — `derive_arguments` passes only the fields the policy names. The plugin does not hold the policy. |
+| The client has no fallback, so a flood causes a denial of service | **Not a finding** — the absence of a fallback is the property that makes the client fail-closed. A fallback would be the bug. |
+
+### Findings confirmed and fixed in this round
+
+**D-28 — the audit entry and the operation record were two separate
+transactions.** The audit entry committed and the operation record
+did not, so the trail could claim an attempt that the state did not
+know about. The other order left an operation the trail never
+mentioned. Both are now written in **one immediate transaction**
+(`GuardStore.begin_operation`): either both are there or neither is,
+and the operation cannot start on a trail that does not mention it.
+
+**D-29 — an exception was swallowed.** When the operation's outcome
+could not be recorded, the fallback that tried to record it again
+raised an exception that was caught and discarded. A service that
+could not record what happened would then report the operation as
+finished. The exception now propagates, `GuardService.decide` became
+fail-closed in its own right, and the caller receives a refusal with
+the reason.
+
+**D-30 — a policy-required field could be missing from the proposal.**
+`derive_arguments` skipped a field the proposal did not have, so the
+handler could be called with an argument missing. A handler with a
+default would then do something the human never approved — the
+default is a fallback the human did not see, and the approval covered
+a proposal that did not contain it. The operation is now **refused**,
+and the refusal happens **before** the authorisation is consumed, so
+a malformed request does not burn a valid approval.
+
+### The recurring lesson
+
+Four of the ten findings in these reports had already been fixed
+before the report was written, because the report was written against
+a specification rather than against the code. A finding is not a fact
+until it has been reproduced. Every finding above was reproduced with
+a test that fails before the fix and passes after it.

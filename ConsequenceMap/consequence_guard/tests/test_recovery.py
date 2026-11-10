@@ -157,7 +157,7 @@ class GrantIntegrityTests(RecoveryTestCase):
             self.authority.revoke_device(grant)
 
     def test_a_grant_for_a_revoked_recovery_key_is_refused(self):
-        self.registry.revoke("recovery", self.recovery_key.public_key_id())
+        self.registry.revoke("recovery", self.recovery_key.public_key_id(), authority=self.authority)
         with self.assertRaises(UnknownGrant):
             self.authority.revoke_device(self._grant())
 
@@ -190,7 +190,7 @@ class AgentCannotTests(RecoveryTestCase):
         anything - the service's verifier is what decides whether an
         authorisation holds.
         """
-        self.registry.revoke("device", "device-lost")
+        self.registry.revoke("device", "device-lost", authority=self.authority)
         self.assertTrue(self.registry.is_revoked("device", "device-lost"))
 
 

@@ -490,6 +490,76 @@ class GuardStore:
         rows = self._read("SELECT COUNT(*) FROM seen_nonces")
         return int(rows[0][0]) if rows else 0
 
+    # -- atomic operation start ----------------------------------------
+
+    def begin_operation(
+        self,
+        *,
+        operation_id: str,
+        request_id: str,
+        authorization_id: str,
+        operation: str,
+        proposal_hash: str,
+        now: str,
+        event: str,
+        payload: Mapping[str, Any],
+    ) -> str:
+        """Record the operation AND the audit entry, atomically.
+
+        Writing them separately leaves a window: the audit entry
+        commits and the operation record does not, so the trail claims
+        an attempt that the state does not know about. The other order
+        leaves an operation the trail never mentions.
+
+        Both are written in ONE immediate transaction. Either both are
+        there or neither is, and the operation cannot start on a trail
+        that does not mention it.
+
+        Returns the record hash of the audit entry.
+        """
+        with self._lock:
+            with self._transaction() as connection:
+                row = connection.execute(
+                    "SELECT sequence, record_hash FROM audit_log "
+                    "ORDER BY sequence DESC LIMIT 1"
+                ).fetchone()
+                if row is None:
+                    sequence = 0
+                    previous_hash = "0" * 64
+                else:
+                    sequence = int(row[0]) + 1
+                    previous_hash = row[1]
+                document = {
+                    "sequence": sequence,
+                    "event": event,
+                    "payload": dict(payload),
+                    "recorded_at": now,
+                    "previous_hash": previous_hash,
+                }
+                record_hash = _canonical_hash(self.AUDIT_DOMAIN, document)
+                connection.execute(
+                    "INSERT INTO audit_log "
+                    "(sequence, event, payload, recorded_at, previous_hash, "
+                    " record_hash) VALUES (?, ?, ?, ?, ?, ?)",
+                    (
+                        sequence, event, _canonical_text(document["payload"]),
+                        now, previous_hash, record_hash,
+                    ),
+                )
+                connection.execute(
+                    "INSERT INTO operations "
+                    "(operation_id, state, request_id, authorization_id, "
+                    " operation, proposal_hash, created_at, updated_at, detail) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, '') "
+                    "ON CONFLICT(operation_id) DO UPDATE SET "
+                    " state=excluded.state, updated_at=excluded.updated_at",
+                    (
+                        operation_id, OperationState.RECEIVED, request_id,
+                        authorization_id, operation, proposal_hash, now, now,
+                    ),
+                )
+        return record_hash
+
     # -- audit ---------------------------------------------------------
 
     def append_audit(self, event: str, payload: Mapping[str, Any], now: str) -> str:

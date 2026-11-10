@@ -142,14 +142,33 @@ class PolicyOperation:
     def derive_arguments(self, proposal: Mapping[str, Any]) -> dict:
         """Build the handler's arguments FROM the proposal.
 
-        Only the fields named in ``argument_map`` are passed, and only
-        if the proposal has them. A field the plugin invents is not
-        passed. A field the proposal lacks is not invented.
+        Only the fields named in ``argument_map`` are passed. A field
+        the plugin invents is not passed: the plugin does not hold the
+        policy, and the policy names what the handler may see.
+
+        **A field the policy requires must be present.** If the policy
+        maps ``path`` and the proposal has no ``path``, the operation
+        is REFUSED rather than run with the argument missing. A
+        handler with a default for a missing argument would otherwise
+        do something the human did not approve - the default is a
+        fallback the human never saw, and the approval covered a
+        proposal that did not contain it.
+
+        Raises :class:`PolicyError` when a required field is absent.
         """
         arguments = {}
+        missing = [
+            proposal_field for proposal_field in self.argument_map
+            if proposal_field not in proposal
+        ]
+        if missing:
+            raise PolicyError(
+                "the proposal does not contain the field(s) %s that "
+                "operation %r requires, so the operation is refused"
+                % (", ".join(sorted(missing)), self.identifier)
+            )
         for proposal_field, argument_name in self.argument_map.items():
-            if proposal_field in proposal:
-                arguments[argument_name] = proposal[proposal_field]
+            arguments[argument_name] = proposal[proposal_field]
         return arguments
 
 
@@ -305,7 +324,25 @@ class GuardService:
 
         Each step either returns a decision or refuses. There is no
         path that falls through to an allowance.
+
+        **Any unexpected failure becomes a refusal.** A store that
+        fails to record an outcome raises out of the execution path -
+        and that exception must not escape to the caller as a crash.
+        A service that cannot record what happened must not report
+        the operation as finished, and it must not fail open either.
+        It refuses.
         """
+        try:
+            return self._decide(raw)
+        except Exception as exc:
+            return ServiceDecision(
+                DECISION_DENY,
+                "the guard could not reach a decision, so the request is "
+                "refused: %s: %s" % (type(exc).__name__, exc),
+            )
+
+    def _decide(self, raw: Any) -> ServiceDecision:
+        """The decision path itself. See :meth:`decide`."""
         operation_id = ""
         try:
             message = parse_request_message(raw)
@@ -556,42 +593,55 @@ class GuardService:
         # which is unique per approval.
         instance_id = "op:%s:%s" % (authorization_id or "unknown", nonce or "unknown")
 
-        # The audit record of the attempt comes first. If it cannot be
-        # written, the operation does not run.
+        # The audit record of the attempt AND the operation record are
+        # written in ONE transaction.
+        #
+        # Writing them separately leaves a window: the audit entry
+        # commits and the operation record does not, so the trail
+        # claims an attempt the state does not know about - or the
+        # other way round, an operation the trail never mentions.
+        #
+        # Atomically, either both are there or neither is. And if they
+        # cannot both be written, the operation does not run.
         try:
-            self.store.append_audit(
-                "guard.request.accepted",
-                {
-                    "operation_id": instance_id,
-                    "operation": operation.identifier,
-                    "authorization_id": authorization_id,
-                    "request_digest": request_digest(message),
-                },
-                now,
-            )
-        except (StoreUnavailable, StoreError) as exc:
-            return ServiceDecision(
-                DECISION_DENY,
-                "the audit trail could not be written, so the operation is "
-                "refused: %s" % (exc,),
-                operation_id,
-            )
-
-        try:
-            self.store.record_operation(
+            self.store.begin_operation(
                 operation_id=instance_id,
-                state=OperationState.RECEIVED,
                 request_id=authorization.get("request_id", ""),
                 authorization_id=authorization_id,
                 operation=operation.identifier,
                 proposal_hash=authorization.get("proposal_hash", ""),
                 now=now,
+                event="guard.request.accepted",
+                payload={
+                    "operation_id": instance_id,
+                    "operation": operation.identifier,
+                    "authorization_id": authorization_id,
+                    "request_digest": request_digest(message),
+                },
             )
         except (StoreUnavailable, StoreError) as exc:
             return ServiceDecision(
                 DECISION_DENY,
                 "the operation could not be recorded, so it is refused: %s"
                 % (exc,),
+                operation_id,
+            )
+
+        # The arguments are DERIVED from the proposal, by the policy's
+        # allowlist. The plugin never supplies them.
+        #
+        # This happens BEFORE the authorisation is consumed. If the
+        # proposal is missing a field the policy requires, the
+        # operation is refused and the approval is NOT spent: the
+        # human can send a corrected proposal without approving
+        # again. Spending it first would burn a valid approval on a
+        # malformed request.
+        try:
+            arguments = operation.derive_arguments(message["proposal"])
+        except PolicyError as exc:
+            return ServiceDecision(
+                DECISION_DENY,
+                "the proposal does not satisfy the operation: %s" % (exc,),
                 operation_id,
             )
 
@@ -631,10 +681,6 @@ class GuardService:
             proposal_hash=authorization.get("proposal_hash", ""),
             now=now,
         )
-
-        # The arguments are DERIVED from the proposal, by the policy's
-        # allowlist. The plugin never supplies them.
-        arguments = operation.derive_arguments(message["proposal"])
 
         self.store.record_operation(
             operation_id=instance_id,
@@ -716,5 +762,15 @@ class GuardService:
                     now=now,
                     detail="the outcome could not be recorded: %s" % (exc,),
                 )
-            except Exception:
-                pass
+            except Exception as fallback_exc:
+                # The fallback could not be written either. The store is
+                # broken, and there is nowhere left to record that.
+                #
+                # It is NOT swallowed. It is raised: a service that
+                # cannot record what happened must not pretend the
+                # operation finished. The exception propagates to
+                # handle_safe, which turns it into a refusal.
+                raise StoreUnavailable(
+                    "the operation outcome could not be recorded, and the "
+                    "fallback record failed too: %s" % (fallback_exc,)
+                ) from fallback_exc
