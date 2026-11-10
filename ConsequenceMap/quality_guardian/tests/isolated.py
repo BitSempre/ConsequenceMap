@@ -5,6 +5,7 @@ temporary directory. The production tree is never modified by a test.
 """
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import tempfile
@@ -45,6 +46,18 @@ def make_isolated_project() -> Path:
         "class AddTest(unittest.TestCase):\n"
         "    def test_add(self):\n"
         "        self.assertEqual(add(2, 3), 5)\n",
+        encoding="utf-8",
+    )
+    # The isolated project carries an EXPLICIT repair policy. Without one,
+    # an absent policy resolves to "repair suspended" — the safe default —
+    # and the tests that exercise the repair path could not run. The
+    # permission is granted HERE, in the disposable copy only; the
+    # production policy is never touched by a test.
+    state = root / "quality_guardian" / "state"
+    state.mkdir(parents=True)
+    (state / "repair-policy.json").write_text(
+        json.dumps({"auto_repair": True, "source": "isolated-test-project"},
+                   indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
     docs = root / "docs"

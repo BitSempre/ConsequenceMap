@@ -51,27 +51,52 @@ class TestRun:
 
 
 def _parse_counts(stderr: str) -> dict:
-    """Extract the per-test counts from unittest's stderr summary."""
+    """Extract the per-test counts from unittest's stderr summary.
+
+    The full-suite run concatenates the output of TWO processes, so the
+    text can carry more than one "Ran N tests" summary. Every summary
+    present is summed, not just the first: taking only the first would
+    report the plugin's count while the guard's 134 tests ran unseen,
+    and would miss a failure in the second package.
+    """
     counts = {"passed": 0, "failed": 0, "errors": 0, "skipped": 0}
-    ran = re.search(r"Ran (\d+) tests?", stderr)
+    ran = re.findall(r"Ran (\d+) tests?", stderr)
     if ran:
-        counts["passed"] = int(ran.group(1))
+        counts["passed"] = sum(int(n) for n in ran)
     for label, key in (("failures", "failed"), ("errors", "errors")):
-        m = re.search(rf"{label}=(\d+)", stderr)
-        if m:
-            counts[key] = int(m.group(1))
-    m = re.search(r"skipped=(\d+)", stderr)
-    if m:
-        counts["skipped"] = int(m.group(1))
+        found = re.findall(rf"{label}=(\d+)", stderr)
+        if found:
+            counts[key] = sum(int(n) for n in found)
+    found = re.findall(r"skipped=(\d+)", stderr)
+    if found:
+        counts["skipped"] = sum(int(n) for n in found)
     return counts
+
+
+def _module_address(module: str, root: Path = None) -> str:
+    """The dotted address of a test module.
+
+    The project has TWO test packages: ``consequence_map.tests`` and
+    ``consequence_guard.tests``. A module name is not enough to say
+    which one holds it, so the package that actually contains the file
+    wins. The name alone would address the wrong package - or no
+    package at all, and the run would report a module that does not
+    exist.
+    """
+    base = Path(root) if root else config.PROJECT_ROOT
+    for package in ("consequence_map", "consequence_guard"):
+        if (base / package / "tests" / (module + ".py")).exists():
+            return f"{package}.tests.{module}"
+    return f"consequence_map.tests.{module}"
 
 
 def run_test_module(module: str, timeout: int = None, root: Path = None) -> TestRun:
     """Run one test module of the project suite.
 
-    The module is addressed as ``consequence_map.tests.<module>`` and the
-    run happens with the project root as the working directory, exactly as
-    the Phase 2A suite is run.
+    The module is addressed in whichever test package actually holds it -
+    ``consequence_map.tests.<module>`` or ``consequence_guard.tests.<module>`` -
+    and the run happens with the project root as the working directory,
+    exactly as the Phase 2A suite is run.
     """
     base = Path(root) if root else config.PROJECT_ROOT
     limit = timeout if timeout is not None else config.SELECTIVE_TEST_TIMEOUT
@@ -81,7 +106,7 @@ def run_test_module(module: str, timeout: int = None, root: Path = None) -> Test
     env["PYTHONPATH"] = str(base) + os.pathsep + env.get("PYTHONPATH", "")
     try:
         proc = subprocess.run(
-            [sys.executable, "-m", "unittest", f"consequence_map.tests.{module}", "-v"],
+            [sys.executable, "-m", "unittest", _module_address(module, base), "-v"],
             capture_output=True, text=True, timeout=limit, cwd=str(base), env=env,
         )
     except subprocess.TimeoutExpired as exc:
@@ -155,6 +180,25 @@ def run_full_suite(root: Path = None, timeout: int = None) -> TestRun:
             [sys.executable, "-m", "unittest", "discover",
              "-s", str(base / "consequence_map" / "tests"), "-t", str(base), "-v"],
             capture_output=True, text=True, timeout=limit, cwd=str(base), env=env,
+        )
+        # The guard's own tests live in a SECOND package. A discover on
+        # consequence_map/tests cannot see them, so the full run has to
+        # cover both or the security suite is simply never executed.
+        try:
+            proc2 = subprocess.run(
+                [sys.executable, "-m", "unittest", "discover",
+                 "-s", str(base / "consequence_guard" / "tests"), "-t", str(base), "-v"],
+                capture_output=True, text=True, timeout=limit, cwd=str(base), env=env,
+            )
+        except subprocess.TimeoutExpired as exc:
+            proc2 = subprocess.CompletedProcess(
+                proc.args, 1, proc.stdout or "",
+                (proc.stderr or "") + "\nGUARD PACKAGE TIMED OUT after %ss" % (limit,),
+            )
+        proc = subprocess.CompletedProcess(
+            proc.args, proc.returncode or proc2.returncode,
+            (proc.stdout or "") + (proc2.stdout or ""),
+            (proc.stderr or "") + (proc2.stderr or ""),
         )
     except subprocess.TimeoutExpired as exc:
         run.timed_out = True

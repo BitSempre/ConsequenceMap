@@ -1,0 +1,38 @@
+{
+  "branch": "feature/platform-v1",
+  "created": "2026-11-10T23:15:19.466590",
+  "files": {
+    "consequence_map/hooks.py": {
+      "backup": "consequence_map__hooks.py",
+      "bytes": 15911,
+      "sha256": "76ca18b0cb08f72100503bdde0e335f265c81bf11531fb25180b5f9b0630530e"
+    },
+    "consequence_map/tests/test_independent_review.py": {
+      "backup": "consequence_map__tests__test_independent_review.py",
+      "bytes": 11979,
+      "sha256": "de4487c5fd39c71a1feaef936f1debe137725fab9a9a27afea1a71291b7f0e99"
+    },
+    "quality_guardian/config.py": {
+      "backup": "quality_guardian__config.py",
+      "bytes": 11599,
+      "sha256": "c41fe9fbb843ccc21f105d4ef981722385affcd5854d6e5f82a260e695155604"
+    },
+    "quality_guardian/state/repair-policy.json": {
+      "backup": "quality_guardian__state__repair-policy.json",
+      "bytes": 462,
+      "sha256": "52f60c0afb16746a54c32a31b96c53f64eaa48ff074641966ec610f5c6c3b129"
+    },
+    "quality_guardian/tests/isolated.py": {
+      "backup": "quality_guardian__tests__isolated.py",
+      "bytes": 2173,
+      "sha256": "0b2443402bdc970a561fcd546524b785bcedaf86ccf730c171f7bd3b1fac55a4"
+    },
+    "quality_guardian/tests/test_guardian.py": {
+      "backup": "quality_guardian__tests__test_guardian.py",
+      "bytes": 13525,
+      "sha256": "ed3076a0a21f27badd965aa65ad5f69b4389204065db3bab016551b587eb5e75"
+    }
+  },
+  "head": "5920406",
+  "purpose": "pre-fix backup for the two authorised corrections"
+}

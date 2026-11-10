@@ -483,7 +483,7 @@ def _attempt_repairs(cycle: Cycle, root: Path) -> None:
                 detail=proposal.error + " — human review required",
             ))
             continue
-        if not repair.write_file_text(path, fixed):
+        if not repair.write_file_text(path, fixed, root=root):
             proposal.error = "the file could not be written"
             continue
         proposal.applied = True
@@ -498,7 +498,7 @@ def _attempt_repairs(cycle: Cycle, root: Path) -> None:
                 regressed = True
                 break
         if regressed:
-            repair.write_file_text(path, original)
+            repair.write_file_text(path, original, root=root)
             proposal.reverted = True
             proposal.applied = False
             cycle.result.add(CheckResult(

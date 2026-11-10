@@ -1,0 +1,32 @@
+{
+  "branch": "feature/platform-v1",
+  "created": "2026-11-10T22:22:00.093040",
+  "files": {
+    "quality_guardian/config.py": {
+      "backup": "quality_guardian__config.py",
+      "bytes": 7599,
+      "sha256": "4eee4eb841dd895e4545ca6f578c800312753a4126af4b32839eaa23489bc1f2"
+    },
+    "quality_guardian/guardian.py": {
+      "backup": "quality_guardian__guardian.py",
+      "bytes": 22886,
+      "sha256": "839fab5bc1dea6854e693bfe305adda89f0787f129f77fec801f93ac6aed033a"
+    },
+    "quality_guardian/repair.py": {
+      "backup": "quality_guardian__repair.py",
+      "bytes": 10943,
+      "sha256": "7f46bf78524f6341049bfcc35bab1939c877cc4f84af5b4939f5d02eaf1398e3"
+    },
+    "quality_guardian/runner.py": {
+      "backup": "quality_guardian__runner.py",
+      "bytes": 6544,
+      "sha256": "13199b08ef0f491a70ea32fdc2ae94851768888eb6258a6cff24e787abc058b0"
+    },
+    "quality_guardian/state/repair-policy.json": {
+      "backup": "repair-policy.json",
+      "bytes": 462,
+      "sha256": "52f60c0afb16746a54c32a31b96c53f64eaa48ff074641966ec610f5c6c3b129"
+    }
+  },
+  "head": "5920406"
+}

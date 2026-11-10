@@ -84,6 +84,13 @@ class AuthorizationSink:
     must never be mistaken for an approval.
     """
 
+    def __init__(self) -> None:
+        #: How many times a record could not be written. The inert sink
+        #: never fails to write, so this stays at zero - but the
+        #: attribute exists so every sink exposes the same counter and
+        #: the status command can read it without a special case.
+        self.failures = 0
+
     def begin(self, record) -> None:
         """An escalation is in flight."""
 
@@ -402,6 +409,26 @@ def on_transform_tool_result(**kwargs: Any) -> Optional[None]:
 # -- the command ------------------------------------------------------
 
 
+def _sink_failures() -> int:
+    """How many records the audit sink failed to write this session.
+
+    A storage failure is counted by the sink and the operation
+    continues - the host owns the decision. But a gap in the audit
+    trail must not be INVISIBLE: the counter is reported by the status
+    command, so the operator can see that the trail is incomplete.
+
+    The counter is read, never reset and never hidden. A sink that does
+    not keep one reports zero rather than making the status command
+    fail.
+    """
+    sink = getattr(STATE, "sink", None)
+    failures = getattr(sink, "failures", 0)
+    try:
+        return int(failures)
+    except (TypeError, ValueError):
+        return 0
+
+
 def on_command(raw_args: str = "") -> str:
     """The command palette entry (DEC-12 = A).
 
@@ -417,13 +444,15 @@ def on_command(raw_args: str = "") -> str:
             "Excluded tool calls this session: %d\n"
             "Pending escalations: %d\n"
             "Duplicate observations ignored: %d\n"
-            "Orphan observations: %d"
+            "Orphan observations: %d\n"
+            "Audit sink failures this session: %d"
             % (
                 __version__,
                 self_exclusion.COUNTER.total(),
                 len(STATE.correlator.pending()),
                 STATE.correlator.duplicates,
                 STATE.correlator.orphans,
+                _sink_failures(),
             )
         )
     if argument == "pending":

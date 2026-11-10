@@ -74,6 +74,30 @@ MODULE_TO_TESTS = {
     "consequence_map.redaction.boundary": ["test_redaction"],
     "consequence_map.config": ["test_static_audits"],
     "consequence_map.dependencies": ["test_static_audits"],
+    "consequence_guard.crypto": ['test_crypto', 'test_binding', 'test_rfc8032_vectors'],
+    "consequence_guard.ipc": ['test_ipc', 'test_instance_id'],
+    "consequence_guard.policy": ['test_binding'],
+    "consequence_guard.protocol": ['test_ipc', 'test_binding'],
+    "consequence_guard.recovery": ['test_recovery', 'test_recovery_after_crash', 'test_review_findings', 'test_review_round12'],
+    "consequence_guard.client": ["test_ipc"],
+    "consequence_guard.recovery_after_crash": ["test_recovery_after_crash", "test_instance_id"],
+    "consequence_guard.service": ['test_service', 'test_binding', 'test_ipc'],
+    "consequence_guard.store": ['test_store', 'test_recovery', 'test_recovery_after_crash'],
+    "consequence_map.authorization": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
+    "consequence_map.core.agent": ['test_agent', 'test_regressions', 'test_regressions_round2'],
+    "consequence_map.core.analysis": ['test_analysis', 'test_regressions_round2', 'test_regressions_round3', 'test_regressions_round6'],
+    "consequence_map.core.audit": ['test_agent', 'test_audit', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round6', 'test_regressions_round7'],
+    "consequence_map.core.authorization": ['test_agent', 'test_authorization', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round7'],
+    "consequence_map.core.canonical": ['test_agent', 'test_audit', 'test_authorization', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round3', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round6', 'test_regressions_round7'],
+    "consequence_map.core.deployment": ['test_deployment', 'test_regressions_round2', 'test_regressions_round5'],
+    "consequence_map.core.execution": ['test_agent', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round7'],
+    "consequence_map.core.guard": ['test_agent', 'test_deployment', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round5'],
+    "consequence_map.core.timeutil": ['test_agent', 'test_audit', 'test_authorization', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round6', 'test_regressions_round7'],
+    "consequence_map.correlation": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
+    "consequence_map.hooks": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
+    "consequence_map.lifecycle": ['test_independent_review', 'test_lifecycle'],
+    "consequence_map.paths": ['test_phase2b'],
+    "consequence_map.self_exclusion": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
 }
 
 #: Extra test modules that must run whenever ANY package module changed,
@@ -82,10 +106,51 @@ ALWAYS_RUN_TESTS = ["test_import_audit", "test_static_audits"]
 
 #: The full regression set.
 FULL_TEST_SET = [
-    "test_enums", "test_validation", "test_records", "test_serialization",
-    "test_schema", "test_triggers", "test_repository", "test_migrations",
-    "test_redaction", "test_integration", "test_static_audits",
-    "test_import_audit", "test_coverage_gaps",
+    "test_agent",
+    "test_analysis",
+    "test_audit",
+    "test_authorization",
+    "test_binding",
+    "test_coverage_gaps",
+    "test_crypto",
+    "test_deployment",
+    "test_enums",
+    "test_execution",
+    "test_guard",
+    "test_host_load",
+    "test_import_audit",
+    "test_independent_review",
+    "test_instance_id",
+    "test_integration",
+    "test_integrity_regressions",
+    "test_ipc",
+    "test_lifecycle",
+    "test_migrations",
+    "test_nonce",
+    "test_phase2b",
+    "test_plugin_integration",
+    "test_records",
+    "test_recovery",
+    "test_recovery_after_crash",
+    "test_redaction",
+    "test_regressions",
+    "test_regressions_round2",
+    "test_regressions_round3",
+    "test_regressions_round4",
+    "test_regressions_round5",
+    "test_regressions_round6",
+    "test_regressions_round7",
+    "test_repository",
+    "test_review_findings",
+    "test_review_round12",
+    "test_rfc8032_vectors",
+    "test_schema",
+    "test_serialization",
+    "test_service",
+    "test_static_audits",
+    "test_store",
+    "test_triggers",
+    "test_validation",
 ]
 
 #: The minimum Hermes runtime the project declares.
@@ -119,7 +184,7 @@ def module_for_path(path) -> str:
     except (ValueError, OSError):
         return ""
     parts = list(rel.parts)
-    if not parts or parts[0] != "consequence_map":
+    if not parts or parts[0] not in ("consequence_map", "consequence_guard"):
         return ""
     if parts[-1] == "__init__.py":
         parts = parts[:-1]
@@ -173,12 +238,24 @@ MIN_REPAIR_SIZE_RATIO = 0.5
 #: Detection, test execution, reporting and baseline recording are unaffected.
 REPAIR_POLICY_FILE = PROJECT_ROOT / "quality_guardian" / "state" / "repair-policy.json"
 
-#: The default when the policy file is absent: automatic repair is enabled.
-DEFAULT_AUTO_REPAIR = True
+#: The default when the policy file is absent, unreadable or malformed:
+#: automatic repair is DISABLED.
+#:
+#: An unreadable policy must never GRANT a capability the owner suspended.
+#: Absence of evidence is not permission. A policy that explicitly says
+#: ``auto_repair: true`` is the only thing that enables the capability.
+DEFAULT_AUTO_REPAIR = False
 
 
 def repair_policy(root: Path = None) -> dict:
-    """Read the repair policy. Never raises; a malformed policy fails safe."""
+    """Read the repair policy. Never raises; a malformed policy fails safe.
+
+    "Fails safe" means the capability is **suspended**: an absent,
+    unreadable, malformed or non-boolean policy resolves to
+    ``DEFAULT_AUTO_REPAIR``, which is ``False``. Only an explicit
+    ``"auto_repair": true`` in a readable policy file enables automatic
+    repair.
+    """
     base = Path(root) if root else PROJECT_ROOT
     path = base / "quality_guardian" / "state" / "repair-policy.json"
     try:

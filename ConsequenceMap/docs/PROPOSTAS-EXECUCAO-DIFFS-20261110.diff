@@ -1,0 +1,257 @@
+# Diffs das Propostas 1, 2 e 3 — execução autorizada 2026-11-10
+# Gerado por: git diff (nunca aplicado por git checkout)
+diff --git a/ConsequenceMap/quality_guardian/config.py b/ConsequenceMap/quality_guardian/config.py
+index 67d1c56..582e278 100644
+--- a/ConsequenceMap/quality_guardian/config.py
++++ b/ConsequenceMap/quality_guardian/config.py
+@@ -74,6 +74,28 @@ MODULE_TO_TESTS = {
+     "consequence_map.redaction.boundary": ["test_redaction"],
+     "consequence_map.config": ["test_static_audits"],
+     "consequence_map.dependencies": ["test_static_audits"],
++    "consequence_guard.crypto": ['test_crypto', 'test_binding', 'test_rfc8032_vectors'],
++    "consequence_guard.ipc": ['test_ipc', 'test_instance_id'],
++    "consequence_guard.policy": ['test_binding'],
++    "consequence_guard.protocol": ['test_ipc', 'test_binding'],
++    "consequence_guard.recovery": ['test_recovery', 'test_recovery_after_crash', 'test_review_findings', 'test_review_round12'],
++    "consequence_guard.service": ['test_service', 'test_binding', 'test_ipc'],
++    "consequence_guard.store": ['test_store', 'test_recovery', 'test_recovery_after_crash'],
++    "consequence_map.authorization": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
++    "consequence_map.core.agent": ['test_agent', 'test_regressions', 'test_regressions_round2'],
++    "consequence_map.core.analysis": ['test_analysis', 'test_regressions_round2', 'test_regressions_round3', 'test_regressions_round6'],
++    "consequence_map.core.audit": ['test_agent', 'test_audit', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round6', 'test_regressions_round7'],
++    "consequence_map.core.authorization": ['test_agent', 'test_authorization', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round7'],
++    "consequence_map.core.canonical": ['test_agent', 'test_audit', 'test_authorization', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round3', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round6', 'test_regressions_round7'],
++    "consequence_map.core.deployment": ['test_deployment', 'test_regressions_round2', 'test_regressions_round5'],
++    "consequence_map.core.execution": ['test_agent', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round7'],
++    "consequence_map.core.guard": ['test_agent', 'test_deployment', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round5'],
++    "consequence_map.core.timeutil": ['test_agent', 'test_audit', 'test_authorization', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round6', 'test_regressions_round7'],
++    "consequence_map.correlation": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
++    "consequence_map.hooks": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
++    "consequence_map.lifecycle": ['test_independent_review', 'test_lifecycle'],
++    "consequence_map.paths": ['test_phase2b'],
++    "consequence_map.self_exclusion": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
+ }
+ 
+ #: Extra test modules that must run whenever ANY package module changed,
+@@ -82,10 +104,51 @@ ALWAYS_RUN_TESTS = ["test_import_audit", "test_static_audits"]
+ 
+ #: The full regression set.
+ FULL_TEST_SET = [
+-    "test_enums", "test_validation", "test_records", "test_serialization",
+-    "test_schema", "test_triggers", "test_repository", "test_migrations",
+-    "test_redaction", "test_integration", "test_static_audits",
+-    "test_import_audit", "test_coverage_gaps",
++    "test_agent",
++    "test_analysis",
++    "test_audit",
++    "test_authorization",
++    "test_binding",
++    "test_coverage_gaps",
++    "test_crypto",
++    "test_deployment",
++    "test_enums",
++    "test_execution",
++    "test_guard",
++    "test_host_load",
++    "test_import_audit",
++    "test_independent_review",
++    "test_instance_id",
++    "test_integration",
++    "test_integrity_regressions",
++    "test_ipc",
++    "test_lifecycle",
++    "test_migrations",
++    "test_nonce",
++    "test_phase2b",
++    "test_plugin_integration",
++    "test_records",
++    "test_recovery",
++    "test_recovery_after_crash",
++    "test_redaction",
++    "test_regressions",
++    "test_regressions_round2",
++    "test_regressions_round3",
++    "test_regressions_round4",
++    "test_regressions_round5",
++    "test_regressions_round6",
++    "test_regressions_round7",
++    "test_repository",
++    "test_review_findings",
++    "test_review_round12",
++    "test_rfc8032_vectors",
++    "test_schema",
++    "test_serialization",
++    "test_service",
++    "test_static_audits",
++    "test_store",
++    "test_triggers",
++    "test_validation",
+ ]
+ 
+ #: The minimum Hermes runtime the project declares.
+@@ -119,7 +182,7 @@ def module_for_path(path) -> str:
+     except (ValueError, OSError):
+         return ""
+     parts = list(rel.parts)
+-    if not parts or parts[0] != "consequence_map":
++    if not parts or parts[0] not in ("consequence_map", "consequence_guard"):
+         return ""
+     if parts[-1] == "__init__.py":
+         parts = parts[:-1]
+
+diff --git a/ConsequenceMap/quality_guardian/runner.py b/ConsequenceMap/quality_guardian/runner.py
+index d584624..cdf29f3 100644
+--- a/ConsequenceMap/quality_guardian/runner.py
++++ b/ConsequenceMap/quality_guardian/runner.py
+@@ -51,27 +51,52 @@ class TestRun:
+ 
+ 
+ def _parse_counts(stderr: str) -> dict:
+-    """Extract the per-test counts from unittest's stderr summary."""
++    """Extract the per-test counts from unittest's stderr summary.
++
++    The full-suite run concatenates the output of TWO processes, so the
++    text can carry more than one "Ran N tests" summary. Every summary
++    present is summed, not just the first: taking only the first would
++    report the plugin's count while the guard's 134 tests ran unseen,
++    and would miss a failure in the second package.
++    """
+     counts = {"passed": 0, "failed": 0, "errors": 0, "skipped": 0}
+-    ran = re.search(r"Ran (\d+) tests?", stderr)
++    ran = re.findall(r"Ran (\d+) tests?", stderr)
+     if ran:
+-        counts["passed"] = int(ran.group(1))
++        counts["passed"] = sum(int(n) for n in ran)
+     for label, key in (("failures", "failed"), ("errors", "errors")):
+-        m = re.search(rf"{label}=(\d+)", stderr)
+-        if m:
+-            counts[key] = int(m.group(1))
+-    m = re.search(r"skipped=(\d+)", stderr)
+-    if m:
+-        counts["skipped"] = int(m.group(1))
++        found = re.findall(rf"{label}=(\d+)", stderr)
++        if found:
++            counts[key] = sum(int(n) for n in found)
++    found = re.findall(r"skipped=(\d+)", stderr)
++    if found:
++        counts["skipped"] = sum(int(n) for n in found)
+     return counts
+ 
+ 
++def _module_address(module: str, root: Path = None) -> str:
++    """The dotted address of a test module.
++
++    The project has TWO test packages: ``consequence_map.tests`` and
++    ``consequence_guard.tests``. A module name is not enough to say
++    which one holds it, so the package that actually contains the file
++    wins. The name alone would address the wrong package - or no
++    package at all, and the run would report a module that does not
++    exist.
++    """
++    base = Path(root) if root else config.PROJECT_ROOT
++    for package in ("consequence_map", "consequence_guard"):
++        if (base / package / "tests" / (module + ".py")).exists():
++            return f"{package}.tests.{module}"
++    return f"consequence_map.tests.{module}"
++
++
+ def run_test_module(module: str, timeout: int = None, root: Path = None) -> TestRun:
+     """Run one test module of the project suite.
+ 
+-    The module is addressed as ``consequence_map.tests.<module>`` and the
+-    run happens with the project root as the working directory, exactly as
+-    the Phase 2A suite is run.
++    The module is addressed in whichever test package actually holds it -
++    ``consequence_map.tests.<module>`` or ``consequence_guard.tests.<module>`` -
++    and the run happens with the project root as the working directory,
++    exactly as the Phase 2A suite is run.
+     """
+     base = Path(root) if root else config.PROJECT_ROOT
+     limit = timeout if timeout is not None else config.SELECTIVE_TEST_TIMEOUT
+@@ -81,7 +106,7 @@ def run_test_module(module: str, timeout: int = None, root: Path = None) -> Test
+     env["PYTHONPATH"] = str(base) + os.pathsep + env.get("PYTHONPATH", "")
+     try:
+         proc = subprocess.run(
+-            [sys.executable, "-m", "unittest", f"consequence_map.tests.{module}", "-v"],
++            [sys.executable, "-m", "unittest", _module_address(module, base), "-v"],
+             capture_output=True, text=True, timeout=limit, cwd=str(base), env=env,
+         )
+     except subprocess.TimeoutExpired as exc:
+@@ -156,6 +181,25 @@ def run_full_suite(root: Path = None, timeout: int = None) -> TestRun:
+              "-s", str(base / "consequence_map" / "tests"), "-t", str(base), "-v"],
+             capture_output=True, text=True, timeout=limit, cwd=str(base), env=env,
+         )
++        # The guard's own tests live in a SECOND package. A discover on
++        # consequence_map/tests cannot see them, so the full run has to
++        # cover both or the security suite is simply never executed.
++        try:
++            proc2 = subprocess.run(
++                [sys.executable, "-m", "unittest", "discover",
++                 "-s", str(base / "consequence_guard" / "tests"), "-t", str(base), "-v"],
++                capture_output=True, text=True, timeout=limit, cwd=str(base), env=env,
++            )
++        except subprocess.TimeoutExpired as exc:
++            proc2 = subprocess.CompletedProcess(
++                proc.args, 1, proc.stdout or "",
++                (proc.stderr or "") + "\nGUARD PACKAGE TIMED OUT after %ss" % (limit,),
++            )
++        proc = subprocess.CompletedProcess(
++            proc.args, proc.returncode or proc2.returncode,
++            (proc.stdout or "") + (proc2.stdout or ""),
++            (proc.stderr or "") + (proc2.stderr or ""),
++        )
+     except subprocess.TimeoutExpired as exc:
+         run.timed_out = True
+         run.duration = time.monotonic() - started
+
+diff --git a/ConsequenceMap/quality_guardian/repair.py b/ConsequenceMap/quality_guardian/repair.py
+index 5e387e6..6187f1c 100644
+--- a/ConsequenceMap/quality_guardian/repair.py
++++ b/ConsequenceMap/quality_guardian/repair.py
+@@ -270,15 +270,20 @@ class RepairSuspended(RuntimeError):
+     """Raised when a write is attempted while automatic repair is suspended."""
+ 
+ 
+-def write_file_text(path: Path, content: str) -> bool:
++def write_file_text(path: Path, content: str, root: Path = None) -> bool:
+     """Write the file atomically. Returns True on success.
+ 
+     This is the ONLY function in the Guardian that writes to a project
+     source file, so it is the single choke point for the automatic-repair
+     capability. When the repair policy suspends automatic repair, every
+     write is refused here — whichever path reached it.
++
++    The policy is consulted for the project ROOT the file belongs to. The
++    caller passes the cycle root; when it is omitted the global
++    PROJECT_ROOT is used, which is the owner-controlled policy for the
++    production project.
+     """
+-    if not config.auto_repair_enabled():
++    if not config.auto_repair_enabled(root):
+         raise RepairSuspended(
+             "automatic repair is suspended by the repair policy; "
+             "no file was written"
+
+diff --git a/ConsequenceMap/quality_guardian/guardian.py b/ConsequenceMap/quality_guardian/guardian.py
+index b7fc450..bfa7b38 100644
+--- a/ConsequenceMap/quality_guardian/guardian.py
++++ b/ConsequenceMap/quality_guardian/guardian.py
+@@ -483,7 +483,7 @@ def _attempt_repairs(cycle: Cycle, root: Path) -> None:
+                 detail=proposal.error + " — human review required",
+             ))
+             continue
+-        if not repair.write_file_text(path, fixed):
++        if not repair.write_file_text(path, fixed, root=root):
+             proposal.error = "the file could not be written"
+             continue
+         proposal.applied = True
+@@ -498,7 +498,7 @@ def _attempt_repairs(cycle: Cycle, root: Path) -> None:
+                 regressed = True
+                 break
+         if regressed:
+-            repair.write_file_text(path, original)
++            repair.write_file_text(path, original, root=root)
+             proposal.reverted = True
+             proposal.applied = False
+             cycle.result.add(CheckResult(
+

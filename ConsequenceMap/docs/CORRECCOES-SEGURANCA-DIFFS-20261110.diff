@@ -1,0 +1,229 @@
+# ConsequenceMap — Duas correcções de segurança (fail-closed + contador de falhas)
+
+# ==== quality_guardian/config.py ====
+diff --git a/ConsequenceMap/quality_guardian/config.py b/ConsequenceMap/quality_guardian/config.py
+index 67d1c56..2c312f4 100644
+--- a/ConsequenceMap/quality_guardian/config.py
++++ b/ConsequenceMap/quality_guardian/config.py
+@@ -74,6 +74,30 @@ MODULE_TO_TESTS = {
+     "consequence_map.redaction.boundary": ["test_redaction"],
+     "consequence_map.config": ["test_static_audits"],
+     "consequence_map.dependencies": ["test_static_audits"],
++    "consequence_guard.crypto": ['test_crypto', 'test_binding', 'test_rfc8032_vectors'],
++    "consequence_guard.ipc": ['test_ipc', 'test_instance_id'],
++    "consequence_guard.policy": ['test_binding'],
++    "consequence_guard.protocol": ['test_ipc', 'test_binding'],
++    "consequence_guard.recovery": ['test_recovery', 'test_recovery_after_crash', 'test_review_findings', 'test_review_round12'],
++    "consequence_guard.client": ["test_ipc"],
++    "consequence_guard.recovery_after_crash": ["test_recovery_after_crash", "test_instance_id"],
++    "consequence_guard.service": ['test_service', 'test_binding', 'test_ipc'],
++    "consequence_guard.store": ['test_store', 'test_recovery', 'test_recovery_after_crash'],
++    "consequence_map.authorization": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
++    "consequence_map.core.agent": ['test_agent', 'test_regressions', 'test_regressions_round2'],
++    "consequence_map.core.analysis": ['test_analysis', 'test_regressions_round2', 'test_regressions_round3', 'test_regressions_round6'],
++    "consequence_map.core.audit": ['test_agent', 'test_audit', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round6', 'test_regressions_round7'],
++    "consequence_map.core.authorization": ['test_agent', 'test_authorization', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round7'],
++    "consequence_map.core.canonical": ['test_agent', 'test_audit', 'test_authorization', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round3', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round6', 'test_regressions_round7'],
++    "consequence_map.core.deployment": ['test_deployment', 'test_regressions_round2', 'test_regressions_round5'],
++    "consequence_map.core.execution": ['test_agent', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round7'],
++    "consequence_map.core.guard": ['test_agent', 'test_deployment', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round5'],
++    "consequence_map.core.timeutil": ['test_agent', 'test_audit', 'test_authorization', 'test_deployment', 'test_execution', 'test_guard', 'test_regressions', 'test_regressions_round2', 'test_regressions_round4', 'test_regressions_round5', 'test_regressions_round6', 'test_regressions_round7'],
++    "consequence_map.correlation": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
++    "consequence_map.hooks": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
++    "consequence_map.lifecycle": ['test_independent_review', 'test_lifecycle'],
++    "consequence_map.paths": ['test_phase2b'],
++    "consequence_map.self_exclusion": ['test_independent_review', 'test_phase2b', 'test_plugin_integration'],
+ }
+ 
+ #: Extra test modules that must run whenever ANY package module changed,
+@@ -82,10 +106,51 @@ ALWAYS_RUN_TESTS = ["test_import_audit", "test_static_audits"]
+ 
+ #: The full regression set.
+ FULL_TEST_SET = [
+-    "test_enums", "test_validation", "test_records", "test_serialization",
+-    "test_schema", "test_triggers", "test_repository", "test_migrations",
+-    "test_redaction", "test_integration", "test_static_audits",
+-    "test_import_audit", "test_coverage_gaps",
++    "test_agent",
++    "test_analysis",
++    "test_audit",
++    "test_authorization",
++    "test_binding",
++    "test_coverage_gaps",
++    "test_crypto",
++    "test_deployment",
++    "test_enums",
++    "test_execution",
++    "test_guard",
++    "test_host_load",
++    "test_import_audit",
++    "test_independent_review",
++    "test_instance_id",
++    "test_integration",
++    "test_integrity_regressions",
++    "test_ipc",
++    "test_lifecycle",
++    "test_migrations",
++    "test_nonce",
++    "test_phase2b",
++    "test_plugin_integration",
++    "test_records",
++    "test_recovery",
++    "test_recovery_after_crash",
++    "test_redaction",
++    "test_regressions",
++    "test_regressions_round2",
++    "test_regressions_round3",
++    "test_regressions_round4",
++    "test_regressions_round5",
++    "test_regressions_round6",
++    "test_regressions_round7",
++    "test_repository",
++    "test_review_findings",
++    "test_review_round12",
++    "test_rfc8032_vectors",
++    "test_schema",
++    "test_serialization",
++    "test_service",
++    "test_static_audits",
++    "test_store",
++    "test_triggers",
++    "test_validation",
+ ]
+ 
+ #: The minimum Hermes runtime the project declares.
+@@ -119,7 +184,7 @@ def module_for_path(path) -> str:
+     except (ValueError, OSError):
+         return ""
+     parts = list(rel.parts)
+-    if not parts or parts[0] != "consequence_map":
++    if not parts or parts[0] not in ("consequence_map", "consequence_guard"):
+         return ""
+     if parts[-1] == "__init__.py":
+         parts = parts[:-1]
+@@ -173,12 +238,24 @@ MIN_REPAIR_SIZE_RATIO = 0.5
+ #: Detection, test execution, reporting and baseline recording are unaffected.
+ REPAIR_POLICY_FILE = PROJECT_ROOT / "quality_guardian" / "state" / "repair-policy.json"
+ 
+-#: The default when the policy file is absent: automatic repair is enabled.
+-DEFAULT_AUTO_REPAIR = True
++#: The default when the policy file is absent, unreadable or malformed:
++#: automatic repair is DISABLED.
++#:
++#: An unreadable policy must never GRANT a capability the owner suspended.
++#: Absence of evidence is not permission. A policy that explicitly says
++#: ``auto_repair: true`` is the only thing that enables the capability.
++DEFAULT_AUTO_REPAIR = False
+ 
+ 
+ def repair_policy(root: Path = None) -> dict:
+-    """Read the repair policy. Never raises; a malformed policy fails safe."""
++    """Read the repair policy. Never raises; a malformed policy fails safe.
++
++    "Fails safe" means the capability is **suspended**: an absent,
++    unreadable, malformed or non-boolean policy resolves to
++    ``DEFAULT_AUTO_REPAIR``, which is ``False``. Only an explicit
++    ``"auto_repair": true`` in a readable policy file enables automatic
++    repair.
++    """
+     base = Path(root) if root else PROJECT_ROOT
+     path = base / "quality_guardian" / "state" / "repair-policy.json"
+     try:
+
+# ==== quality_guardian/tests/isolated.py ====
+diff --git a/ConsequenceMap/quality_guardian/tests/isolated.py b/ConsequenceMap/quality_guardian/tests/isolated.py
+index efc7a61..23a690c 100644
+--- a/ConsequenceMap/quality_guardian/tests/isolated.py
++++ b/ConsequenceMap/quality_guardian/tests/isolated.py
+@@ -5,6 +5,7 @@ temporary directory. The production tree is never modified by a test.
+ """
+ from __future__ import annotations
+ 
++import json
+ import os
+ import shutil
+ import tempfile
+@@ -47,6 +48,18 @@ def make_isolated_project() -> Path:
+         "        self.assertEqual(add(2, 3), 5)\n",
+         encoding="utf-8",
+     )
++    # The isolated project carries an EXPLICIT repair policy. Without one,
++    # an absent policy resolves to "repair suspended" — the safe default —
++    # and the tests that exercise the repair path could not run. The
++    # permission is granted HERE, in the disposable copy only; the
++    # production policy is never touched by a test.
++    state = root / "quality_guardian" / "state"
++    state.mkdir(parents=True)
++    (state / "repair-policy.json").write_text(
++        json.dumps({"auto_repair": True, "source": "isolated-test-project"},
++                   indent=2, sort_keys=True) + "\n",
++        encoding="utf-8",
++    )
+     docs = root / "docs"
+     docs.mkdir()
+     (docs / "PHASE-2A-MANIFEST.md").write_text(
+
+# ==== consequence_map/hooks.py ====
+diff --git a/ConsequenceMap/consequence_map/hooks.py b/ConsequenceMap/consequence_map/hooks.py
+index b55f4dc..874ffb4 100644
+--- a/ConsequenceMap/consequence_map/hooks.py
++++ b/ConsequenceMap/consequence_map/hooks.py
+@@ -84,6 +84,13 @@ class AuthorizationSink:
+     must never be mistaken for an approval.
+     """
+ 
++    def __init__(self) -> None:
++        #: How many times a record could not be written. The inert sink
++        #: never fails to write, so this stays at zero - but the
++        #: attribute exists so every sink exposes the same counter and
++        #: the status command can read it without a special case.
++        self.failures = 0
++
+     def begin(self, record) -> None:
+         """An escalation is in flight."""
+ 
+@@ -402,6 +409,26 @@ def on_transform_tool_result(**kwargs: Any) -> Optional[None]:
+ # -- the command ------------------------------------------------------
+ 
+ 
++def _sink_failures() -> int:
++    """How many records the audit sink failed to write this session.
++
++    A storage failure is counted by the sink and the operation
++    continues - the host owns the decision. But a gap in the audit
++    trail must not be INVISIBLE: the counter is reported by the status
++    command, so the operator can see that the trail is incomplete.
++
++    The counter is read, never reset and never hidden. A sink that does
++    not keep one reports zero rather than making the status command
++    fail.
++    """
++    sink = getattr(STATE, "sink", None)
++    failures = getattr(sink, "failures", 0)
++    try:
++        return int(failures)
++    except (TypeError, ValueError):
++        return 0
++
++
+ def on_command(raw_args: str = "") -> str:
+     """The command palette entry (DEC-12 = A).
+ 
+@@ -417,13 +444,15 @@ def on_command(raw_args: str = "") -> str:
+             "Excluded tool calls this session: %d\n"
+             "Pending escalations: %d\n"
+             "Duplicate observations ignored: %d\n"
+-            "Orphan observations: %d"
++            "Orphan observations: %d\n"
++            "Audit sink failures this session: %d"
+             % (
+                 __version__,
+                 self_exclusion.COUNTER.total(),
+                 len(STATE.correlator.pending()),
+                 STATE.correlator.duplicates,
+                 STATE.correlator.orphans,
++                _sink_failures(),
+             )
+         )
+     if argument == "pending":
+

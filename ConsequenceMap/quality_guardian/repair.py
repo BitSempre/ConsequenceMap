@@ -270,15 +270,20 @@ class RepairSuspended(RuntimeError):
     """Raised when a write is attempted while automatic repair is suspended."""
 
 
-def write_file_text(path: Path, content: str) -> bool:
+def write_file_text(path: Path, content: str, root: Path = None) -> bool:
     """Write the file atomically. Returns True on success.
 
     This is the ONLY function in the Guardian that writes to a project
     source file, so it is the single choke point for the automatic-repair
     capability. When the repair policy suspends automatic repair, every
     write is refused here — whichever path reached it.
+
+    The policy is consulted for the project ROOT the file belongs to. The
+    caller passes the cycle root; when it is omitted the global
+    PROJECT_ROOT is used, which is the owner-controlled policy for the
+    production project.
     """
-    if not config.auto_repair_enabled():
+    if not config.auto_repair_enabled(root):
         raise RepairSuspended(
             "automatic repair is suspended by the repair policy; "
             "no file was written"
