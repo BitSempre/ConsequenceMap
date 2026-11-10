@@ -70,20 +70,64 @@ class HookDecision:
         return result
 
 
+class AuthorizationSink:
+    """Where the plugin records what the host observed.
+
+    The seam is explicit so the runtime does not depend on a database
+    being present, and so a test can observe exactly what would have
+    been written.
+
+    The default sink is **inert**: it records nothing and writes
+    nothing. The plugin's entry point replaces it with one that writes
+    to the plugin's own store. That is deliberate — a hook must never
+    fail because the storage is unavailable, but a *missing* record
+    must never be mistaken for an approval.
+    """
+
+    def begin(self, record) -> None:
+        """An escalation is in flight."""
+
+    def settle(self, record) -> None:
+        """The escalation was answered, or it timed out."""
+
+    def close(self, record) -> None:
+        """The tool call finished."""
+
+
+class MemoryAuthorizationSink(AuthorizationSink):
+    """A sink that keeps the records in memory. Used by the tests."""
+
+    def __init__(self) -> None:
+        self.begun = []
+        self.settled = []
+        self.closed = []
+
+    def begin(self, record) -> None:
+        self.begun.append(record)
+
+    def settle(self, record) -> None:
+        self.settled.append(record)
+
+    def close(self, record) -> None:
+        self.closed.append(record)
+
+
 class HookState:
     """The plugin's runtime state.
 
-    It owns the correlator, the authorization machine and the pending
-    escalations. It is the single object the callbacks share, so the
-    state transitions are easy to follow and easy to test.
+    It owns the correlator, the authorization machine, the pending
+    escalations and the sink the records are written to. It is the
+    single object the callbacks share, so the state transitions are
+    easy to follow and easy to test.
     """
 
-    def __init__(self, *, machine=None, correlator=None) -> None:
+    def __init__(self, *, machine=None, correlator=None, sink=None) -> None:
         from .authorization import AuthorizationMachine
         from .correlation import Correlator
 
         self.machine = machine or AuthorizationMachine()
         self.correlator = correlator or Correlator()
+        self.sink = sink if sink is not None else AuthorizationSink()
         self._lock = threading.RLock()
         self._registered = False
 
@@ -91,6 +135,7 @@ class HookState:
         """Forget the session's state. Used by the tests and on load."""
         with self._lock:
             self.correlator = type(self.correlator)()
+            self.sink = AuthorizationSink()
 
 
 #: The plugin's state. A module-level object because the hooks are
@@ -165,7 +210,17 @@ def on_pre_approval_request(**kwargs: Any) -> Optional[None]:
     pattern_key = kwargs.get("pattern_key")
     tool_call_id = kwargs.get("tool_call_id", "")
     with STATE._lock:
-        STATE.correlator.note_request(pattern_key, tool_call_id)
+        forecast_id = STATE.correlator.note_request(pattern_key, tool_call_id)
+        if forecast_id is not None:
+            # The escalation is in flight. The record says PENDING,
+            # which is not terminal and authorizes nothing.
+            STATE.sink.begin(
+                STATE.machine.pending(
+                    forecast_id=forecast_id,
+                    tool_call_id=tool_call_id,
+                    pattern_key=pattern_key if isinstance(pattern_key, str) else "",
+                )
+            )
     return None
 
 
@@ -182,7 +237,18 @@ def on_post_approval_response(**kwargs: Any) -> Optional[None]:
     tool_call_id = kwargs.get("tool_call_id", "")
     choice = kwargs.get("choice")
     with STATE._lock:
-        STATE.correlator.note_response(pattern_key, tool_call_id)
+        forecast_id = STATE.correlator.note_response(pattern_key, tool_call_id)
+        if forecast_id is not None:
+            # The answer is recorded. A duplicate is ignored by the
+            # correlator and never produces a second record.
+            STATE.sink.settle(
+                STATE.machine.from_choice(
+                    choice,
+                    forecast_id=forecast_id,
+                    tool_call_id=tool_call_id,
+                    pattern_key=pattern_key if isinstance(pattern_key, str) else "",
+                )
+            )
     return None
 
 

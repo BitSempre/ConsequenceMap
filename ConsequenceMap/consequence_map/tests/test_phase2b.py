@@ -358,6 +358,126 @@ class SelfExclusionTests(unittest.TestCase):
             self.assertTrue(self_exclusion.is_excluded(name))
 
 
+class PendingStateTests(unittest.TestCase):
+    """The one state that is not terminal.
+
+    ``PENDING`` says an escalation is in flight. It says nothing about
+    whether the human will answer, and it authorizes nothing.
+    """
+
+    def setUp(self):
+        from ..authorization import AuthorizationMachine
+
+        self.machine = AuthorizationMachine()
+
+    def test_pending_is_derivable(self):
+        record = self.machine.pending(forecast_id="fc_1")
+        self.assertEqual(record.state, AUTHORIZATION_STATE.PENDING)
+        self.assertEqual(record.authorized_by, AUTHORIZED_BY.NONE)
+
+    def test_pending_authorizes_nothing(self):
+        self.assertFalse(self.machine.pending().is_approval)
+
+    def test_pending_is_the_only_non_terminal_state(self):
+        """Everything else is an answer, a refusal, or an absence."""
+        for choice in (
+            "once", "deny", "timeout", "cancelled", "notify_failed",
+            "smart_approve", "smart_deny",
+        ):
+            record = self.machine.from_choice(choice)
+            self.assertNotEqual(record.state, AUTHORIZATION_STATE.PENDING)
+
+
+class HookRecordTests(unittest.TestCase):
+    """The hooks record what the host observed.
+
+    The sink is the seam. A hook must never fail because the storage
+    is unavailable, but a missing record must never be mistaken for
+    an approval.
+    """
+
+    def setUp(self):
+        from .. import hooks
+
+        self.hooks = hooks
+        self.hooks.STATE.reset()
+        self.sink = hooks.MemoryAuthorizationSink()
+        self.hooks.STATE.sink = self.sink
+        self_exclusion.COUNTER.reset()
+        self.pattern = "plugin_rule:cm:fc_abc:E-HIGH"
+
+    def _register(self):
+        self.hooks.STATE.correlator.register(
+            forecast_id="fc_abc", rule="E-HIGH", pattern_key=self.pattern,
+            tool_call_id="tc_1",
+        )
+
+    def test_an_escalation_in_flight_is_recorded_as_pending(self):
+        self._register()
+        self.hooks.on_pre_approval_request(
+            pattern_key=self.pattern, tool_call_id="tc_1",
+        )
+        self.assertEqual(len(self.sink.begun), 1)
+        self.assertEqual(self.sink.begun[0].state, AUTHORIZATION_STATE.PENDING)
+        self.assertFalse(self.sink.begun[0].is_approval)
+
+    def test_the_answer_is_recorded_as_the_state_it_is(self):
+        self._register()
+        self.hooks.on_pre_approval_request(
+            pattern_key=self.pattern, tool_call_id="tc_1",
+        )
+        self.hooks.on_post_approval_response(
+            pattern_key=self.pattern, tool_call_id="tc_1", choice="once",
+        )
+        self.assertEqual(len(self.sink.settled), 1)
+        self.assertEqual(
+            self.sink.settled[0].state, AUTHORIZATION_STATE.HUMAN_APPROVED
+        )
+        self.assertTrue(self.sink.settled[0].is_approval)
+
+    def test_a_refusal_is_recorded_as_a_refusal(self):
+        self._register()
+        self.hooks.on_pre_approval_request(
+            pattern_key=self.pattern, tool_call_id="tc_1",
+        )
+        self.hooks.on_post_approval_response(
+            pattern_key=self.pattern, tool_call_id="tc_1", choice="deny",
+        )
+        self.assertEqual(
+            self.sink.settled[0].state, AUTHORIZATION_STATE.HUMAN_REJECTED
+        )
+        self.assertFalse(self.sink.settled[0].is_approval)
+
+    def test_an_orphan_response_records_nothing(self):
+        """EC-2: an observation that belongs to nobody is not recorded."""
+        self.hooks.on_post_approval_response(
+            pattern_key=self.pattern, tool_call_id="tc_1", choice="once",
+        )
+        self.assertEqual(self.sink.settled, [])
+
+    def test_a_duplicate_response_records_once(self):
+        """EC-3: the first observation wins."""
+        self._register()
+        self.hooks.on_pre_approval_request(
+            pattern_key=self.pattern, tool_call_id="tc_1",
+        )
+        for _ in range(2):
+            self.hooks.on_post_approval_response(
+                pattern_key=self.pattern, tool_call_id="tc_1", choice="once",
+            )
+        self.assertEqual(len(self.sink.settled), 1)
+        self.assertEqual(self.hooks.STATE.correlator.duplicates, 1)
+
+    def test_an_excluded_tool_records_nothing(self):
+        """RECUR-3: the plugin's own calls leave no trace."""
+        self.hooks.on_pre_approval_request(
+            tool_name="consequence_map_forecast",
+            pattern_key=self.pattern, tool_call_id="tc_1",
+        )
+        self.assertEqual(self.sink.begun, [])
+        self.assertEqual(self_exclusion.COUNTER.total(), 1)
+
+
 class HookTests(unittest.TestCase):
     def setUp(self):
         from .. import hooks

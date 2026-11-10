@@ -278,6 +278,30 @@ class AuthorizationMachine:
             decided_at=decided_at,
         )
 
+    def pending(
+        self,
+        *,
+        forecast_id: str = "",
+        tool_call_id: str = "",
+        pattern_key: str = "",
+        decided_at: Optional[str] = None,
+    ) -> AuthorizationRecord:
+        """The plugin asked, and no answer has arrived yet.
+
+        ``PENDING`` is the one state that is **not** terminal. It says
+        an escalation is in flight - it says nothing about whether the
+        human will answer, and it never authorizes anything.
+        """
+        return AuthorizationRecord(
+            AUTHORIZATION_STATE.PENDING,
+            forecast_id=forecast_id,
+            tool_call_id=tool_call_id,
+            pattern_key=pattern_key,
+            provenance=provenance_for_source("approval_hook"),
+            notes="the escalation is in flight; no answer has arrived",
+            decided_at=decided_at,
+        )
+
     def not_required(self, *, forecast_id: str = "") -> AuthorizationRecord:
         """No escalation was expected, so none was needed."""
         return AuthorizationRecord(
