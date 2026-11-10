@@ -141,9 +141,14 @@ class TheWholeChainTests(LifecycleTestCase):
         confirmed nor refuted."""
         self.lifecycle.record_forecast(self.forecast)
         self.lifecycle.seal_forecast(self.forecast.id)
+        # The outcome names an execution, so the execution must exist.
+        # The storage enforces it: an outcome may not name an
+        # execution that never ran.
+        execution = self._execution()
+        self.lifecycle.record_execution(execution)
         outcome = R.Outcome(
             id="out_151515151515", forecast_id=self.forecast.id,
-            execution_id="exe_555555555555", recorded_at=TS,
+            execution_id=execution.id, recorded_at=TS,
             recorded_by="plugin", verification_method="UNVERIFIED",
             summary="the outcome could not be verified",
             observations=[
@@ -172,9 +177,11 @@ class TheWholeChainTests(LifecycleTestCase):
         """
         self.lifecycle.record_forecast(self.forecast)
         self.lifecycle.seal_forecast(self.forecast.id)
+        execution = self._execution()
+        self.lifecycle.record_execution(execution)
         outcome = R.Outcome(
             id="out_202020202020", forecast_id=self.forecast.id,
-            execution_id="exe_555555555555", recorded_at=TS,
+            execution_id=execution.id, recorded_at=TS,
             recorded_by="plugin", verification_method="UNVERIFIED",
             summary="the outcome could not be verified")
         verdict, counts = derive_verdict(outcome)
@@ -196,9 +203,11 @@ class TheWholeChainTests(LifecycleTestCase):
         """
         self.lifecycle.record_forecast(self.forecast)
         self.lifecycle.seal_forecast(self.forecast.id)
+        execution = self._execution()
+        self.lifecycle.record_execution(execution)
         outcome = R.Outcome(
             id="out_212121212121", forecast_id=self.forecast.id,
-            execution_id="exe_555555555555", recorded_at=TS,
+            execution_id=execution.id, recorded_at=TS,
             recorded_by="plugin", verification_method="UNVERIFIED",
             summary="the outcome could not be verified",
             observations=[
@@ -215,9 +224,11 @@ class TheWholeChainTests(LifecycleTestCase):
     def test_a_diverged_outcome_says_so(self):
         self.lifecycle.record_forecast(self.forecast)
         self.lifecycle.seal_forecast(self.forecast.id)
+        execution = self._execution()
+        self.lifecycle.record_execution(execution)
         outcome = R.Outcome(
             id="out_181818181818", forecast_id=self.forecast.id,
-            execution_id="exe_555555555555", recorded_at=TS,
+            execution_id=execution.id, recorded_at=TS,
             recorded_by="plugin", verification_method="FILE_DIFF",
             summary="something else happened",
             observations=[

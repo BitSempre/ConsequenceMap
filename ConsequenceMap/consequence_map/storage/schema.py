@@ -221,7 +221,9 @@ DDL_STATEMENTS: Tuple[str, ...] = (
       resolved_at TEXT,
       escalation_expected INTEGER NOT NULL,
       notes TEXT,
-      supersedes TEXT
+      supersedes TEXT,
+      FOREIGN KEY(forecast_id) REFERENCES forecast(id),
+      FOREIGN KEY(proposal_id, proposal_version) REFERENCES proposal(id, version)
     )
     """,
     """
@@ -235,7 +237,9 @@ DDL_STATEMENTS: Tuple[str, ...] = (
       decided_at TEXT NOT NULL,
       surface TEXT NOT NULL,
       scope_note TEXT,
-      supersedes TEXT
+      supersedes TEXT,
+      FOREIGN KEY(forecast_id) REFERENCES forecast(id),
+      FOREIGN KEY(proposal_id, proposal_version) REFERENCES proposal(id, version)
     )
     """,
     """
@@ -250,7 +254,10 @@ DDL_STATEMENTS: Tuple[str, ...] = (
       trigger_tool TEXT,
       source TEXT NOT NULL,
       tool_call_id TEXT,
-      error_type TEXT
+      error_type TEXT,
+      FOREIGN KEY(forecast_id) REFERENCES forecast(id),
+      FOREIGN KEY(host_authorization_id) REFERENCES host_authorization(id),
+      FOREIGN KEY(product_decision_id) REFERENCES product_decision(id)
     )
     """,
     """
@@ -274,7 +281,9 @@ DDL_STATEMENTS: Tuple[str, ...] = (
       recorded_at TEXT NOT NULL,
       recorded_by TEXT NOT NULL,
       verification_method TEXT NOT NULL,
-      summary TEXT NOT NULL
+      summary TEXT NOT NULL,
+      FOREIGN KEY(forecast_id) REFERENCES forecast(id),
+      FOREIGN KEY(execution_id) REFERENCES execution(id)
     )
     """,
     """
@@ -298,7 +307,9 @@ DDL_STATEMENTS: Tuple[str, ...] = (
       created_at TEXT NOT NULL,
       verdict TEXT NOT NULL,
       counts_json TEXT NOT NULL,
-      accuracy_note TEXT NOT NULL
+      accuracy_note TEXT NOT NULL,
+      FOREIGN KEY(forecast_id) REFERENCES forecast(id),
+      FOREIGN KEY(outcome_id) REFERENCES outcome(id)
     )
     """,
     """
