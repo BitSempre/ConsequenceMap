@@ -1,6 +1,6 @@
 {
  "branch": "feature/platform-v1",
- "commits": 51,
+ "commits": 53,
  "files": {
   "ConsequenceMap/.gitignore": "7d5015c17c4b5fed6f797558dc1e5af7e2fe8d6122347029ef7d76d2db3ea286",
   "ConsequenceMap/consequence_guard/__init__.py": "cc259ade38c2251513bd37ec42b2c32d8a1afcccf1555eba57ec0b76a5b4f0fe",
@@ -97,7 +97,8 @@
   "ConsequenceMap/docs/PHASE-2A-CRITERIA-MATRIX.md": "e93bc75c6f6553f4c2fae5df295432f28282d0e0aad9488b91f42c9d82a4b10e",
   "ConsequenceMap/docs/PHASE-2A-IMPLEMENTATION-REPORT.md": "09345dad876630b47ec1887a7a22c25b41a40b96f686ef766942abdbbe2e1287",
   "ConsequenceMap/docs/PHASE-2A-MANIFEST-ADDENDUM-A-1.md": "2f6ebcd289c94d44afe31c6e0234d2d7932695f27eb5a4e45ddcce43e463db9a",
-  "ConsequenceMap/docs/PHASE-2A-MANIFEST-ADDENDUM-A-2.md": "9e198e222d5eaf0b5ae09580c03faf7dd606f77f5099ffb2319c8bf699d722be",
+  "ConsequenceMap/docs/PHASE-2A-MANIFEST-ADDENDUM-A-2.md": "bd5cbb88eb2bb14553292235f2b710eb0d9d9c9990a61799a3a9971ea3d9dc99",
+  "ConsequenceMap/docs/PHASE-2A-MANIFEST-ADDENDUM-A-3.md": "609fd5edfe19c353ff2a57f19822149a6a5f1c5c143f078c8c98421caa46f8f6",
   "ConsequenceMap/docs/PHASE-2A-MANIFEST.md": "a00984d7928294a0d9d8c91f0c756d6307ad9061b0b864ed729a91653cc2e313",
   "ConsequenceMap/docs/PHASE-2B-COMPLETION-REPORT.md": "ca172b3e7839ef4b7ddc07aaf1088ec5e3348f12b7d0cd62fcae676b3f19985b",
   "ConsequenceMap/docs/QUALITY-GUARDIAN-FINAL-CONSOLIDATED-SPECIFICATION-20261108.md": "ba4ead5482f207127dd4a1f7a2f5d3c0f2e863837877b58ac7b8768ede0183a2",
@@ -249,7 +250,7 @@
   "security-decisions/ADR-002-WINDOWS-SERVICE-IDENTITY.md": "52092564b253d0f45efa08add99372b48c89978efc248f72837bd78dce983c68",
   "security-decisions/SECURITY-DECISIONS-D22-D28.md": "a6e8499d0023627da507a84906ab46d50738b709d1116b78d747764d6921fe6a"
  },
- "generated_at": "2026-11-10T16:57:22Z",
- "head": "44997c785d60d156076d4f9c8e15bc86424fe047",
+ "generated_at": "2026-11-10T17:01:54Z",
+ "head": "6d604d8db00b1b0695bfe445f5b07ceb582f91e9",
  "project": "ConsequenceMap Security Platform v1 - with the Phase 2B product loop"
 }
