@@ -8,3 +8,4 @@ provides_hooks:
   - post_approval_response
   - post_tool_call
   - transform_tool_result
+requires_hermes: ">=0.22.5"

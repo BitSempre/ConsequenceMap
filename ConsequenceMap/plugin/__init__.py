@@ -63,20 +63,13 @@ def register(ctx: Any) -> None:
         from consequence_map.hooks import (
             RepositoryAuthorizationSink,
             HookState,
+            STATE,
         )
 
-        # Injete o provedor do Hermes para que as inserções usem a mesma conexão
-        # que o host cria através do sqlite_util.transaction.
-        try:
-            from hermes_cli.sqlite_util import transaction as hermes_transaction
-            def hermes_provider(path):
-                return hermes_transaction(provider=path)
-            db_module.set_connection_provider(hermes_provider)
-        except Exception:
-            logger.warning(
-                "ConsequenceMap: não foi possível injetar o provedor do Hermes",
-                exc_info=True,
-            )
+        # The connection provider is the package default
+        # (`storage.db.hermes_connection_provider`), which uses the public
+        # `plugins.plugin_storage.plugin_db` surface. No private Hermes
+        # module is imported here.
         # The sink writes to the plugin's own database. If the
         # database cannot be opened, the sink counts the failure and
         # the hooks keep working: a hook must never fail because the
@@ -89,7 +82,7 @@ def register(ctx: Any) -> None:
             connection = db_module.connect()
             apply_migrations(connection)
             repository = Repository(connection)
-            HookState.STATE.sink = RepositoryAuthorizationSink(repository)
+            STATE.sink = RepositoryAuthorizationSink(repository)
         except Exception:
             logger.warning(
                 "ConsequenceMap: the database is unavailable; the "
