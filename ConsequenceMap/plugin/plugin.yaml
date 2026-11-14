@@ -1,7 +1,7 @@
 name: consequence-map
 version: 0.3.0
 description: "Decision Intelligence for AI Agents. Forecasts the consequence of an action before it happens, preserves the decision and its evidence, and compares the forecast with what actually occurred."
-author: "Nous Research"
+author: "BitSempre"
 provides_hooks:
   - pre_tool_call
   - pre_approval_request

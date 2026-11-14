@@ -16,6 +16,7 @@ outside the plugin's own database, and never a raw secret. The
 write path is not exposed at all - the plugin writes through its own
 repository, from its own hooks.
 """
+
 from __future__ import annotations
 
 import json
@@ -28,19 +29,13 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-#: Where the plugin's database lives. The host's public storage API
-#: is used when it is available; this is the fallback for the
+#: Where the plugin's database lives. Use the public `plugins.plugin_storage`
+#: surface when available; fall back to `get_hermes_home()` for the
 #: in-process demonstration.
-def _database_path() -> Optional[str]:
-    explicit = os.environ.get("CONSEQUENCE_MAP_DB")
-    if explicit:
-        return explicit
-    home = os.environ.get("HERMES_HOME") or os.path.expanduser("~/.hermes")
-    candidate = Path(home) / "plugin-data" / "consequence-map" / "data.db"
-    return str(candidate) if candidate.exists() else None
+from plugin.consequence_map.storage.db import database_path as _database_path
 
 
-def _connect() -> Optional[sqlite3.Connection]:
+def _connect() -> Optional:
     path = _database_path()
     if not path or not os.path.exists(path):
         return None
@@ -113,13 +108,11 @@ def get_decision(forecast_id: str = "") -> Dict[str, Any]:
         "SELECT * FROM product_decision ORDER BY decided_at DESC LIMIT 50"
     )
     authorizations = _rows(
-        "SELECT * FROM host_authorization ORDER BY requested_at DESC LIMIT 50"
+        "SELECT * FROM host_authorization ORDER BY created_at DESC LIMIT 50"
     )
     if forecast_id:
         decisions = [d for d in decisions if d.get("forecast_id") == forecast_id]
-        authorizations = [
-            a for a in authorizations if a.get("forecast_id") == forecast_id
-        ]
+        authorizations = [a for a in authorizations if a.get("forecast_id") == forecast_id]
     return {
         "found": bool(decisions or authorizations),
         "decisions": decisions,
@@ -135,30 +128,24 @@ def get_decision(forecast_id: str = "") -> Dict[str, Any]:
 @router.get("/outcome")
 def get_outcome(forecast_id: str = "") -> Dict[str, Any]:
     """What actually happened, and the comparison with the forecast."""
-    outcomes = _rows("SELECT * FROM outcome ORDER BY observed_at DESC LIMIT 50")
+    outcomes = _rows("SELECT * FROM outcome ORDER BY recorded_at DESC LIMIT 50")
     observations = _rows(
-        "SELECT * FROM outcome_observation ORDER BY observed_at DESC LIMIT 200"
+        "SELECT * FROM outcome_observation LIMIT 200"
     )
     comparisons = _rows(
-        "SELECT * FROM comparison ORDER BY compared_at DESC LIMIT 50"
+        "SELECT * FROM comparison ORDER BY created_at DESC LIMIT 50"
     )
     comparison_items = _rows(
         "SELECT * FROM comparison_item ORDER BY rowid DESC LIMIT 500"
     )
     if forecast_id:
         outcomes = [o for o in outcomes if o.get("forecast_id") == forecast_id]
-        comparisons = [
-            c for c in comparisons if c.get("forecast_id") == forecast_id
-        ]
+        comparisons = [c for c in comparisons if c.get("forecast_id") == forecast_id]
         outcome_ids = {o.get("outcome_id") for o in outcomes}
-        observations = [
-            o for o in observations if o.get("outcome_id") in outcome_ids
-        ]
+        observations = [o for o in observations if o.get("outcome_id") in outcome_ids]
         comparison_ids = {c.get("comparison_id") for c in comparisons}
-        comparison_items = [
-            i for i in comparison_items
-            if i.get("comparison_id") in comparison_ids
-        ]
+        comparison_items = [i for i in comparison_items
+                            if i.get("comparison_id") in comparison_ids]
     return {
         "found": bool(outcomes or comparisons),
         "outcomes": outcomes,
@@ -181,7 +168,6 @@ def get_status() -> Dict[str, Any]:
             rows = _rows("SELECT COUNT(*) AS n FROM %s" % table)
             counts[table] = rows[0]["n"] if rows else 0
     return {
-        "database": path,
         "database_present": bool(path and os.path.exists(path)),
         "counts": counts,
         "not_verifiable": (

@@ -6,7 +6,7 @@ specification's printed block is illustrative and incomplete (MC4/R06).
 """
 from __future__ import annotations
 
-from typing import Tuple
+from typing import Dict, Tuple
 
 #: The 5 forecast child tables, in the order the specification lists them.
 FORECAST_CHILD_TABLES: Tuple[str, ...] = (

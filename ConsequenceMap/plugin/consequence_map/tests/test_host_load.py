@@ -15,9 +15,10 @@ import os
 import sys
 import unittest
 
-PLUGIN_ROOT = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-    "plugin",
+#: The plugin root is three levels up from this file
+#: (tests -> consequence_map -> plugin).
+PLUGIN_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 )
 
 #: The Hermes runtime, when it is installed.

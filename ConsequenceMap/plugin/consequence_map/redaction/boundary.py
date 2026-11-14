@@ -10,9 +10,10 @@ The redactor FAILS CLOSED. If it raises, the write fails with
 (AC-PRIV-02).
 
 The redactor is INJECTABLE. The production default calls the host's
-`agent.redact.redact_for_egress`; the test suite injects a deterministic
+`agent.redact.redact_sensitive_text`; the test suite injects a deterministic
 local implementation so the suite never needs Hermes on the path.
 """
+
 from __future__ import annotations
 
 import re
@@ -40,15 +41,14 @@ _REDACTOR: Optional[Redactor] = None
 #: Patterns the plugin adds. Additive only - they can never weaken a
 #: built-in pattern (PR-3).
 _ADDITIONAL_PATTERNS: Tuple[re.Pattern, ...] = (
-    re.compile(r"(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{16,}"),            # GitHub tokens
-    re.compile(r"sk-[A-Za-z0-9]{20,}"),                                 # OpenAI-style keys
-    re.compile(r"AKIA[0-9A-Z]{16}"),                                    # AWS access key ids
-    re.compile(r"xox[baprs]-[A-Za-z0-9-]{10,}"),                        # Slack tokens
-    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),                    # private keys
+    re.compile(r"(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{16,}"),  # GitHub tokens
+    re.compile(r"sk-[A-Za-z0-9]{20,}"),  # OpenAI-style keys
+    re.compile(r"AKIA[0-9A-Z]{16}"),  # AWS access key ids
+    re.compile(r"xox[baprs]-[A-Za-z0-9-]{10,}"),  # Slack tokens
+    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),  # private keys
 )
 
 #: The built-in secret shapes the plugin sweeps for, independent of the host.
-#:
 #: The patterns are built with explicit character classes rather than
 #: the shorthand escapes, because a word boundary written as a literal
 #: backslash-b inside a raw string is two characters, not a boundary -
@@ -72,14 +72,14 @@ def get_redactor() -> Redactor:
 
 
 def host_redactor(text: str) -> str:
-    """The production redactor: the host's `redact_for_egress`.
+    """The production redactor: the host's `redact_sensitive_text`.
 
-    PR-1 names `agent.redact.redact_for_egress(text)`. The import is
+    PR-1 names `agent.redact.redact_sensitive_text(text)`. The import is
     inside the function so importing this module imports no Hermes code.
     """
-    from agent.redact import redact_for_egress  # noqa: PLC0415 - deliberate lazy import
+    from agent.redact import redact_sensitive_text  # noqa: PLC0415 - deliberate lazy import
 
-    return redact_for_egress(text)
+    return redact_sensitive_text(text)
 
 
 def default_redactor(text: str) -> str:
